@@ -4,15 +4,12 @@
 - **Telefone**: +244912000000
 - **Nome**: Admin TUDOaqui
 - **Role**: admin
-- **Auth Flow**: OTP-based
 
-### User 1 (Test Cliente)
+### Regular User (Cliente)
 - **Telefone**: +244923456789
 - **Role**: cliente
-- **Auth Flow**: OTP-based
 
-### Seed Users (criados pelo seed)
-- +244912000000 - Admin TUDOaqui (admin)
+### Seed Users
 - +244911000001 - Carlos Mendes (organizador)
 - +244911000002 - Ana Ferreira (vendedor)
 - +244911000003 - Manuel Santos (anfitriao)
@@ -22,19 +19,20 @@
 
 ### How to get OTP
 ```sql
-su - postgres -c "psql -d tudoaqui -t -A -c \"SELECT codigo FROM otp_codes WHERE telefone='+244923456789' AND verificado=false ORDER BY created_at DESC LIMIT 1;\""
+su - postgres -c "psql -d tudoaqui -t -A -c \"SELECT codigo FROM otp_codes WHERE telefone='+244912000000' AND verificado=false ORDER BY created_at DESC LIMIT 1;\""
 ```
 
 ### API Base URL
 - External: https://7c2cc0aa-d889-4231-8146-9d7173a35f22.preview.emergentagent.com
 
 ### Auth Flow
-1. POST /api/v1/auth/login with {"telefone": "+244923456789"}
-2. Get OTP from database (see SQL above)
-3. POST /api/v1/auth/verify-otp with {"telefone": "+244923456789", "codigo": "<OTP>"}
+1. POST /api/v1/auth/login with {"telefone": "+244912000000"}
+2. Get OTP from database
+3. POST /api/v1/auth/verify-otp with {"telefone": "+244912000000", "codigo": "<OTP>"}
 4. Use access_token as Bearer token
 
 ### Notes
 - SMS in SANDBOX mode - OTPs stored in DB
 - PostgreSQL must be running: pg_ctlcluster 15 main start
 - Seed data: POST /api/v1/seed
+- Rate limiter: 5 login attempts/min per IP
