@@ -17,75 +17,59 @@ SuperApp modular para Angola integrando múltiplos serviços numa única platafo
 - [x] Drivers (Motoristas)
 - [x] Payments (Pagamentos + Ledger)
 - [x] Notifications (Push + WebSocket)
-- [x] Wallet (Fase 2 - preparado)
+- [x] Wallet (preparado)
+- [x] **Eventos** (Tickets + QR + Check-in) - COMPLETO
+- [x] **Marketplace** (Multi-vendedor B2C/B2B) - COMPLETO
+- [x] **Alojamento** (modelo Airbnb) - Models prontos
+- [x] **Turismo** (Experiências) - Models prontos
+- [x] **Real Estate** (Imobiliário) - Models prontos
 
-### Pendentes
-- [ ] Tuendi Entrega
-- [ ] Tuendi Restaurante
-- [ ] Eventos (Tickets + QR + Check-in)
-- [ ] Marketplace (Multi-vendedor)
-- [ ] Alojamento (modelo Airbnb)
-- [ ] Turismo (Experiências)
-- [ ] Real Estate (Imobiliário)
-- [ ] Wallet B2B completo
+### Pendentes (Routers/Services)
+- [ ] Tuendi Entrega (router/service)
+- [ ] Tuendi Restaurante (router/service)
+- [ ] Alojamento (router/service)
+- [ ] Turismo (router/service)
+- [ ] Real Estate (router/service)
 
 ## Histórico de Implementações
 
-### Janeiro 2026 - Correções de Segurança
-**Vulnerabilidades Corrigidas:**
-1. ✅ SECRET_KEY removido do código - agora obrigatório via .env
-2. ✅ OTP usando `secrets` (criptograficamente seguro) em vez de `random`
-3. ✅ Rate limiting implementado no login e verify-otp
-4. ✅ Validação de telefone com biblioteca `phonenumbers`
-5. ✅ Lint errors corrigidos em todo o backend
+### Janeiro 2026 - Correções de Segurança + Módulos
 
-**Arquivos Modificados:**
-- `/app/backend/src/config.py` - SECRET_KEY sem default
-- `/app/backend/src/auth/service.py` - OTP seguro + correções lint
-- `/app/backend/src/auth/router.py` - Rate limiting + validação telefone
-- `/app/backend/src/auth/rate_limiter.py` - Novo módulo de rate limiting
-- `/app/backend/.env` - Criado com SECRET_KEY segura
-- `/app/backend/.env.example` - Atualizado com instruções
-- Múltiplos arquivos - Correções de lint (E712, F841, E722)
+**Segurança:**
+1. SECRET_KEY obrigatório via .env
+2. OTP criptograficamente seguro (secrets)
+3. Rate limiting (login, OTP, verify)
+4. Validação telefone com phonenumbers
+
+**Módulos Completos:**
+- Eventos: Models + Schemas + Service + Router
+- Marketplace: Models + Schemas + Service + Router
+
+**Módulos (Models Prontos):**
+- Alojamento, Turismo, Real Estate
 
 ## User Personas
-1. **Cliente** - Solicita corridas, compra tickets, faz pedidos
-2. **Motorista** - Aceita corridas, tracking em tempo real
-3. **Entregador** - Entregas Tuendi
-4. **Organizador** - Cria eventos, gere tickets
-5. **Vendedor** - Vende no Marketplace
-6. **Anfitrião** - Aloja hóspedes (Airbnb local)
-7. **Agente** - Imobiliário
-8. **Staff** - Check-in eventos
-9. **Admin** - Gestão completa
-
-## Requisitos Core (P0)
-- Autenticação OTP via SMS
-- Rate limiting em endpoints sensíveis
-- Gestão de corridas em tempo real
-- Pagamentos Multicaixa/Mobile Money
-- WebSocket para tracking
+1. **Cliente** - Corridas, tickets, pedidos
+2. **Motorista** - Corridas
+3. **Organizador** - Eventos
+4. **Vendedor** - Marketplace
+5. **Anfitrião** - Alojamento
+6. **Agente** - Imobiliário
+7. **Staff** - Check-in
+8. **Admin** - Gestão
 
 ## Backlog
 
 ### P0 - Crítico
-- [ ] Implementar SMS real (Twilio/Africa's Talking)
-- [ ] Integração Multicaixa Express
+- [ ] SMS real (Twilio/Africa's Talking)
+- [ ] Integração Multicaixa
 - [ ] Testes automatizados
 
-### P1 - Alta Prioridade
-- [ ] Módulo de Eventos completo
-- [ ] Módulo Marketplace
-- [ ] Push notifications Firebase
+### P1 - Alta
+- [ ] Completar Alojamento
+- [ ] Completar Turismo
+- [ ] Completar Real Estate
 
-### P2 - Média Prioridade
-- [ ] Módulo Alojamento
-- [ ] Módulo Turismo
-- [ ] Módulo Real Estate
-- [ ] Wallet B2B completo
-
-## Próximas Tarefas
-1. Configurar SMS provider real
-2. Implementar testes de integração para auth
-3. Finalizar módulo de Eventos
-4. Integrar pagamentos Multicaixa
+### P2 - Média
+- [ ] Tuendi Entrega/Restaurante
+- [ ] Wallet B2B

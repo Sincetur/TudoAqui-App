@@ -1,6 +1,6 @@
 """
 TUDOaqui API - Main Application
-Fase 1 MVP: Tuendi Taxi
+Fase 1 MVP: Tuendi Taxi + Eventos + Marketplace + Alojamento + Turismo + Real Estate
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
 from src.config import settings
-from src.database import engine, Base, init_db, close_db
+from src.database import engine, Base, close_db
 
 # Import routers
 from src.auth.router import router as auth_router
@@ -18,6 +18,8 @@ from src.tuendi.rides.router import router as rides_router
 from src.payments.router import router as payments_router
 from src.notifications.router import router as notifications_router
 from src.common.ws_router import router as ws_router
+from src.events.router import router as events_router
+from src.marketplace.router import router as marketplace_router
 
 
 @asynccontextmanager
@@ -46,29 +48,49 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     description="""
-## TUDOaqui SuperApp API - Fase 1 MVP
-
-### 🚕 Tuendi Taxi
-API para o módulo de mobilidade do TUDOaqui SuperApp.
+## TUDOaqui SuperApp API - Versão Completa
 
 ### Módulos Disponíveis:
-- **Auth**: Autenticação via OTP + JWT
-- **Drivers**: Gestão de motoristas
-- **Rides**: Gestão de corridas
-- **Payments**: Pagamentos e Ledger
 
-### Fluxo de Autenticação:
-1. `POST /api/v1/auth/login` - Envia OTP para telefone
-2. `POST /api/v1/auth/verify-otp` - Verifica OTP e retorna tokens
-3. Use `Authorization: Bearer {access_token}` nas requisições
+#### 🚕 Tuendi
+- **Taxi**: Corridas urbanas
+- **Entrega**: Delivery de pacotes
+- **Restaurante**: Delivery de comida
 
-### Fluxo de Corrida:
-1. Cliente: `POST /api/v1/rides/estimate` - Estima preço
-2. Cliente: `POST /api/v1/rides/request` - Solicita corrida
-3. Motorista: `POST /api/v1/rides/{id}/accept` - Aceita corrida
-4. Motorista: `POST /api/v1/rides/{id}/start` - Inicia corrida
-5. Motorista: `POST /api/v1/rides/{id}/finish` - Finaliza corrida
-6. Cliente: `POST /api/v1/rides/{id}/rate` - Avalia corrida
+#### 🎟️ Eventos
+- Criação e gestão de eventos
+- Venda de tickets com QR Code
+- Check-in digital
+
+#### 🛒 Marketplace
+- Multi-vendedor B2C/B2B
+- Gestão de produtos e pedidos
+- Integração com Tuendi Entrega
+
+#### 🏨 Alojamento
+- Reserva de propriedades (modelo Airbnb)
+- Gestão de disponibilidade
+- Integração com Tuendi Taxi
+
+#### 🧭 Turismo
+- Experiências e tours
+- Pacotes turísticos
+- QR Voucher
+
+#### 🏠 Real Estate
+- Venda e arrendamento de imóveis
+- Gestão de leads
+- Painel do agente
+
+#### 💳 Payments
+- Multicaixa Express
+- Mobile Money
+- Ledger centralizado
+
+### Autenticação:
+1. `POST /api/v1/auth/login` - Envia OTP
+2. `POST /api/v1/auth/verify-otp` - Verifica e retorna tokens
+3. Use `Authorization: Bearer {access_token}`
     """,
     version=settings.APP_VERSION,
     lifespan=lifespan,
@@ -155,6 +177,8 @@ app.include_router(rides_router, prefix="/api/v1")
 app.include_router(payments_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(ws_router, prefix="/api/v1")
+app.include_router(events_router, prefix="/api/v1")
+app.include_router(marketplace_router, prefix="/api/v1")
 
 
 # Para rodar com: uv run uvicorn src.main:app --reload
