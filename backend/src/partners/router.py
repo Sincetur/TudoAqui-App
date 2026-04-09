@@ -17,14 +17,28 @@ from src.partners import Partner
 
 router = APIRouter(prefix="/partners", tags=["Parceiros"])
 
-PARTNER_ROLES = ["vendedor", "anfitriao", "organizador", "agente", "motorista", "entregador"]
+PARTNER_ROLES = ["motorista", "motoqueiro", "proprietario", "guia_turista", "agente_imobiliario", "agente_viagem", "staff"]
 
 
 # ============================================
 # Schemas
 # ============================================
 
+PARTNER_TIPOS = [
+    {"id": "motorista", "label": "Motorista", "desc": "Condutor de taxi ou transporte privado"},
+    {"id": "motoqueiro", "label": "Motoqueiro", "desc": "Entregas rapidas de moto ou kupapata"},
+    {"id": "proprietario", "label": "Proprietario", "desc": "Dono de alojamento, restaurante ou loja"},
+    {"id": "staff", "label": "Staff", "desc": "Funcionario de eventos ou servicos"},
+    {"id": "guia_turista", "label": "Guia Turista", "desc": "Guia de experiencias e tours turisticos"},
+    {"id": "agente_imobiliario", "label": "Agente Imobiliario", "desc": "Venda e arrendamento de imoveis"},
+    {"id": "agente_viagem", "label": "Agente de Viagem", "desc": "Pacotes turisticos e viagens"},
+]
+
+PARTNER_TIPO_IDS = [t["id"] for t in PARTNER_TIPOS]
+
+
 class PartnerRegister(BaseModel):
+    tipo: str
     nome_negocio: str
     descricao: str | None = None
     provincia: str | None = None
@@ -63,6 +77,7 @@ def partner_to_dict(p: Partner, include_payment=False) -> dict:
     d = {
         "id": str(p.id),
         "user_id": str(p.user_id),
+        "tipo": p.tipo,
         "nome_negocio": p.nome_negocio,
         "descricao": p.descricao,
         "provincia": p.provincia,
@@ -131,6 +146,12 @@ def partner_payment_info(p: Partner) -> dict:
 # Partner Registration & Profile
 # ============================================
 
+@router.get("/tipos")
+async def get_partner_tipos():
+    """Lista os tipos de parceiro disponiveis."""
+    return {"tipos": PARTNER_TIPOS}
+
+
 @router.post("/register")
 async def register_partner(
     data: PartnerRegister,
@@ -141,12 +162,16 @@ async def register_partner(
     if current_user.role not in PARTNER_ROLES:
         raise HTTPException(status_code=403, detail=f"Precisa ter um role de parceiro ({', '.join(PARTNER_ROLES)}). Solicite upgrade na sua conta.")
 
+    if data.tipo not in PARTNER_TIPO_IDS:
+        raise HTTPException(status_code=400, detail=f"Tipo de parceiro invalido. Opcoes: {PARTNER_TIPO_IDS}")
+
     existing = await db.execute(select(Partner).where(Partner.user_id == current_user.id))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Ja e parceiro registado")
 
     partner = Partner(
         user_id=current_user.id,
+        tipo=data.tipo,
         nome_negocio=data.nome_negocio,
         descricao=data.descricao,
         provincia=data.provincia,

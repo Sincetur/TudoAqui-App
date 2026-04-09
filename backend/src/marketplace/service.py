@@ -44,7 +44,7 @@ class MarketplaceService:
         user_result = await db.execute(select(User).where(User.id == user_id))
         user = user_result.scalar_one_or_none()
         if user:
-            user.role = UserRole.VENDEDOR.value
+            user.role = UserRole.PROPRIETARIO.value
         
         seller = Seller(
             user_id=user_id,

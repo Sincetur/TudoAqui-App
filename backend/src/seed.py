@@ -33,12 +33,12 @@ async def run_seed():
         users = {}
         user_data = [
             ("seed_admin", "+244912000000", "Admin TUDOaqui", UserRole.ADMIN),
-            ("seed_org", "+244911000001", "Carlos Mendes", UserRole.ORGANIZADOR),
-            ("seed_seller", "+244911000002", "Ana Ferreira", UserRole.VENDEDOR),
-            ("seed_host", "+244911000003", "Manuel Santos", UserRole.ANFITRIAO),
-            ("seed_agent", "+244911000004", "Sofia Neto", UserRole.AGENTE),
-            ("seed_rest", "+244911000005", "Pedro Gomes", UserRole.VENDEDOR),
-            ("seed_guide", "+244911000006", "Joana Silva", UserRole.ANFITRIAO),
+            ("seed_org", "+244911000001", "Carlos Mendes", UserRole.GUIA_TURISTA),
+            ("seed_seller", "+244911000002", "Ana Ferreira", UserRole.PROPRIETARIO),
+            ("seed_host", "+244911000003", "Manuel Santos", UserRole.PROPRIETARIO),
+            ("seed_agent", "+244911000004", "Sofia Neto", UserRole.AGENTE_IMOBILIARIO),
+            ("seed_rest", "+244911000005", "Pedro Gomes", UserRole.PROPRIETARIO),
+            ("seed_guide", "+244911000006", "Joana Silva", UserRole.AGENTE_VIAGEM),
         ]
         for key, tel, nome, role in user_data:
             u = User(id=uuid.uuid4(), telefone=tel, nome=nome, role=role, status=UserStatus.ATIVO)

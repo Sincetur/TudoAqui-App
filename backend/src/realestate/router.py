@@ -107,7 +107,7 @@ async def register_agent(
 
 @router.get("/agents/me/profile", response_model=AgentResponse)
 async def get_my_agent_profile(
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Obtém perfil de agente do usuário."""
@@ -120,7 +120,7 @@ async def get_my_agent_profile(
 @router.put("/agents/me", response_model=AgentResponse)
 async def update_my_agent(
     request: AgentUpdate,
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza perfil de agente."""
@@ -137,7 +137,7 @@ async def update_my_agent(
 
 @router.get("/agents/me/stats", response_model=AgentStats)
 async def get_my_stats(
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Estatísticas do agente."""
@@ -253,7 +253,7 @@ async def get_property(
 @router.post("/properties", response_model=REPropertyResponse, status_code=status.HTTP_201_CREATED)
 async def create_property(
     request: REPropertyCreate,
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria novo imóvel."""
@@ -307,7 +307,7 @@ async def get_property_simple(property_id: UUID, db: AsyncSession) -> REProperty
 async def list_my_properties(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista imóveis do agente."""
@@ -323,7 +323,7 @@ async def list_my_properties(
 async def update_property(
     property_id: UUID,
     request: REPropertyUpdate,
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza imóvel."""
@@ -345,7 +345,7 @@ async def update_property(
 @router.post("/properties/{property_id}/publish", response_model=REPropertyResponse)
 async def publish_property(
     property_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Publica imóvel."""
@@ -399,7 +399,7 @@ async def list_my_leads(
     status: LeadStatus | None = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista leads do agente."""
@@ -435,7 +435,7 @@ async def list_my_leads(
 async def update_lead(
     lead_id: UUID,
     request: LeadUpdate,
-    current_user: User = Depends(require_roles(UserRole.AGENTE, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza lead."""

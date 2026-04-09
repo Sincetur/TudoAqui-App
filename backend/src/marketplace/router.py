@@ -73,7 +73,7 @@ async def register_seller(
 
 @router.get("/sellers/me/profile", response_model=SellerResponse)
 async def get_my_seller_profile(
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Obtém perfil de vendedor do usuário."""
@@ -86,7 +86,7 @@ async def get_my_seller_profile(
 @router.put("/sellers/me", response_model=SellerResponse)
 async def update_my_seller(
     request: SellerUpdate,
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza perfil de vendedor."""
@@ -105,7 +105,7 @@ async def update_my_seller(
 
 @router.get("/sellers/me/stats", response_model=SellerStats)
 async def get_my_seller_stats(
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Obtém estatísticas do vendedor."""
@@ -213,7 +213,7 @@ async def get_product(
 @router.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(
     request: ProductCreate,
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria novo produto."""
@@ -257,7 +257,7 @@ async def create_product(
 async def list_my_products(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista produtos do vendedor."""
@@ -296,7 +296,7 @@ async def list_my_products(
 async def update_product(
     product_id: UUID,
     request: ProductUpdate,
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza produto."""
@@ -422,7 +422,7 @@ async def list_seller_orders(
     status: OrderStatus | None = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista pedidos do vendedor."""
@@ -460,7 +460,7 @@ async def list_seller_orders(
 async def update_order_status(
     order_id: UUID,
     request: OrderStatusUpdate,
-    current_user: User = Depends(require_roles(UserRole.VENDEDOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza status do pedido."""

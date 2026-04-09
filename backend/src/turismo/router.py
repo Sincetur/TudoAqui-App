@@ -148,7 +148,7 @@ async def list_reviews(
 @router.post("/experiences", response_model=ExperienceResponse, status_code=status.HTTP_201_CREATED)
 async def create_experience(
     request: ExperienceCreate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria nova experiência."""
@@ -160,7 +160,7 @@ async def create_experience(
 async def list_my_experiences(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista experiências do anfitrião."""
@@ -201,7 +201,7 @@ async def list_my_experiences(
 async def update_experience(
     experience_id: UUID,
     request: ExperienceUpdate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza experiência."""
@@ -222,7 +222,7 @@ async def update_experience(
 @router.post("/experiences/{experience_id}/publish", response_model=ExperienceResponse)
 async def publish_experience(
     experience_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Publica experiência."""
@@ -244,7 +244,7 @@ async def publish_experience(
 async def create_schedule(
     experience_id: UUID,
     request: ScheduleCreate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria horário para experiência."""
@@ -274,7 +274,7 @@ async def create_schedule(
 
 @router.get("/host/stats", response_model=TurismoHostStats)
 async def get_host_stats(
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Estatísticas do anfitrião."""
@@ -384,7 +384,7 @@ async def list_host_bookings(
     status: ExperienceBookingStatus | None = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista reservas das experiências do anfitrião."""
@@ -418,7 +418,7 @@ async def list_host_bookings(
 async def validate_voucher(
     experience_id: UUID,
     request: BookingValidateRequest,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Valida voucher sem usar."""
@@ -434,7 +434,7 @@ async def validate_voucher(
 async def use_voucher(
     experience_id: UUID,
     request: BookingValidateRequest,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Usa voucher (check-in)."""

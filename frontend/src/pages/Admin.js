@@ -9,12 +9,12 @@ import { PageHeader, LoadingState, Badge } from '../components/Layout';
 
 const ROLES = [
   { value: 'cliente', label: 'Cliente' },
-  { value: 'organizador', label: 'Organizador' },
-  { value: 'vendedor', label: 'Vendedor' },
-  { value: 'anfitriao', label: 'Anfitriao' },
-  { value: 'agente', label: 'Agente' },
   { value: 'motorista', label: 'Motorista' },
-  { value: 'entregador', label: 'Entregador' },
+  { value: 'motoqueiro', label: 'Motoqueiro' },
+  { value: 'proprietario', label: 'Proprietario' },
+  { value: 'guia_turista', label: 'Guia Turista' },
+  { value: 'agente_imobiliario', label: 'Agente Imobiliario' },
+  { value: 'agente_viagem', label: 'Agente de Viagem' },
   { value: 'staff', label: 'Staff' },
   { value: 'admin', label: 'Admin' },
 ];
@@ -27,7 +27,7 @@ const STATUSES = [
 ];
 
 const roleColor = (r) => {
-  const map = { admin: 'danger', staff: 'warning', organizador: 'primary', vendedor: 'accent', anfitriao: 'success', agente: 'primary', motorista: 'accent', entregador: 'accent', cliente: 'default' };
+  const map = { admin: 'danger', staff: 'warning', proprietario: 'primary', motorista: 'accent', motoqueiro: 'accent', guia_turista: 'success', agente_imobiliario: 'primary', agente_viagem: 'primary', cliente: 'default' };
   return map[r] || 'default';
 };
 
@@ -419,6 +419,12 @@ function UpgradesTab() {
 
 
 
+const TIPO_LABELS = {
+  motorista: 'Motorista', motoqueiro: 'Motoqueiro', proprietario: 'Proprietario',
+  staff: 'Staff', guia_turista: 'Guia Turista', agente_imobiliario: 'Agente Imobiliario',
+  agente_viagem: 'Agente de Viagem',
+};
+
 function PartnersTab() {
   const [partners, setPartners] = useState([]);
   const [stats, setStats] = useState(null);
@@ -499,6 +505,7 @@ function PartnersTab() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h4 className="text-white font-bold text-sm">{p.nome_negocio}</h4>
+                  <p className="text-primary-400 text-xs font-medium">{TIPO_LABELS[p.tipo] || p.tipo}</p>
                   <p className="text-dark-500 text-xs">{p.cidade}, {p.provincia}</p>
                   {p.descricao && <p className="text-dark-400 text-xs mt-1">{p.descricao}</p>}
                 </div>

@@ -43,7 +43,7 @@ class RealEstateService:
         user_result = await db.execute(select(User).where(User.id == user_id))
         user = user_result.scalar_one_or_none()
         if user:
-            user.role = UserRole.AGENTE.value
+            user.role = UserRole.AGENTE_IMOBILIARIO.value
         
         agent = RealEstateAgent(
             user_id=user_id,

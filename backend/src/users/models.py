@@ -16,11 +16,11 @@ from src.database import Base
 class UserRole(str, Enum):
     CLIENTE = "cliente"
     MOTORISTA = "motorista"
-    ENTREGADOR = "entregador"
-    ORGANIZADOR = "organizador"
-    VENDEDOR = "vendedor"
-    ANFITRIAO = "anfitriao"
-    AGENTE = "agente"
+    MOTOQUEIRO = "motoqueiro"
+    PROPRIETARIO = "proprietario"
+    GUIA_TURISTA = "guia_turista"
+    AGENTE_IMOBILIARIO = "agente_imobiliario"
+    AGENTE_VIAGEM = "agente_viagem"
     STAFF = "staff"
     ADMIN = "admin"
 

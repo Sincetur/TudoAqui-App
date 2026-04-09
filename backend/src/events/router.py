@@ -100,7 +100,7 @@ async def get_event(
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 async def create_event(
     request: EventCreate,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -118,7 +118,7 @@ async def create_event(
 async def list_my_events(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -134,7 +134,7 @@ async def list_my_events(
 async def update_event(
     event_id: UUID,
     request: EventUpdate,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -161,7 +161,7 @@ async def update_event(
 @router.post("/{event_id}/publish", response_model=EventResponse)
 async def publish_event(
     event_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -185,7 +185,7 @@ async def publish_event(
 @router.post("/{event_id}/cancel", response_model=EventResponse)
 async def cancel_event(
     event_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -209,7 +209,7 @@ async def cancel_event(
 @router.get("/{event_id}/stats", response_model=EventStats)
 async def get_event_stats(
     event_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -235,7 +235,7 @@ async def get_event_stats(
 async def create_ticket_type(
     event_id: UUID,
     request: TicketTypeCreate,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -273,7 +273,7 @@ async def create_ticket_type(
 async def update_ticket_type(
     ticket_type_id: UUID,
     request: TicketTypeUpdate,
-    current_user: User = Depends(require_roles(UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -350,7 +350,7 @@ async def get_my_tickets(
 async def checkin_ticket(
     event_id: UUID,
     request: CheckInRequest,
-    current_user: User = Depends(require_roles(UserRole.STAFF, UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.STAFF, UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -404,7 +404,7 @@ async def checkin_ticket(
 async def validate_qr(
     event_id: UUID,
     request: CheckInRequest,
-    current_user: User = Depends(require_roles(UserRole.STAFF, UserRole.ORGANIZADOR, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.STAFF, UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """

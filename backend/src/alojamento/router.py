@@ -162,7 +162,7 @@ async def list_property_reviews(
 @router.post("/properties", response_model=PropertyResponse, status_code=status.HTTP_201_CREATED)
 async def create_property(
     request: PropertyCreate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria nova propriedade."""
@@ -174,7 +174,7 @@ async def create_property(
 async def list_my_properties(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista propriedades do anfitrião."""
@@ -219,7 +219,7 @@ async def list_my_properties(
 async def update_property(
     property_id: UUID,
     request: PropertyUpdate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza propriedade."""
@@ -240,7 +240,7 @@ async def update_property(
 @router.post("/properties/{property_id}/publish", response_model=PropertyResponse)
 async def publish_property(
     property_id: UUID,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Publica propriedade."""
@@ -259,7 +259,7 @@ async def publish_property(
 async def update_availability(
     property_id: UUID,
     request: AvailabilityUpdate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza disponibilidade de datas."""
@@ -281,7 +281,7 @@ async def update_availability(
 
 @router.get("/host/stats", response_model=HostStats)
 async def get_host_stats(
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Obtém estatísticas do anfitrião."""
@@ -401,7 +401,7 @@ async def list_host_bookings(
     status: BookingStatus | None = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Lista reservas das propriedades do anfitrião."""
@@ -438,7 +438,7 @@ async def list_host_bookings(
 async def update_booking_status(
     booking_id: UUID,
     request: BookingStatusUpdate,
-    current_user: User = Depends(require_roles(UserRole.ANFITRIAO, UserRole.ADMIN)),
+    current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
     db: AsyncSession = Depends(get_db)
 ):
     """Atualiza status da reserva."""

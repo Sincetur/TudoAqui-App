@@ -15,7 +15,7 @@ from src.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/account", tags=["Account"])
 
-UPGRADABLE_ROLES = ["organizador", "vendedor", "anfitriao", "agente", "motorista", "entregador"]
+UPGRADABLE_ROLES = ["motorista", "motoqueiro", "proprietario", "guia_turista", "agente_imobiliario", "agente_viagem", "staff"]
 
 
 class RoleRequestCreate(BaseModel):

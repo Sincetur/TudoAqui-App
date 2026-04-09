@@ -5,18 +5,20 @@ import { PageHeader, LoadingState, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
 
 const ROLE_LABELS = {
-  cliente: 'Cliente', organizador: 'Organizador de Eventos', vendedor: 'Vendedor Marketplace',
-  anfitriao: 'Anfitriao (Alojamento/Turismo)', agente: 'Agente Imobiliario',
-  motorista: 'Motorista', entregador: 'Entregador', staff: 'Staff', admin: 'Administrador',
+  cliente: 'Cliente', motorista: 'Motorista', motoqueiro: 'Motoqueiro',
+  proprietario: 'Proprietario', guia_turista: 'Guia Turista',
+  agente_imobiliario: 'Agente Imobiliario', agente_viagem: 'Agente de Viagem',
+  staff: 'Staff', admin: 'Administrador',
 };
 
 const UPGRADABLE = [
-  { value: 'organizador', label: 'Organizador de Eventos', desc: 'Criar e gerir eventos, vender bilhetes' },
-  { value: 'vendedor', label: 'Vendedor Marketplace', desc: 'Vender produtos no marketplace' },
-  { value: 'anfitriao', label: 'Anfitriao', desc: 'Publicar alojamentos e experiencias de turismo' },
-  { value: 'agente', label: 'Agente Imobiliario', desc: 'Publicar imoveis para venda e arrendamento' },
-  { value: 'motorista', label: 'Motorista', desc: 'Fazer corridas de taxi' },
-  { value: 'entregador', label: 'Entregador', desc: 'Fazer entregas de pacotes e comida' },
+  { value: 'motorista', label: 'Motorista', desc: 'Condutor de taxi ou transporte privado' },
+  { value: 'motoqueiro', label: 'Motoqueiro', desc: 'Entregas rapidas de moto ou kupapata' },
+  { value: 'proprietario', label: 'Proprietario', desc: 'Dono de alojamento, restaurante ou loja' },
+  { value: 'guia_turista', label: 'Guia Turista', desc: 'Guia de experiencias e tours turisticos' },
+  { value: 'agente_imobiliario', label: 'Agente Imobiliario', desc: 'Venda e arrendamento de imoveis' },
+  { value: 'agente_viagem', label: 'Agente de Viagem', desc: 'Pacotes turisticos e viagens' },
+  { value: 'staff', label: 'Staff', desc: 'Funcionario de eventos ou servicos' },
 ];
 
 const statusConfig = {
@@ -25,7 +27,7 @@ const statusConfig = {
   rejeitado: { icon: XCircle, variant: 'danger', label: 'Rejeitado' },
 };
 
-const PARTNER_ROLES = ['vendedor', 'anfitriao', 'organizador', 'agente', 'motorista', 'entregador'];
+const PARTNER_ROLES = ['motorista', 'motoqueiro', 'proprietario', 'guia_turista', 'agente_imobiliario', 'agente_viagem', 'staff'];
 
 export default function Account({ user, onProfileUpdate }) {
   const [profile, setProfile] = useState(null);
@@ -188,7 +190,7 @@ export default function Account({ user, onProfileUpdate }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">{partner.nome_negocio}</p>
-                    <p className="text-dark-500 text-xs">{partner.cidade}, {partner.provincia}</p>
+                    <p className="text-dark-500 text-xs">{(PARTNER_TIPOS.find(t => t.value === partner.tipo) || {}).label || partner.tipo} - {partner.cidade}, {partner.provincia}</p>
                   </div>
                   <Badge variant={partner.status === 'aprovado' ? 'success' : partner.status === 'pendente' ? 'warning' : partner.status === 'suspenso' ? 'danger' : 'default'}>
                     {partner.status}
@@ -369,6 +371,16 @@ function EditProfileForm({ profile, onClose, onUpdated }) {
 }
 
 
+const PARTNER_TIPOS = [
+  { value: 'motorista', label: 'Motorista' },
+  { value: 'motoqueiro', label: 'Motoqueiro' },
+  { value: 'proprietario', label: 'Proprietario' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'guia_turista', label: 'Guia Turista' },
+  { value: 'agente_imobiliario', label: 'Agente Imobiliario' },
+  { value: 'agente_viagem', label: 'Agente de Viagem' },
+];
+
 function PartnerRegisterForm({ onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -380,6 +392,7 @@ function PartnerRegisterForm({ onClose, onCreated }) {
     const fd = new FormData(e.target);
     try {
       await api.registerPartner({
+        tipo: fd.get('tipo'),
         nome_negocio: fd.get('nome_negocio'),
         descricao: fd.get('descricao') || null,
         provincia: fd.get('provincia') || null,
@@ -396,6 +409,9 @@ function PartnerRegisterForm({ onClose, onCreated }) {
   return (
     <FormModal title="Registar como Parceiro" onClose={onClose}>
       <form onSubmit={handleSubmit} data-testid="partner-register-form">
+        <FormField label="Tipo de Parceiro *">
+          <FormSelect name="tipo" options={PARTNER_TIPOS} placeholder="Seleccionar tipo..." required />
+        </FormField>
         <FormField label="Nome do Negocio *">
           <FormInput name="nome_negocio" placeholder="Ex: Loja do Joao" required />
         </FormField>
