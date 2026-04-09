@@ -15,14 +15,24 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 ### Core
 - [x] Auth OTP (telefone), 9 roles, rate limiting
 - [x] Seed Data Angola (eventos, produtos, alojamento, turismo, imoveis, restaurantes c/ menus)
-- [x] Admin Panel (stats, gestao users, conteudo, aprovacao upgrades)
-- [x] Account (perfil, editar nome/email, solicitar upgrade role, historico)
+- [x] Admin Panel (stats, gestao users, conteudo, aprovacao upgrades, gestao pagamentos)
+- [x] Account (perfil, editar nome/email, solicitar upgrade role, historico, meus pagamentos)
 
 ### Frontend (9 Paginas + Admin)
 - [x] Login OTP, Dashboard, Eventos, Marketplace, Alojamento, Turismo, Imobiliario, Entregas, Restaurantes
-- [x] Conta (perfil + upgrade), Admin (4 tabs: overview, users, upgrades, conteudo)
+- [x] Conta (perfil + upgrade + pagamentos), Admin (5 tabs: overview, users, pagamentos, upgrades, conteudo)
 - [x] Formularios criacao (Eventos, Marketplace, Alojamento, Turismo)
 - [x] Carrinho restaurante, estimativa entrega
+- [x] CheckoutModal reutilizavel em todos os modulos
+
+### Pagamentos (Transferencia Bancaria + Cash)
+- [x] Transferencia Bancaria BAI (Conta: 20967898310001, IBAN: AO06 0040 0000 0967898310151, SWIFT: BAIPAOLU)
+- [x] Pagamento em Dinheiro (Cash)
+- [x] CheckoutModal com dados bancarios, copy IBAN, comprovativo
+- [x] Admin: tab Pagamentos (stats, filtros, confirmar/rejeitar)
+- [x] Meus Pagamentos na pagina Conta
+- [x] Botoes Comprar/Pagar/Reservar em: Marketplace, Restaurantes, Eventos, Alojamento, Turismo, Entregas
+- [x] Multicaixa Express marcado como "em breve"
 
 ### Role Upgrade System
 - [x] User solicita upgrade com motivo
@@ -33,36 +43,25 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 
 ### PWA (Progressive Web App)
 - [x] manifest.json com icones 192x192 e 512x512
-- [x] Service Worker (sw.js) com cache offline (stale-while-revalidate)
+- [x] Service Worker (sw.js) com cache offline
 - [x] Splash screen nativo
 - [x] Meta tags Apple/Android para instalacao
-- [x] Categorias: lifestyle, shopping, food, travel
 
 ### Producao Web / Deploy
-- [x] Dockerfile.backend (Python 3.11 + uvicorn)
-- [x] Dockerfile.frontend (Node 20 build + Nginx serve)
+- [x] Dockerfiles (backend + frontend)
 - [x] docker-compose.yml (PostgreSQL, Backend, Frontend, Nginx, Certbot)
-- [x] Nginx configs para 4 dominios (tudoaqui.ao, app, api, admin)
-- [x] nginx-spa.conf (cache assets, no-cache SW, SPA fallback)
-- [x] Rate limiting (5r/m login, 30r/s API)
-- [x] SSL automatico (Let's Encrypt + renovacao)
-- [x] Security headers (HSTS, X-Frame-Options, CSP)
+- [x] Nginx configs para 4 dominios
+- [x] SSL automatico (Let's Encrypt)
 - [x] Scripts: deploy.sh, update.sh, backup.sh
-- [x] .env.production template
 - [x] README-DEPLOY.md com instrucoes completas
 
 ## API Endpoints
 - Auth: login, verify-otp, me
 - Account: profile (GET/PUT), role-request (POST), role-requests (GET)
-- Admin: stats, users (GET/PUT role/status), role-requests (GET/approve/reject), events, restaurants, sellers, agents
-- Modulos: events, marketplace/products, alojamento/properties, turismo/experiences, realestate/properties, restaurantes, entregas/estimate
+- Admin: stats, users, role-requests, events, restaurants, sellers, agents
+- Payments: bank-info, methods, create, list, comprovativo, admin/all, admin/stats, confirm, reject
+- Modulos: events, marketplace, alojamento, turismo, realestate, restaurantes, entregas
 - Seed: POST /api/v1/seed
-
-## Dominios Producao
-- tudoaqui.ao -> Frontend PWA
-- app.tudoaqui.ao -> Frontend PWA
-- api.tudoaqui.ao -> Backend FastAPI
-- admin.tudoaqui.ao -> Admin Panel
 
 ## Backlog
 - P1: Integracao Multicaixa Express / Mobile Money
