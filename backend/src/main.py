@@ -23,6 +23,8 @@ from src.marketplace.router import router as marketplace_router
 from src.alojamento.router import router as alojamento_router
 from src.turismo.router import router as turismo_router
 from src.realestate.router import router as realestate_router
+from src.tuendi.entrega.router import router as entrega_router
+from src.tuendi.restaurante.router import router as restaurante_router
 
 
 @asynccontextmanager
@@ -153,6 +155,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # Health Check
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 async def health_check():
     """Verifica se a API está online"""
     return {
@@ -163,13 +166,14 @@ async def health_check():
 
 
 @app.get("/", tags=["Root"])
+@app.get("/api/", tags=["Root"])
 async def root():
     """Endpoint raiz"""
     return {
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "docs": "/docs",
-        "health": "/health"
+        "health": "/api/health"
     }
 
 
@@ -185,6 +189,8 @@ app.include_router(marketplace_router, prefix="/api/v1")
 app.include_router(alojamento_router, prefix="/api/v1")
 app.include_router(turismo_router, prefix="/api/v1")
 app.include_router(realestate_router, prefix="/api/v1")
+app.include_router(entrega_router, prefix="/api/v1")
+app.include_router(restaurante_router, prefix="/api/v1")
 
 
 # Para rodar com: uv run uvicorn src.main:app --reload

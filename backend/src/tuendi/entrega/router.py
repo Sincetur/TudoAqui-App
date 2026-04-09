@@ -379,9 +379,9 @@ def _delivery_to_detail_response(delivery: "Delivery") -> DeliveryDetailResponse
     if delivery.driver:
         driver_nome = delivery.driver.user.nome if delivery.driver.user else None
         driver_telefone = delivery.driver.user.telefone if delivery.driver.user else None
-        driver_foto = delivery.driver.foto_url
-        driver_veiculo = f"{delivery.driver.veiculo_marca} {delivery.driver.veiculo_modelo}"
-        driver_placa = delivery.driver.veiculo_placa
+        driver_foto = delivery.driver.user.avatar_url if delivery.driver.user else None
+        driver_veiculo = f"{delivery.driver.marca or ''} {delivery.driver.modelo or ''}".strip() or delivery.driver.veiculo
+        driver_placa = delivery.driver.matricula
     
     return DeliveryDetailResponse(
         **base.model_dump(),
