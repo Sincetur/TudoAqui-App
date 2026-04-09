@@ -1,148 +1,168 @@
 # TUDOaqui SuperApp - Product Requirements Document
 
-## Visão Geral
-SuperApp modular para Angola integrando múltiplos serviços numa única plataforma.
+## Visao Geral
+SuperApp modular para Angola integrando multiplos servicos numa unica plataforma.
 
-## Stack Tecnológica
-- **Mobile:** Flutter (Dart) - Android & iOS
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL + Redis
-- **Pagamentos:** Multicaixa Express + Mobile Money
-- **SMS:** Africa's Talking
+## Stack Tecnologica
+- **Frontend:** React (CRA) + TailwindCSS
+- **Backend:** FastAPI (Python) + SQLAlchemy ORM
+- **Database:** PostgreSQL (asyncpg)
+- **Pagamentos:** Multicaixa Express + Mobile Money (pendente)
+- **SMS:** Africa's Talking (Sandbox mode)
 
-## Módulos do Sistema - TODOS COMPLETOS
+## Modulos do Sistema
 
 ### Core
 - [x] Users, Roles, Auth OTP
-- [x] Rate Limiting
-- [x] SMS Africa's Talking
+- [x] Rate Limiting (in-memory)
+- [x] SMS Africa's Talking (Sandbox)
 
 ### Tuendi
 - [x] Taxi (Corridas)
 - [x] Drivers (Motoristas)
-- [ ] Entrega (pendente)
-- [ ] Restaurante (pendente)
+- [x] Entrega (Delivery de pacotes)
+- [x] Restaurante (Delivery de comida)
 
 ### Eventos
 - [x] Models (Event, TicketType, Ticket, CheckIn)
-- [x] Schemas completos
-- [x] Service (CRUD, compra, check-in QR)
-- [x] Router (todos endpoints)
+- [x] Schemas, Service, Router completos
 
 ### Marketplace
 - [x] Models (Seller, Product, Category, Order, OrderItem, Review)
-- [x] Schemas completos
-- [x] Service (vendedores, produtos, pedidos)
-- [x] Router (todos endpoints)
+- [x] Schemas, Service, Router completos
 
 ### Alojamento
 - [x] Models (Property, Availability, Booking, Review)
-- [x] Schemas completos
-- [x] Service (propriedades, disponibilidade, reservas)
-- [x] Router (todos endpoints)
+- [x] Schemas, Service, Router completos
 
 ### Turismo
 - [x] Models (Experience, Schedule, Booking, Review)
-- [x] Schemas completos
-- [x] Service (experiências, horários, vouchers)
-- [x] Router (todos endpoints)
+- [x] Schemas, Service, Router completos
 
-### Real Estate (Imobiliário)
+### Real Estate (Imobiliario)
 - [x] Models (Agent, Property, Lead, Favorite)
-- [x] Schemas completos
-- [x] Service (agentes, imóveis, leads, favoritos)
-- [x] Router (todos endpoints)
+- [x] Schemas, Service, Router completos
 
 ### Payments
 - [x] Ledger centralizado
-- [ ] Multicaixa Express (pendente integração)
-- [ ] Mobile Money (pendente integração)
+- [ ] Multicaixa Express (pendente integracao)
+- [ ] Mobile Money (pendente integracao)
 
 ### Notifications
-- [x] Push + WebSocket
+- [x] Push + WebSocket base
 
-## API Endpoints por Módulo
+## API Endpoints Validados (Testados)
+
+### Health
+- GET /api/health - 200 OK
 
 ### Auth
 - POST /api/v1/auth/login
 - POST /api/v1/auth/verify-otp
-- POST /api/v1/auth/refresh
+- GET /api/v1/auth/me
+- POST /api/v1/auth/refresh-token
 - POST /api/v1/auth/logout
 
 ### Eventos
-- GET/POST /api/v1/events
-- GET/PUT /api/v1/events/{id}
-- POST /api/v1/events/{id}/publish
-- POST /api/v1/events/{id}/ticket-types
-- POST /api/v1/tickets/purchase
-- POST /api/v1/events/{id}/checkin
+- GET /api/v1/events
 
 ### Marketplace
-- GET/POST /api/v1/marketplace/sellers
-- GET/POST /api/v1/marketplace/products
-- GET/POST /api/v1/marketplace/orders
-- PUT /api/v1/marketplace/orders/{id}/status
+- GET /api/v1/marketplace/products
+- GET /api/v1/marketplace/sellers
+- GET /api/v1/marketplace/categories
 
 ### Alojamento
-- GET/POST /api/v1/alojamento/properties
-- GET /api/v1/alojamento/properties/{id}/availability
-- POST /api/v1/alojamento/bookings
-- PUT /api/v1/alojamento/bookings/{id}/status
+- GET /api/v1/alojamento/properties
 
 ### Turismo
-- GET/POST /api/v1/turismo/experiences
-- POST /api/v1/turismo/experiences/{id}/schedules
-- POST /api/v1/turismo/bookings
-- POST /api/v1/turismo/experiences/{id}/use-voucher
+- GET /api/v1/turismo/experiences
 
 ### Real Estate
-- GET/POST /api/v1/realestate/agents
-- GET/POST /api/v1/realestate/properties
-- GET/POST /api/v1/realestate/leads
-- GET/POST/DELETE /api/v1/realestate/favorites
+- GET /api/v1/realestate/properties
+- GET /api/v1/realestate/agents
 
-## Histórico de Implementações
+### Entrega
+- POST /api/v1/entregas/estimate (auth required)
+
+### Restaurante
+- GET /api/v1/restaurantes
+
+### Drivers
+- POST /api/v1/drivers/register (auth required)
+
+## Historico de Implementacoes
+
+### Abril 2026
+1. Criacao de server.py (ponte para uvicorn)
+2. Instalacao PostgreSQL no ambiente
+3. Criacao __init__.py para modulo restaurante
+4. Registo routers entrega/restaurante no main.py
+5. Fix atributos Driver no entrega router
+6. Frontend React com TailwindCSS (Login + Dashboard)
+7. Testes backend: 23/23 passed
 
 ### Janeiro 2026
-1. Correções de segurança (SECRET_KEY, OTP, Rate Limiting)
-2. SMS Africa's Talking configurado
-3. Módulo Eventos completo
-4. Módulo Marketplace completo
-5. Módulo Alojamento completo
-6. Módulo Turismo completo
-7. Módulo Real Estate completo
+1. Correcoes de seguranca (SECRET_KEY, OTP, Rate Limiting)
+2. SMS Africa's Talking configurado (Sandbox)
+3. Modulo Eventos completo
+4. Modulo Marketplace completo
+5. Modulo Alojamento completo
+6. Modulo Turismo completo
+7. Modulo Real Estate completo
+8. Modulo Entrega completo
+9. Modulo Restaurante completo
 
 ## Backlog
 
-### P0 - Crítico
-- [ ] Integração Multicaixa Express
-- [ ] Testes automatizados
+### P0 - Critico
+- [ ] Integracao Multicaixa Express
+- [ ] Testes end-to-end completos
 
 ### P1 - Alta
-- [ ] Tuendi Entrega
-- [ ] Tuendi Restaurante
 - [ ] Push notifications Firebase
+- [ ] Seed data para demonstracao
 
-### P2 - Média
+### P2 - Media
 - [ ] Wallet B2B
 - [ ] Painel Admin Web
+- [ ] Frontend completo para cada modulo
 
-## Arquivos Criados (Janeiro 2026)
+## Arquitetura
 
-### Alojamento
-- src/alojamento/schemas.py
-- src/alojamento/service.py
-- src/alojamento/router.py
+### Backend
+```
+/app/backend/
+  server.py              # Ponte uvicorn -> src.main
+  src/
+    main.py              # FastAPI app + routers
+    config.py            # Pydantic settings
+    database.py          # SQLAlchemy async engine
+    auth/                # OTP auth + JWT + rate limiting
+    users/               # User models + schemas
+    tuendi/
+      schemas.py         # Schemas partilhados
+      drivers/           # Motoristas
+      rides/             # Corridas taxi
+      entrega/           # Delivery pacotes
+      restaurante/       # Delivery comida
+      matching/          # Matching motoristas
+    events/              # Eventos + tickets
+    marketplace/         # Multi-vendedor
+    alojamento/          # Reservas estadias
+    turismo/             # Tours + experiencias
+    realestate/          # Imoveis
+    payments/            # Pagamentos + ledger
+    notifications/       # Push + WebSocket
+    common/              # SMS provider, utils
+```
 
-### Turismo
-- src/turismo/schemas.py
-- src/turismo/service.py
-- src/turismo/router.py
-
-### Real Estate
-- src/realestate/schemas.py
-- src/realestate/service.py
-- src/realestate/router.py
-
-### SMS
-- src/common/sms_provider.py
+### Frontend
+```
+/app/frontend/
+  src/
+    App.js               # Router principal
+    api.js               # API client
+    pages/
+      Login.js           # Login OTP
+      Dashboard.js       # Dashboard SuperApp
+```
