@@ -3,14 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #f97316;
-  --color-primary-dark: #ea580c;
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-text: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-border: #334155;
+  --color-primary: #dc2626;
+  --color-primary-dark: #b91c1c;
+  --color-accent: #eab308;
+  --color-accent-dark: #ca8a04;
+  --color-bg: #0a0a0a;
+  --color-surface: #171717;
+  --color-surface-hover: #262626;
+  --color-text: #ffffff;
+  --color-text-secondary: #a3a3a3;
+  --color-border: #262626;
 }
 
 * {
@@ -32,4 +34,23 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }

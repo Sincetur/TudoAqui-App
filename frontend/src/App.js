@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { api } from './api';
+import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import { api } from './api';
+import Events from './pages/Events';
+import Marketplace from './pages/Marketplace';
+import Alojamento from './pages/Alojamento';
+import Turismo from './pages/Turismo';
+import Imoveis from './pages/Imoveis';
+import Entregas from './pages/Entregas';
+import Restaurantes from './pages/Restaurantes';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -46,16 +54,32 @@ function App() {
     );
   }
 
+  if (!user) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={
-          user ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
-        } />
-        <Route path="/*" element={
-          user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
-        } />
-      </Routes>
+      <Layout user={user} onLogout={handleLogout}>
+        <Routes>
+          <Route path="/" element={<Dashboard user={user} />} />
+          <Route path="/eventos" element={<Events />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/alojamento" element={<Alojamento />} />
+          <Route path="/turismo" element={<Turismo />} />
+          <Route path="/imoveis" element={<Imoveis />} />
+          <Route path="/entregas" element={<Entregas />} />
+          <Route path="/restaurantes" element={<Restaurantes />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }

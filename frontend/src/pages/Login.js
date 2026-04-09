@@ -3,7 +3,7 @@ import { Phone, ArrowRight, Shield, Loader2 } from 'lucide-react';
 import { api } from '../api';
 
 export default function Login({ onLogin }) {
-  const [step, setStep] = useState('phone'); // phone | otp
+  const [step, setStep] = useState('phone');
   const [telefone, setTelefone] = useState('');
   const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,17 +44,17 @@ export default function Login({ onLogin }) {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 mb-4 shadow-lg shadow-primary-600/20">
             <span className="text-white text-2xl font-black">T</span>
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">
-            TUDO<span className="text-primary-500">aqui</span>
+            TUDO<span className="text-accent-400">Aqui</span>
           </h1>
-          <p className="text-dark-400 text-sm mt-1">A sua vida, num so app.</p>
+          <p className="text-dark-400 text-sm mt-1">a sua vida em um so lugar</p>
         </div>
 
         {/* Card */}
-        <div className="bg-dark-900 border border-dark-700 rounded-2xl p-6 shadow-xl">
+        <div className="bg-dark-900 border border-dark-800 rounded-2xl p-6 shadow-xl">
           {step === 'phone' ? (
             <form onSubmit={handleSendOtp} data-testid="phone-form">
               <h2 className="text-lg font-semibold text-white mb-1">Entrar</h2>
@@ -68,7 +68,7 @@ export default function Login({ onLogin }) {
                   placeholder="+244 923 456 789"
                   value={telefone}
                   onChange={e => setTelefone(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition"
+                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition"
                   required
                 />
               </div>
@@ -102,7 +102,7 @@ export default function Login({ onLogin }) {
                   value={codigo}
                   onChange={e => setCodigo(e.target.value)}
                   maxLength={6}
-                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-center text-xl tracking-widest"
+                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-center text-xl tracking-widest"
                   required
                 />
               </div>
@@ -131,7 +131,7 @@ export default function Login({ onLogin }) {
         </div>
 
         <p className="text-center text-dark-600 text-xs mt-6">
-          TUDOaqui SuperApp v1.0
+          TUDOAqui SuperApp v1.0
         </p>
       </div>
     </div>
