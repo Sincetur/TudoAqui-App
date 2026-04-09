@@ -20,6 +20,9 @@ from src.notifications.router import router as notifications_router
 from src.common.ws_router import router as ws_router
 from src.events.router import router as events_router
 from src.marketplace.router import router as marketplace_router
+from src.alojamento.router import router as alojamento_router
+from src.turismo.router import router as turismo_router
+from src.realestate.router import router as realestate_router
 
 
 @asynccontextmanager
@@ -179,6 +182,9 @@ app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(ws_router, prefix="/api/v1")
 app.include_router(events_router, prefix="/api/v1")
 app.include_router(marketplace_router, prefix="/api/v1")
+app.include_router(alojamento_router, prefix="/api/v1")
+app.include_router(turismo_router, prefix="/api/v1")
+app.include_router(realestate_router, prefix="/api/v1")
 
 
 # Para rodar com: uv run uvicorn src.main:app --reload
