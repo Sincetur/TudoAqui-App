@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Users, Calendar, ShoppingBag, Home, MapPin, Building2, UtensilsCrossed,
-  BarChart3, Shield, ChevronDown, Search, RefreshCw
+  BarChart3, Shield, ChevronDown, Search, RefreshCw, ArrowUpCircle, CheckCircle, XCircle
 } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, LoadingState, Badge } from '../components/Layout';
@@ -46,6 +46,7 @@ export default function Admin({ user }) {
   const tabs = [
     { key: 'overview', label: 'Visao Geral', icon: BarChart3 },
     { key: 'users', label: 'Utilizadores', icon: Users },
+    { key: 'upgrades', label: 'Upgrades', icon: ArrowUpCircle },
     { key: 'content', label: 'Conteudo', icon: ShoppingBag },
   ];
 
@@ -81,6 +82,7 @@ export default function Admin({ user }) {
 
         {!loading && tab === 'overview' && stats && <OverviewTab stats={stats} />}
         {!loading && tab === 'users' && <UsersTab />}
+        {!loading && tab === 'upgrades' && <UpgradesTab />}
         {!loading && tab === 'content' && <ContentTab />}
       </div>
     </div>
@@ -296,6 +298,121 @@ function UsersTab() {
     </div>
   );
 }
+
+function UpgradesTab() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('');
+  const [actionLoading, setActionLoading] = useState('');
+
+  const fetchRequests = () => {
+    setLoading(true);
+    const qs = filter ? `?status_filter=${filter}` : '';
+    api.adminRoleRequests(qs)
+      .then(d => setRequests(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchRequests(); }, [filter]);
+
+  const handleApprove = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.adminApproveRole(id, 'Aprovado pelo admin');
+      fetchRequests();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleReject = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.adminRejectRole(id, 'Rejeitado pelo admin');
+      fetchRequests();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  return (
+    <div className="space-y-4" data-testid="admin-upgrades-tab">
+      <div className="flex gap-2">
+        {['', 'pendente', 'aprovado', 'rejeitado'].map(s => (
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            data-testid={`upgrade-filter-${s || 'all'}`}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${filter === s ? 'bg-primary-600 text-white' : 'bg-dark-900 border border-dark-800 text-dark-400 hover:text-white'}`}
+          >{s === '' ? 'Todos' : s.charAt(0).toUpperCase() + s.slice(1)}</button>
+        ))}
+      </div>
+
+      {loading ? <LoadingState /> : (
+        <div className="space-y-3">
+          {requests.length === 0 && <p className="text-dark-500 text-sm text-center py-8">Nenhum pedido de upgrade</p>}
+          {requests.map((r, i) => (
+            <div key={r.id} className="bg-dark-900 border border-dark-800 rounded-xl p-4" data-testid={`upgrade-request-${i}`}>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-dark-700 flex items-center justify-center">
+                    <span className="text-dark-300 text-sm font-bold">{(r.user_nome || 'U')[0]}</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold text-sm">{r.user_nome || 'Sem nome'}</p>
+                    <p className="text-dark-400 text-xs">{r.user_telefone}</p>
+                  </div>
+                </div>
+                <Badge variant={r.status === 'pendente' ? 'warning' : r.status === 'aprovado' ? 'success' : 'danger'}>
+                  {r.status}
+                </Badge>
+              </div>
+              <div className="mt-3 pl-13">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <Badge variant={roleColor(r.user_role_atual)}>{r.user_role_atual}</Badge>
+                  <span className="text-dark-500">→</span>
+                  <Badge variant={roleColor(r.role_pretendido)}>{r.role_pretendido}</Badge>
+                </div>
+                <p className="text-dark-400 text-sm mt-1">{r.motivo}</p>
+                <p className="text-dark-600 text-xs mt-1">{new Date(r.created_at).toLocaleDateString('pt-AO')}</p>
+              </div>
+              {r.status === 'pendente' && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-dark-800">
+                  <button
+                    onClick={() => handleApprove(r.id)}
+                    disabled={actionLoading === r.id}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500/15 text-green-400 hover:bg-green-500/25 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                    data-testid={`approve-btn-${i}`}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" /> Aprovar
+                  </button>
+                  <button
+                    onClick={() => handleReject(r.id)}
+                    disabled={actionLoading === r.id}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                    data-testid={`reject-btn-${i}`}
+                  >
+                    <XCircle className="w-3.5 h-3.5" /> Rejeitar
+                  </button>
+                </div>
+              )}
+              {r.admin_nota && (
+                <p className="text-dark-500 text-xs mt-2 italic">Nota: {r.admin_nota}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 
 function ContentTab() {
   const [events, setEvents] = useState([]);

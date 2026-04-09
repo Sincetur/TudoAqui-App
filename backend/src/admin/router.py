@@ -9,6 +9,7 @@ from sqlalchemy import select, func, update
 
 from src.database import get_db
 from src.users.models import User, UserRole, UserStatus
+from src.users.role_request import RoleRequest
 from src.auth.dependencies import get_current_user, require_roles
 from src.events.models import Event
 from src.marketplace.models import Product, Seller
@@ -214,3 +215,95 @@ async def list_all_agents(
         }
         for a in agents
     ]
+
+
+# === ROLE REQUESTS ===
+
+@router.get("/role-requests")
+async def list_role_requests(
+    status_filter: str = None,
+    limit: int = Query(50, ge=1, le=200),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Listar pedidos de upgrade de role"""
+    query = select(RoleRequest).order_by(RoleRequest.created_at.desc()).limit(limit)
+    if status_filter:
+        query = query.where(RoleRequest.status == status_filter)
+    result = await db.execute(query)
+    requests = result.scalars().all()
+
+    items = []
+    for rr in requests:
+        user_result = await db.execute(select(User).where(User.id == rr.user_id))
+        user = user_result.scalar_one_or_none()
+        items.append({
+            "id": str(rr.id),
+            "user_id": str(rr.user_id),
+            "user_nome": user.nome if user else None,
+            "user_telefone": user.telefone if user else None,
+            "user_role_atual": user.role if user else None,
+            "role_pretendido": rr.role_pretendido,
+            "motivo": rr.motivo,
+            "status": rr.status,
+            "admin_nota": rr.admin_nota,
+            "created_at": rr.created_at.isoformat() if rr.created_at else None,
+            "reviewed_at": rr.reviewed_at.isoformat() if rr.reviewed_at else None,
+        })
+    return items
+
+
+@router.put("/role-requests/{request_id}/approve")
+async def approve_role_request(
+    request_id: UUID,
+    nota: str = None,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Aprovar pedido de upgrade de role"""
+    result = await db.execute(select(RoleRequest).where(RoleRequest.id == request_id))
+    rr = result.scalar_one_or_none()
+    if not rr:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    if rr.status != "pendente":
+        raise HTTPException(status_code=400, detail="Pedido ja foi processado")
+
+    # Update request
+    from datetime import datetime, timezone
+    rr.status = "aprovado"
+    rr.admin_nota = nota
+    rr.reviewed_by = current_user.id
+    rr.reviewed_at = datetime.now(timezone.utc)
+
+    # Update user role
+    user_result = await db.execute(select(User).where(User.id == rr.user_id))
+    user = user_result.scalar_one_or_none()
+    if user:
+        user.role = rr.role_pretendido
+
+    await db.commit()
+    return {"message": f"Pedido aprovado. Role atualizado para {rr.role_pretendido}", "status": "aprovado"}
+
+
+@router.put("/role-requests/{request_id}/reject")
+async def reject_role_request(
+    request_id: UUID,
+    nota: str = None,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Rejeitar pedido de upgrade de role"""
+    result = await db.execute(select(RoleRequest).where(RoleRequest.id == request_id))
+    rr = result.scalar_one_or_none()
+    if not rr:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
+    if rr.status != "pendente":
+        raise HTTPException(status_code=400, detail="Pedido ja foi processado")
+
+    from datetime import datetime, timezone
+    rr.status = "rejeitado"
+    rr.admin_nota = nota
+    rr.reviewed_by = current_user.id
+    rr.reviewed_at = datetime.now(timezone.utc)
+    await db.commit()
+    return {"message": "Pedido rejeitado", "status": "rejeitado"}

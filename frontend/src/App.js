@@ -12,6 +12,7 @@ import Imoveis from './pages/Imoveis';
 import Entregas from './pages/Entregas';
 import Restaurantes from './pages/Restaurantes';
 import Admin from './pages/Admin';
+import Account from './pages/Account';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -78,6 +79,7 @@ function App() {
           <Route path="/imoveis" element={<Imoveis />} />
           <Route path="/entregas" element={<Entregas />} />
           <Route path="/restaurantes" element={<Restaurantes />} />
+          <Route path="/conta" element={<Account user={user} onProfileUpdate={() => api.getMe().then(setUser)} />} />
           {user.role === 'admin' && <Route path="/admin" element={<Admin user={user} />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Package, UtensilsCrossed, Calendar, ShoppingBag, Home, MapPin, Building2,
-  LogOut, LayoutDashboard, ChevronLeft, Shield
+  LogOut, LayoutDashboard, ChevronLeft, Shield, UserCircle
 } from 'lucide-react';
 
 const navItems = [
@@ -20,9 +20,11 @@ export default function Layout({ user, onLogout, children }) {
   const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
 
-  const allNavItems = isAdmin
-    ? [...navItems, { to: '/admin', icon: Shield, label: 'Admin' }]
-    : navItems;
+  const allNavItems = [
+    ...navItems,
+    { to: '/conta', icon: UserCircle, label: 'Conta' },
+    ...(isAdmin ? [{ to: '/admin', icon: Shield, label: 'Admin' }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-dark-950 flex" data-testid="app-layout">

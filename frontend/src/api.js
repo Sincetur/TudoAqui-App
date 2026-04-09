@@ -94,4 +94,13 @@ export const api = {
   adminRestaurants: () => request('/admin/restaurants'),
   adminSellers: () => request('/admin/sellers'),
   adminAgents: () => request('/admin/agents'),
+  adminRoleRequests: (filter = '') => request(`/admin/role-requests${filter}`),
+  adminApproveRole: (id, nota = '') => request(`/admin/role-requests/${id}/approve?nota=${nota}`, { method: 'PUT' }),
+  adminRejectRole: (id, nota = '') => request(`/admin/role-requests/${id}/reject?nota=${nota}`, { method: 'PUT' }),
+
+  // Account
+  getProfile: () => request('/account/profile'),
+  updateProfile: (data) => request('/account/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  requestRoleUpgrade: (data) => request('/account/role-request', { method: 'POST', body: JSON.stringify(data) }),
+  myRoleRequests: () => request('/account/role-requests'),
 };
