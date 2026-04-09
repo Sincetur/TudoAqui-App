@@ -32,9 +32,15 @@ class Settings(BaseSettings):
     OTP_LENGTH: int = 6
     
     # SMS Provider (configurar com provider real em produção)
-    SMS_PROVIDER: str = "mock"  # mock | twilio | africas_talking
+    SMS_PROVIDER: str = "mock"  # mock | africastalking
     SMS_API_KEY: str = ""
     SMS_SENDER: str = "TUDOaqui"
+    
+    # Africa's Talking
+    AFRICASTALKING_API_KEY: str = ""
+    AFRICASTALKING_USERNAME: str = ""
+    AFRICASTALKING_SENDER_ID: str = ""  # Opcional, usar shortcode registado
+    AFRICASTALKING_SANDBOX: bool = True  # True para testes, False para produção
     
     # Tuendi Config
     TAXA_PLATAFORMA: float = 0.20  # 20%

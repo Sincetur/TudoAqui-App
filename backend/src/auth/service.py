@@ -202,16 +202,20 @@ class AuthService:
         return result.rowcount
     
     async def _send_sms(self, telefone: str, message: str) -> bool:
-        """Envia SMS (mock em desenvolvimento)"""
-        if settings.SMS_PROVIDER == "mock":
-            print(f"[SMS MOCK] Para: {telefone} | Mensagem: {message}")
+        """
+        Envia SMS usando o provider configurado.
+        Suporta: mock (dev) e africastalking (produção)
+        """
+        from src.common.sms_provider import sms_provider
+        
+        result = await sms_provider.send_sms(telefone, message)
+        
+        if result["status"] == "success":
             return True
-        
-        # TODO: Implementar integração com provider real
-        # if settings.SMS_PROVIDER == "twilio":
-        #     ...
-        
-        return True
+        else:
+            # Log do erro mas não falha (OTP fica no banco para retry)
+            print(f"[SMS ERROR] {result.get('message', 'Unknown error')}")
+            return False
 
 
 # Instância global

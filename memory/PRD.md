@@ -61,7 +61,7 @@ SuperApp modular para Angola integrando múltiplos serviços numa única platafo
 ## Backlog
 
 ### P0 - Crítico
-- [ ] SMS real (Twilio/Africa's Talking)
+- [x] SMS real (Africa's Talking) - IMPLEMENTADO
 - [ ] Integração Multicaixa
 - [ ] Testes automatizados
 
