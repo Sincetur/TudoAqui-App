@@ -84,4 +84,14 @@ export const api = {
   // Drivers
   registerDriver: (data) => request('/drivers/register', { method: 'POST', body: JSON.stringify(data) }),
   getDriverProfile: () => request('/drivers/me'),
+
+  // Admin
+  adminStats: () => request('/admin/stats'),
+  adminUsers: (params = '') => request(`/admin/users${params}`),
+  adminUpdateRole: (userId, role) => request(`/admin/users/${userId}/role?role=${role}`, { method: 'PUT' }),
+  adminUpdateStatus: (userId, status) => request(`/admin/users/${userId}/status?user_status=${status}`, { method: 'PUT' }),
+  adminEvents: () => request('/admin/events'),
+  adminRestaurants: () => request('/admin/restaurants'),
+  adminSellers: () => request('/admin/sellers'),
+  adminAgents: () => request('/admin/agents'),
 };

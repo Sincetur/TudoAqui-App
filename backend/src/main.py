@@ -25,6 +25,7 @@ from src.turismo.router import router as turismo_router
 from src.realestate.router import router as realestate_router
 from src.tuendi.entrega.router import router as entrega_router
 from src.tuendi.restaurante.router import router as restaurante_router
+from src.admin.router import router as admin_router
 
 
 @asynccontextmanager
@@ -198,6 +199,7 @@ app.include_router(turismo_router, prefix="/api/v1")
 app.include_router(realestate_router, prefix="/api/v1")
 app.include_router(entrega_router, prefix="/api/v1")
 app.include_router(restaurante_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
 
 
 # Para rodar com: uv run uvicorn src.main:app --reload

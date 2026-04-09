@@ -1,11 +1,18 @@
 ## Test Credentials
 
+### Admin User
+- **Telefone**: +244912000000
+- **Nome**: Admin TUDOaqui
+- **Role**: admin
+- **Auth Flow**: OTP-based
+
 ### User 1 (Test Cliente)
 - **Telefone**: +244923456789
 - **Role**: cliente
 - **Auth Flow**: OTP-based
 
 ### Seed Users (criados pelo seed)
+- +244912000000 - Admin TUDOaqui (admin)
 - +244911000001 - Carlos Mendes (organizador)
 - +244911000002 - Ana Ferreira (vendedor)
 - +244911000003 - Manuel Santos (anfitriao)

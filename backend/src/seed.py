@@ -32,6 +32,7 @@ async def run_seed():
         # === USERS ===
         users = {}
         user_data = [
+            ("seed_admin", "+244912000000", "Admin TUDOaqui", UserRole.ADMIN),
             ("seed_org", "+244911000001", "Carlos Mendes", UserRole.ORGANIZADOR),
             ("seed_seller", "+244911000002", "Ana Ferreira", UserRole.VENDEDOR),
             ("seed_host", "+244911000003", "Manuel Santos", UserRole.ANFITRIAO),
