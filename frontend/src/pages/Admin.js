@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Users, Calendar, ShoppingBag, Home, MapPin, Building2, UtensilsCrossed,
   BarChart3, Shield, ChevronDown, Search, RefreshCw, ArrowUpCircle, CheckCircle, XCircle,
-  CreditCard, Banknote, Clock
+  CreditCard, Banknote, Clock, Store, Smartphone
 } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, LoadingState, Badge } from '../components/Layout';
@@ -47,6 +47,7 @@ export default function Admin({ user }) {
   const tabs = [
     { key: 'overview', label: 'Visao Geral', icon: BarChart3 },
     { key: 'users', label: 'Utilizadores', icon: Users },
+    { key: 'partners', label: 'Parceiros', icon: Store },
     { key: 'payments', label: 'Pagamentos', icon: CreditCard },
     { key: 'upgrades', label: 'Upgrades', icon: ArrowUpCircle },
     { key: 'content', label: 'Conteudo', icon: ShoppingBag },
@@ -84,6 +85,7 @@ export default function Admin({ user }) {
 
         {!loading && tab === 'overview' && stats && <OverviewTab stats={stats} />}
         {!loading && tab === 'users' && <UsersTab />}
+        {!loading && tab === 'partners' && <PartnersTab />}
         {!loading && tab === 'payments' && <PaymentsTab />}
         {!loading && tab === 'upgrades' && <UpgradesTab />}
         {!loading && tab === 'content' && <ContentTab />}
@@ -415,6 +417,149 @@ function UpgradesTab() {
   );
 }
 
+
+
+function PartnersTab() {
+  const [partners, setPartners] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionLoading, setActionLoading] = useState('');
+
+  const fetchData = () => {
+    setLoading(true);
+    const qs = statusFilter ? `?status_filter=${statusFilter}` : '';
+    Promise.all([
+      api.adminPartners(qs).catch(() => []),
+      api.adminPartnerStats().catch(() => null),
+    ]).then(([p, s]) => {
+      setPartners(Array.isArray(p) ? p : []);
+      setStats(s);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchData(); }, [statusFilter]);
+
+  const handleAction = async (id, action) => {
+    setActionLoading(id);
+    try {
+      if (action === 'approve') await api.adminApprovePartner(id, 'Aprovado');
+      else if (action === 'suspend') await api.adminSuspendPartner(id, 'Suspenso pelo admin');
+      else if (action === 'reject') await api.adminRejectPartner(id, 'Rejeitado');
+      fetchData();
+    } catch (e) { alert(e.message); }
+    finally { setActionLoading(''); }
+  };
+
+  const statusBadge = (s) => ({ pendente: 'warning', aprovado: 'success', suspenso: 'danger', rejeitado: 'default' }[s] || 'default');
+
+  return (
+    <div className="space-y-4" data-testid="admin-partners-tab">
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs">Total Parceiros</p>
+            <p className="text-white text-xl font-bold mt-1">{stats.total}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs flex items-center gap-1"><Clock className="w-3 h-3 text-yellow-400" /> Pendentes</p>
+            <p className="text-yellow-400 text-xl font-bold mt-1">{stats.pendentes}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> Aprovados</p>
+            <p className="text-green-400 text-xl font-bold mt-1">{stats.aprovados}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs flex items-center gap-1"><XCircle className="w-3 h-3 text-red-400" /> Suspensos</p>
+            <p className="text-red-400 text-xl font-bold mt-1">{stats.suspensos}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="px-3 py-2 bg-dark-900 border border-dark-800 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+          data-testid="partners-status-filter"
+        >
+          <option value="">Todos os estados</option>
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="suspenso">Suspenso</option>
+          <option value="rejeitado">Rejeitado</option>
+        </select>
+        <button onClick={fetchData} className="p-2 bg-dark-900 border border-dark-800 rounded-lg text-dark-400 hover:text-white transition" data-testid="partners-refresh">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {loading ? <LoadingState /> : (
+        <div className="space-y-3">
+          {partners.map((p, i) => (
+            <div key={p.id} className="bg-dark-900 border border-dark-800 rounded-xl p-4" data-testid={`partner-card-${i}`}>
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h4 className="text-white font-bold text-sm">{p.nome_negocio}</h4>
+                  <p className="text-dark-500 text-xs">{p.cidade}, {p.provincia}</p>
+                  {p.descricao && <p className="text-dark-400 text-xs mt-1">{p.descricao}</p>}
+                </div>
+                <Badge variant={statusBadge(p.status)}>{p.status}</Badge>
+              </div>
+
+              {/* Payment methods */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className={`p-2 rounded-lg text-xs text-center ${p.aceita_unitel_money ? 'bg-orange-500/10 text-orange-400' : 'bg-dark-800 text-dark-600'}`}>
+                  <Smartphone className="w-3 h-3 mx-auto mb-0.5" />
+                  {p.aceita_unitel_money ? p.unitel_money_numero : 'Inactivo'}
+                </div>
+                <div className={`p-2 rounded-lg text-xs text-center ${p.aceita_transferencia ? 'bg-blue-500/10 text-blue-400' : 'bg-dark-800 text-dark-600'}`}>
+                  <Building2 className="w-3 h-3 mx-auto mb-0.5" />
+                  {p.aceita_transferencia ? p.banco_nome : 'Inactivo'}
+                </div>
+                <div className={`p-2 rounded-lg text-xs text-center ${p.aceita_dinheiro ? 'bg-green-500/10 text-green-400' : 'bg-dark-800 text-dark-600'}`}>
+                  <Banknote className="w-3 h-3 mx-auto mb-0.5" />
+                  {p.aceita_dinheiro ? 'Activo' : 'Inactivo'}
+                </div>
+              </div>
+
+              {p.aceita_transferencia && p.banco_iban && (
+                <p className="text-dark-500 text-xs mb-2">IBAN: {p.banco_iban}</p>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                {p.status === 'pendente' && (
+                  <>
+                    <button onClick={() => handleAction(p.id, 'approve')} disabled={actionLoading === p.id}
+                      className="flex-1 py-1.5 bg-green-500/15 text-green-400 hover:bg-green-500/25 text-xs font-medium rounded-lg transition disabled:opacity-50"
+                      data-testid={`approve-partner-${i}`}
+                    >Aprovar</button>
+                    <button onClick={() => handleAction(p.id, 'reject')} disabled={actionLoading === p.id}
+                      className="flex-1 py-1.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 text-xs font-medium rounded-lg transition disabled:opacity-50"
+                      data-testid={`reject-partner-${i}`}
+                    >Rejeitar</button>
+                  </>
+                )}
+                {p.status === 'aprovado' && (
+                  <button onClick={() => handleAction(p.id, 'suspend')} disabled={actionLoading === p.id}
+                    className="flex-1 py-1.5 bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25 text-xs font-medium rounded-lg transition disabled:opacity-50"
+                    data-testid={`suspend-partner-${i}`}
+                  >Suspender</button>
+                )}
+                {p.status === 'suspenso' && (
+                  <button onClick={() => handleAction(p.id, 'approve')} disabled={actionLoading === p.id}
+                    className="flex-1 py-1.5 bg-green-500/15 text-green-400 hover:bg-green-500/25 text-xs font-medium rounded-lg transition disabled:opacity-50"
+                    data-testid={`reactivate-partner-${i}`}
+                  >Reactivar</button>
+                )}
+              </div>
+            </div>
+          ))}
+          {partners.length === 0 && <p className="text-dark-500 text-sm text-center py-8">Nenhum parceiro encontrado</p>}
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 function PaymentsTab() {

@@ -117,4 +117,19 @@ export const api = {
   adminPaymentStats: () => request('/payments/admin/stats'),
   adminConfirmPayment: (id, nota = '') => request(`/payments/${id}/confirm`, { method: 'PUT', body: JSON.stringify({ nota }) }),
   adminRejectPayment: (id, nota = '') => request(`/payments/${id}/reject`, { method: 'PUT', body: JSON.stringify({ nota }) }),
+
+  // Partners
+  registerPartner: (data) => request('/partners/register', { method: 'POST', body: JSON.stringify(data) }),
+  getMyPartner: () => request('/partners/me'),
+  updateMyPartner: (data) => request('/partners/me', { method: 'PUT', body: JSON.stringify(data) }),
+  updatePartnerPayment: (data) => request('/partners/me/payment', { method: 'PUT', body: JSON.stringify(data) }),
+  getPartnerPaymentInfo: (id) => request(`/partners/${id}/payment-info`),
+  getPartnerPaymentByUser: (userId) => request(`/partners/by-user/${userId}/payment-info`),
+
+  // Admin Partners
+  adminPartners: (params = '') => request(`/partners/admin/all${params}`),
+  adminPartnerStats: () => request('/partners/admin/stats'),
+  adminApprovePartner: (id, nota = '') => request(`/partners/admin/${id}/approve`, { method: 'PUT', body: JSON.stringify({ nota }) }),
+  adminSuspendPartner: (id, nota = '') => request(`/partners/admin/${id}/suspend`, { method: 'PUT', body: JSON.stringify({ nota }) }),
+  adminRejectPartner: (id, nota = '') => request(`/partners/admin/${id}/reject`, { method: 'PUT', body: JSON.stringify({ nota }) }),
 };

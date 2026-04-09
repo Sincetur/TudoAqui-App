@@ -27,6 +27,7 @@ from src.tuendi.entrega.router import router as entrega_router
 from src.tuendi.restaurante.router import router as restaurante_router
 from src.admin.router import router as admin_router
 from src.account.router import router as account_router
+from src.partners.router import router as partners_router
 
 
 @asynccontextmanager
@@ -38,6 +39,14 @@ async def lifespan(app: FastAPI):
     # Criar tabelas (em produção usar migrations)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    # Ensure partner table columns exist
+    async with engine.begin() as conn:
+        from sqlalchemy import text
+        try:
+            await conn.execute(text('SELECT 1 FROM partners LIMIT 0'))
+        except Exception:
+            pass  # Table will be created by create_all above
     
     print("✅ Base de dados conectada")
     print("📍 Servidor: http://localhost:8000")
@@ -202,6 +211,7 @@ app.include_router(entrega_router, prefix="/api/v1")
 app.include_router(restaurante_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(account_router, prefix="/api/v1")
+app.include_router(partners_router, prefix="/api/v1")
 
 
 # Para rodar com: uv run uvicorn src.main:app --reload

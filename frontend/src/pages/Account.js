@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Shield, Send, Clock, CheckCircle, XCircle, ChevronRight, CreditCard, Building2, Banknote } from 'lucide-react';
+import { User, Shield, Send, Clock, CheckCircle, XCircle, ChevronRight, CreditCard, Building2, Banknote, Smartphone, Store } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, LoadingState, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
@@ -25,13 +25,18 @@ const statusConfig = {
   rejeitado: { icon: XCircle, variant: 'danger', label: 'Rejeitado' },
 };
 
+const PARTNER_ROLES = ['vendedor', 'anfitriao', 'organizador', 'agente', 'motorista', 'entregador'];
+
 export default function Account({ user, onProfileUpdate }) {
   const [profile, setProfile] = useState(null);
   const [requests, setRequests] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [partner, setPartner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showPartnerRegister, setShowPartnerRegister] = useState(false);
+  const [showPartnerPayment, setShowPartnerPayment] = useState(false);
 
   const fetchData = () => {
     setLoading(true);
@@ -39,10 +44,12 @@ export default function Account({ user, onProfileUpdate }) {
       api.getProfile().catch(() => null),
       api.myRoleRequests().catch(() => []),
       api.listMyPayments().catch(() => []),
-    ]).then(([p, r, pay]) => {
+      api.getMyPartner().catch(() => null),
+    ]).then(([p, r, pay, part]) => {
       setProfile(p);
       setRequests(Array.isArray(r) ? r : []);
       setPayments(Array.isArray(pay) ? pay : []);
+      setPartner(part);
     }).finally(() => setLoading(false));
   };
 
@@ -152,6 +159,76 @@ export default function Account({ user, onProfileUpdate }) {
             </div>
           </div>
         )}
+        {/* Partner Section */}
+        {PARTNER_ROLES.includes(currentRole) && (
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-5" data-testid="partner-section">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-white font-semibold text-sm flex items-center gap-2">
+                <Store className="w-4 h-4 text-primary-400" /> Parceiro TUDOaqui
+              </h3>
+              {!partner && (
+                <button
+                  onClick={() => setShowPartnerRegister(true)}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition"
+                  data-testid="register-partner-btn"
+                >
+                  <Store className="w-3.5 h-3.5" /> Registar como Parceiro
+                </button>
+              )}
+            </div>
+
+            {!partner && (
+              <p className="text-dark-400 text-sm">
+                Registe-se como parceiro para receber pagamentos directamente dos clientes. O admin ira aprovar o seu registo.
+              </p>
+            )}
+
+            {partner && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{partner.nome_negocio}</p>
+                    <p className="text-dark-500 text-xs">{partner.cidade}, {partner.provincia}</p>
+                  </div>
+                  <Badge variant={partner.status === 'aprovado' ? 'success' : partner.status === 'pendente' ? 'warning' : partner.status === 'suspenso' ? 'danger' : 'default'}>
+                    {partner.status}
+                  </Badge>
+                </div>
+
+                {/* Payment methods summary */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className={`p-2 rounded-lg text-center text-xs ${partner.aceita_unitel_money ? 'bg-green-500/10 text-green-400' : 'bg-dark-800 text-dark-500'}`}>
+                    <Smartphone className="w-4 h-4 mx-auto mb-0.5" />
+                    Unitel Money
+                    {partner.aceita_unitel_money && <p className="font-mono text-xs mt-0.5">{partner.unitel_money_numero}</p>}
+                  </div>
+                  <div className={`p-2 rounded-lg text-center text-xs ${partner.aceita_transferencia ? 'bg-blue-500/10 text-blue-400' : 'bg-dark-800 text-dark-500'}`}>
+                    <Building2 className="w-4 h-4 mx-auto mb-0.5" />
+                    Transferencia
+                    {partner.aceita_transferencia && <p className="font-mono text-xs mt-0.5">{partner.banco_nome}</p>}
+                  </div>
+                  <div className={`p-2 rounded-lg text-center text-xs ${partner.aceita_dinheiro ? 'bg-yellow-500/10 text-yellow-400' : 'bg-dark-800 text-dark-500'}`}>
+                    <Banknote className="w-4 h-4 mx-auto mb-0.5" />
+                    Dinheiro
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowPartnerPayment(true)}
+                  className="w-full py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-white text-sm rounded-lg transition"
+                  data-testid="config-partner-payment-btn"
+                >
+                  Configurar Dados de Pagamento
+                </button>
+
+                {partner.admin_nota && (
+                  <p className="text-dark-500 text-xs">Nota admin: {partner.admin_nota}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* My Payments */}
         {payments.length > 0 && (
           <div className="bg-dark-900 border border-dark-800 rounded-xl p-5" data-testid="my-payments">
@@ -194,6 +271,19 @@ export default function Account({ user, onProfileUpdate }) {
           profile={profile}
           onClose={() => setShowEditProfile(false)}
           onUpdated={() => { setShowEditProfile(false); fetchData(); if (onProfileUpdate) onProfileUpdate(); }}
+        />
+      )}
+      {showPartnerRegister && (
+        <PartnerRegisterForm
+          onClose={() => setShowPartnerRegister(false)}
+          onCreated={() => { setShowPartnerRegister(false); fetchData(); }}
+        />
+      )}
+      {showPartnerPayment && partner && (
+        <PartnerPaymentForm
+          partner={partner}
+          onClose={() => setShowPartnerPayment(false)}
+          onUpdated={() => { setShowPartnerPayment(false); fetchData(); }}
         />
       )}
     </div>
@@ -273,6 +363,134 @@ function EditProfileForm({ profile, onClose, onUpdated }) {
         </FormField>
         {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
         <SubmitButton loading={loading}>Guardar Alteracoes</SubmitButton>
+      </form>
+    </FormModal>
+  );
+}
+
+
+function PartnerRegisterForm({ onClose, onCreated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const fd = new FormData(e.target);
+    try {
+      await api.registerPartner({
+        nome_negocio: fd.get('nome_negocio'),
+        descricao: fd.get('descricao') || null,
+        provincia: fd.get('provincia') || null,
+        cidade: fd.get('cidade') || null,
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <FormModal title="Registar como Parceiro" onClose={onClose}>
+      <form onSubmit={handleSubmit} data-testid="partner-register-form">
+        <FormField label="Nome do Negocio *">
+          <FormInput name="nome_negocio" placeholder="Ex: Loja do Joao" required />
+        </FormField>
+        <FormField label="Descricao">
+          <FormTextarea name="descricao" placeholder="Descreva o seu negocio..." rows={3} />
+        </FormField>
+        <FormField label="Provincia">
+          <FormInput name="provincia" placeholder="Ex: Luanda" />
+        </FormField>
+        <FormField label="Cidade">
+          <FormInput name="cidade" placeholder="Ex: Luanda" />
+        </FormField>
+        {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
+        <SubmitButton loading={loading}>Registar Parceiro</SubmitButton>
+      </form>
+    </FormModal>
+  );
+}
+
+function PartnerPaymentForm({ partner, onClose, onUpdated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const fd = new FormData(e.target);
+    try {
+      await api.updatePartnerPayment({
+        unitel_money_numero: fd.get('unitel_money_numero') || null,
+        unitel_money_titular: fd.get('unitel_money_titular') || null,
+        aceita_unitel_money: fd.get('aceita_unitel_money') === 'on',
+        banco_nome: fd.get('banco_nome') || null,
+        banco_conta: fd.get('banco_conta') || null,
+        banco_iban: fd.get('banco_iban') || null,
+        banco_titular: fd.get('banco_titular') || null,
+        aceita_transferencia: fd.get('aceita_transferencia') === 'on',
+        aceita_dinheiro: fd.get('aceita_dinheiro') === 'on',
+      });
+      onUpdated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <FormModal title="Configurar Dados de Pagamento" onClose={onClose}>
+      <form onSubmit={handleSubmit} data-testid="partner-payment-form">
+        {/* Unitel Money */}
+        <div className="mb-4 p-3 bg-dark-800 rounded-lg">
+          <label className="flex items-center gap-2 text-white text-sm font-medium mb-2">
+            <input type="checkbox" name="aceita_unitel_money" defaultChecked={partner.aceita_unitel_money} className="rounded border-dark-600" />
+            <Smartphone className="w-4 h-4 text-orange-400" /> Aceitar Unitel Money
+          </label>
+          <FormField label="Numero Unitel Money">
+            <FormInput name="unitel_money_numero" placeholder="+244 9XX XXX XXX" defaultValue={partner.unitel_money_numero || ''} />
+          </FormField>
+          <FormField label="Titular">
+            <FormInput name="unitel_money_titular" placeholder="Nome do titular" defaultValue={partner.unitel_money_titular || ''} />
+          </FormField>
+        </div>
+
+        {/* Transferencia */}
+        <div className="mb-4 p-3 bg-dark-800 rounded-lg">
+          <label className="flex items-center gap-2 text-white text-sm font-medium mb-2">
+            <input type="checkbox" name="aceita_transferencia" defaultChecked={partner.aceita_transferencia} className="rounded border-dark-600" />
+            <Building2 className="w-4 h-4 text-blue-400" /> Aceitar Transferencia Bancaria
+          </label>
+          <FormField label="Banco">
+            <FormInput name="banco_nome" placeholder="Ex: BAI" defaultValue={partner.banco_nome || ''} />
+          </FormField>
+          <FormField label="Numero de Conta">
+            <FormInput name="banco_conta" placeholder="Numero da conta" defaultValue={partner.banco_conta || ''} />
+          </FormField>
+          <FormField label="IBAN">
+            <FormInput name="banco_iban" placeholder="AO06 ..." defaultValue={partner.banco_iban || ''} />
+          </FormField>
+          <FormField label="Titular">
+            <FormInput name="banco_titular" placeholder="Nome do titular" defaultValue={partner.banco_titular || ''} />
+          </FormField>
+        </div>
+
+        {/* Dinheiro */}
+        <div className="mb-4 p-3 bg-dark-800 rounded-lg">
+          <label className="flex items-center gap-2 text-white text-sm font-medium">
+            <input type="checkbox" name="aceita_dinheiro" defaultChecked={partner.aceita_dinheiro} className="rounded border-dark-600" />
+            <Banknote className="w-4 h-4 text-green-400" /> Aceitar Dinheiro (Cash)
+          </label>
+        </div>
+
+        {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
+        <SubmitButton loading={loading}>Guardar Configuracao</SubmitButton>
       </form>
     </FormModal>
   );
