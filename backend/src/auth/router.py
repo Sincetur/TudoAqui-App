@@ -1,7 +1,8 @@
 """
 TUDOaqui API - Auth Router
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+import phonenumbers
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -19,28 +20,65 @@ from src.users.schemas import (
 )
 from src.auth.service import auth_service
 from src.auth.dependencies import get_current_user
+from src.auth.rate_limiter import rate_limiter
 
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 
+def validate_and_format_phone(telefone: str) -> str:
+    """Valida e formata número de telefone angolano"""
+    telefone = telefone.strip()
+    
+    # Se não tem código de país, assume Angola
+    if not telefone.startswith("+"):
+        telefone = f"+244{telefone.lstrip('0')}"
+    
+    try:
+        parsed = phonenumbers.parse(telefone, "AO")
+        if not phonenumbers.is_valid_number(parsed):
+            raise ValueError("Número inválido")
+        return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+    except phonenumbers.NumberParseException:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Formato de telefone inválido. Use: +244XXXXXXXXX"
+        )
+
+
 @router.post("/login", response_model=OTPSentResponse)
 async def login(
     request: LoginRequest,
+    req: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
     Inicia o processo de login enviando OTP para o telefone.
     
     - **telefone**: Número de telefone com código do país (+244...)
+    
+    Rate limit: 5 tentativas por minuto por IP
     """
-    # Valida formato do telefone
-    telefone = request.telefone.strip()
-    if not telefone.startswith("+"):
-        telefone = f"+244{telefone.lstrip('0')}"
+    # Rate limiting por IP
+    client_ip = req.client.host if req.client else "unknown"
+    if not await rate_limiter.check_rate_limit(f"login:{client_ip}", limit=5, window=60):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas tentativas. Aguarde 1 minuto."
+        )
+    
+    # Valida e formata telefone
+    telefone = validate_and_format_phone(request.telefone)
+    
+    # Rate limiting por telefone (anti-spam SMS)
+    if not await rate_limiter.check_rate_limit(f"otp:{telefone}", limit=3, window=300):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitos OTPs solicitados. Aguarde 5 minutos."
+        )
     
     # Envia OTP
-    otp = await auth_service.send_otp(db, telefone)
+    await auth_service.send_otp(db, telefone)
     
     return OTPSentResponse(
         telefone=telefone,
@@ -51,6 +89,7 @@ async def login(
 @router.post("/verify-otp", response_model=TokenResponse)
 async def verify_otp(
     request: OTPVerifyRequest,
+    req: Request,
     user_agent: str | None = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
@@ -59,10 +98,19 @@ async def verify_otp(
     
     - **telefone**: Número de telefone
     - **codigo**: Código OTP recebido por SMS
+    
+    Rate limit: 10 tentativas por minuto por IP
     """
-    telefone = request.telefone.strip()
-    if not telefone.startswith("+"):
-        telefone = f"+244{telefone.lstrip('0')}"
+    # Rate limiting por IP
+    client_ip = req.client.host if req.client else "unknown"
+    if not await rate_limiter.check_rate_limit(f"verify:{client_ip}", limit=10, window=60):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas tentativas. Aguarde 1 minuto."
+        )
+    
+    # Valida e formata telefone
+    telefone = validate_and_format_phone(request.telefone)
     
     # Verifica OTP
     otp = await auth_service.verify_otp(db, telefone, request.codigo)

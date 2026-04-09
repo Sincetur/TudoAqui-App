@@ -227,7 +227,7 @@ async def rate_ride(
             request.comentario
         )
         return RatingResponse.model_validate(rating)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=400, detail="Avaliação já realizada")
 
 

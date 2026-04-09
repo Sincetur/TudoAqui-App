@@ -64,7 +64,7 @@ class NotificationService:
         query = select(Notification).where(Notification.user_id == user_id)
         
         if unread_only:
-            query = query.where(Notification.lida == False)
+            query = query.where(Notification.lida.is_(False))
         
         query = query.order_by(Notification.created_at.desc()).limit(limit).offset(offset)
         
@@ -90,7 +90,7 @@ class NotificationService:
             update(Notification)
             .where(and_(
                 Notification.user_id == user_id,
-                Notification.lida == False
+                Notification.lida.is_(False)
             ))
             .values(lida=True)
         )
@@ -105,7 +105,7 @@ class NotificationService:
             select(func.count(Notification.id))
             .where(and_(
                 Notification.user_id == user_id,
-                Notification.lida == False
+                Notification.lida.is_(False)
             ))
         )
         return result.scalar() or 0

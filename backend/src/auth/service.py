@@ -1,7 +1,6 @@
 """
 TUDOaqui API - Auth Service
 """
-import random
 import string
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -20,8 +19,8 @@ class AuthService:
     
     @staticmethod
     def generate_otp() -> str:
-        """Gera código OTP de 6 dígitos"""
-        return ''.join(random.choices(string.digits, k=settings.OTP_LENGTH))
+        """Gera código OTP de 6 dígitos (criptograficamente seguro)"""
+        return ''.join(secrets.choice(string.digits) for _ in range(settings.OTP_LENGTH))
     
     @staticmethod
     def generate_refresh_token() -> str:
@@ -58,7 +57,7 @@ class AuthService:
             OTPCode.__table__.update()
             .where(and_(
                 OTPCode.telefone == telefone,
-                OTPCode.verificado == False
+                OTPCode.verificado.is_(False)
             ))
             .values(verificado=True)
         )
@@ -87,7 +86,7 @@ class AuthService:
             select(OTPCode)
             .where(and_(
                 OTPCode.telefone == telefone,
-                OTPCode.verificado == False,
+                OTPCode.verificado.is_(False),
                 OTPCode.expira_em > datetime.now(timezone.utc)
             ))
             .order_by(OTPCode.created_at.desc())
@@ -170,7 +169,7 @@ class AuthService:
             select(RefreshToken)
             .where(and_(
                 RefreshToken.token == token,
-                RefreshToken.revogado == False,
+                RefreshToken.revogado.is_(False),
                 RefreshToken.expira_em > datetime.now(timezone.utc)
             ))
         )
@@ -195,7 +194,7 @@ class AuthService:
             RefreshToken.__table__.update()
             .where(and_(
                 RefreshToken.user_id == user_id,
-                RefreshToken.revogado == False
+                RefreshToken.revogado.is_(False)
             ))
             .values(revogado=True)
         )

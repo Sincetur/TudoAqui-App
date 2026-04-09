@@ -66,7 +66,7 @@ class RideService:
             select(Driver)
             .join(User, Driver.user_id == User.id)
             .where(and_(
-                Driver.online == True,
+                Driver.online.is_(True),
                 Driver.status == DriverStatus.APROVADO.value,
                 User.status == "ativo",
                 Driver.latitude.isnot(None),

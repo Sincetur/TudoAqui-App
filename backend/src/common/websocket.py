@@ -56,7 +56,7 @@ class WebSocketManager:
             try:
                 old_ws = self.active_connections[user_key].websocket
                 await old_ws.close()
-            except:
+            except Exception:
                 pass
         
         # Registra nova conexão
@@ -102,7 +102,7 @@ class WebSocketManager:
             try:
                 ws = self.active_connections[user_key].websocket
                 await ws.send_json(data)
-            except:
+            except Exception:
                 self.disconnect(user_id)
     
     async def broadcast_to_ride(self, ride_id: UUID, data: dict, exclude: UUID = None):
@@ -119,7 +119,7 @@ class WebSocketManager:
                 try:
                     ws = self.active_connections[user_key].websocket
                     await ws.send_json(data)
-                except:
+                except Exception:
                     pass
     
     async def broadcast_to_drivers(self, data: dict, lat: float = None, lon: float = None, radius_km: float = 5):
@@ -131,7 +131,7 @@ class WebSocketManager:
                 if conn.user_type == 'driver':
                     try:
                         await conn.websocket.send_json(data)
-                    except:
+                    except Exception:
                         pass
     
     def join_ride(self, user_id: UUID, ride_id: UUID):

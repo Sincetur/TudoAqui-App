@@ -31,8 +31,8 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     
     print("✅ Base de dados conectada")
-    print(f"📍 Servidor: http://localhost:8000")
-    print(f"📚 Docs: http://localhost:8000/docs")
+    print("📍 Servidor: http://localhost:8000")
+    print("📚 Docs: http://localhost:8000/docs")
     
     yield
     
