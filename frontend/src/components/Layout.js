@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  Car, Package, UtensilsCrossed, Calendar, ShoppingBag, Home, MapPin, Building2,
+  Package, UtensilsCrossed, Calendar, ShoppingBag, Home, MapPin, Building2,
   LogOut, LayoutDashboard, ChevronLeft
 } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Package, MapPin, Truck, Clock, ArrowRight, Calculator } from 'lucide-react';
+import { Package, MapPin, ArrowRight, Calculator } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 

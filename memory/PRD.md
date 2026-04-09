@@ -2,9 +2,12 @@
 
 ## Visao Geral
 SuperApp modular para Angola integrando multiplos servicos numa unica plataforma.
+- **Logo**: TUDOAqui
+- **Slogan**: a sua vida em um so lugar
+- **Cores**: Vermelho (primary), Amarelo (accent), Preto (background), Branco (texto)
 
 ## Stack Tecnologica
-- **Frontend:** React (CRA) + TailwindCSS
+- **Frontend:** React (CRA) + TailwindCSS + Lucide React
 - **Backend:** FastAPI (Python) + SQLAlchemy ORM
 - **Database:** PostgreSQL (asyncpg)
 - **Pagamentos:** Multicaixa Express + Mobile Money (pendente)
@@ -18,30 +21,30 @@ SuperApp modular para Angola integrando multiplos servicos numa unica plataforma
 - [x] SMS Africa's Talking (Sandbox)
 
 ### Tuendi
-- [x] Taxi (Corridas)
+- [x] Taxi (Corridas) - Backend completo, Frontend "Em breve"
 - [x] Drivers (Motoristas)
-- [x] Entrega (Delivery de pacotes)
-- [x] Restaurante (Delivery de comida)
+- [x] Entrega (Delivery de pacotes) - Backend + Frontend completos
+- [x] Restaurante (Delivery de comida) - Backend + Frontend completos
 
 ### Eventos
-- [x] Models (Event, TicketType, Ticket, CheckIn)
-- [x] Schemas, Service, Router completos
+- [x] Backend completo (Models, Schemas, Service, Router)
+- [x] Frontend completo (Lista, Detalhe, Pesquisa)
 
 ### Marketplace
-- [x] Models (Seller, Product, Category, Order, OrderItem, Review)
-- [x] Schemas, Service, Router completos
+- [x] Backend completo (Models, Schemas, Service, Router)
+- [x] Frontend completo (Produtos, Categorias, Vendedores)
 
 ### Alojamento
-- [x] Models (Property, Availability, Booking, Review)
-- [x] Schemas, Service, Router completos
+- [x] Backend completo (Models, Schemas, Service, Router)
+- [x] Frontend completo (Propriedades, Pesquisa, Detalhe)
 
 ### Turismo
-- [x] Models (Experience, Schedule, Booking, Review)
-- [x] Schemas, Service, Router completos
+- [x] Backend completo (Models, Schemas, Service, Router)
+- [x] Frontend completo (Experiencias, Pesquisa, Detalhe)
 
 ### Real Estate (Imobiliario)
-- [x] Models (Agent, Property, Lead, Favorite)
-- [x] Schemas, Service, Router completos
+- [x] Backend completo (Models, Schemas, Service, Router)
+- [x] Frontend completo (Imoveis, Agentes, Tabs, Pesquisa, Detalhe)
 
 ### Payments
 - [x] Ledger centralizado
@@ -50,6 +53,35 @@ SuperApp modular para Angola integrando multiplos servicos numa unica plataforma
 
 ### Notifications
 - [x] Push + WebSocket base
+
+## Frontend Implementado
+
+### Estrutura
+```
+/app/frontend/src/
+  App.js                 # Router principal com 8 rotas de modulos
+  api.js                 # API client com todos os endpoints
+  index.css              # CSS variaveis + animacoes
+  components/
+    Layout.js            # Sidebar + PageHeader + EmptyState + Badge + ItemCard
+  pages/
+    Login.js             # Login OTP (telefone + verificacao)
+    Dashboard.js         # Dashboard com cards de modulos e stats
+    Events.js            # Eventos (lista + detalhe)
+    Marketplace.js       # Marketplace (produtos + categorias)
+    Alojamento.js        # Alojamento (propriedades)
+    Turismo.js           # Turismo (experiencias)
+    Imoveis.js           # Imobiliario (imoveis + agentes tabs)
+    Entregas.js          # Entregas (lista + estimativa preco)
+    Restaurantes.js      # Restaurantes (lista + menu detalhe)
+```
+
+### Design System
+- Theme: Dark mode (bg-dark-950, surfaces bg-dark-900)
+- Primary: Red (#dc2626)
+- Accent: Yellow (#eab308)
+- Sidebar navigation (desktop) + Bottom nav (mobile)
+- Componentes reutilizaveis: PageHeader, EmptyState, LoadingState, ItemCard, Badge
 
 ## API Endpoints Validados (Testados)
 
@@ -60,109 +92,45 @@ SuperApp modular para Angola integrando multiplos servicos numa unica plataforma
 - POST /api/v1/auth/login
 - POST /api/v1/auth/verify-otp
 - GET /api/v1/auth/me
-- POST /api/v1/auth/refresh-token
-- POST /api/v1/auth/logout
 
-### Eventos
-- GET /api/v1/events
-
-### Marketplace
-- GET /api/v1/marketplace/products
-- GET /api/v1/marketplace/sellers
-- GET /api/v1/marketplace/categories
-
-### Alojamento
-- GET /api/v1/alojamento/properties
-
-### Turismo
-- GET /api/v1/turismo/experiences
-
-### Real Estate
-- GET /api/v1/realestate/properties
-- GET /api/v1/realestate/agents
-
-### Entrega
+### Todos os modulos
+- GET /api/v1/events, /api/v1/marketplace/products, /api/v1/alojamento/properties
+- GET /api/v1/turismo/experiences, /api/v1/realestate/properties, /api/v1/restaurantes
 - POST /api/v1/entregas/estimate (auth required)
-
-### Restaurante
-- GET /api/v1/restaurantes
-
-### Drivers
-- POST /api/v1/drivers/register (auth required)
-
-## Historico de Implementacoes
-
-### Abril 2026
-1. Criacao de server.py (ponte para uvicorn)
-2. Instalacao PostgreSQL no ambiente
-3. Criacao __init__.py para modulo restaurante
-4. Registo routers entrega/restaurante no main.py
-5. Fix atributos Driver no entrega router
-6. Frontend React com TailwindCSS (Login + Dashboard)
-7. Testes backend: 23/23 passed
-
-### Janeiro 2026
-1. Correcoes de seguranca (SECRET_KEY, OTP, Rate Limiting)
-2. SMS Africa's Talking configurado (Sandbox)
-3. Modulo Eventos completo
-4. Modulo Marketplace completo
-5. Modulo Alojamento completo
-6. Modulo Turismo completo
-7. Modulo Real Estate completo
-8. Modulo Entrega completo
-9. Modulo Restaurante completo
 
 ## Backlog
 
 ### P0 - Critico
 - [ ] Integracao Multicaixa Express
-- [ ] Testes end-to-end completos
+- [ ] Seed data para demonstracao (popular BD com dados demo)
 
 ### P1 - Alta
 - [ ] Push notifications Firebase
-- [ ] Seed data para demonstracao
+- [ ] Formularios de criacao (criar evento, produto, propriedade, etc.)
 
 ### P2 - Media
 - [ ] Wallet B2B
 - [ ] Painel Admin Web
-- [ ] Frontend completo para cada modulo
+- [ ] Modulo Taxi frontend completo
 
-## Arquitetura
+## Historico de Implementacoes
 
-### Backend
-```
-/app/backend/
-  server.py              # Ponte uvicorn -> src.main
-  src/
-    main.py              # FastAPI app + routers
-    config.py            # Pydantic settings
-    database.py          # SQLAlchemy async engine
-    auth/                # OTP auth + JWT + rate limiting
-    users/               # User models + schemas
-    tuendi/
-      schemas.py         # Schemas partilhados
-      drivers/           # Motoristas
-      rides/             # Corridas taxi
-      entrega/           # Delivery pacotes
-      restaurante/       # Delivery comida
-      matching/          # Matching motoristas
-    events/              # Eventos + tickets
-    marketplace/         # Multi-vendedor
-    alojamento/          # Reservas estadias
-    turismo/             # Tours + experiencias
-    realestate/          # Imoveis
-    payments/            # Pagamentos + ledger
-    notifications/       # Push + WebSocket
-    common/              # SMS provider, utils
-```
+### Abril 2026 (Sessao 2)
+1. Frontend completo com 8 paginas de modulos
+2. Layout com sidebar + mobile bottom nav
+3. Cores atualizadas: Vermelho/Amarelo/Preto/Branco
+4. Slogan: "a sua vida em um so lugar"
+5. Testes frontend: 100% passed (iteration_2)
 
-### Frontend
-```
-/app/frontend/
-  src/
-    App.js               # Router principal
-    api.js               # API client
-    pages/
-      Login.js           # Login OTP
-      Dashboard.js       # Dashboard SuperApp
-```
+### Abril 2026 (Sessao 1)
+1. Criacao de server.py (ponte para uvicorn)
+2. Instalacao PostgreSQL no ambiente
+3. Registo routers entrega/restaurante no main.py
+4. Fix atributos Driver no entrega router
+5. Frontend React scaffold (Login + Dashboard)
+6. Testes backend: 23/23 passed (iteration_1)
+
+### Janeiro 2026
+1. Correcoes de seguranca
+2. SMS Africa's Talking configurado
+3. Todos os modulos backend completos

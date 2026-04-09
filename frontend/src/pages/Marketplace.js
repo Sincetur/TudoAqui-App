@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, Search, Star, Package } from 'lucide-react';
+import { ShoppingBag, Search, Package } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 

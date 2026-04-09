@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Building2, Search, MapPin, Bed, Car, Maximize, Heart, Star } from 'lucide-react';
+import { Building2, Search, MapPin, Bed, Maximize, Heart, Star } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 
