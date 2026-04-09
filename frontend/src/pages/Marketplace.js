@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, Search, Package } from 'lucide-react';
+import { ShoppingBag, Search, Package, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
+import FormModal, { FormField, FormInput, FormTextarea, SubmitButton } from '../components/FormModal';
 
 export default function Marketplace() {
   const [products, setProducts] = useState([]);
@@ -10,8 +11,10 @@ export default function Marketplace() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const fetchData = () => {
+    setLoading(true);
     Promise.all([
       api.listProducts().catch(() => []),
       api.listCategories().catch(() => []),
@@ -20,7 +23,9 @@ export default function Marketplace() {
       setCategories(Array.isArray(cats) ? cats : []);
     }).catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const filtered = products.filter(p =>
     (p.nome || '').toLowerCase().includes(search.toLowerCase())
@@ -34,7 +39,13 @@ export default function Marketplace() {
 
   return (
     <div data-testid="marketplace-page">
-      <PageHeader title="Marketplace" subtitle={`${products.length} produtos`} />
+      <PageHeader title="Marketplace" subtitle={`${products.length} produtos`}
+        actions={
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg transition" data-testid="create-product-btn">
+            <Plus className="w-4 h-4" /> Vender
+          </button>
+        }
+      />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-4 animate-fade-in">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
@@ -87,7 +98,56 @@ export default function Marketplace() {
           ))}
         </div>
       </div>
+      {showCreate && <CreateProductForm onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); fetchData(); }} />}
     </div>
+  );
+}
+
+function CreateProductForm({ onClose, onCreated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const fd = new FormData(e.target);
+    try {
+      await api.createProduct({
+        nome: fd.get('nome'),
+        descricao: fd.get('descricao') || null,
+        preco: parseFloat(fd.get('preco')),
+        stock: parseInt(fd.get('stock')) || 0,
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <FormModal title="Publicar Produto" onClose={onClose}>
+      <form onSubmit={handleSubmit} data-testid="create-product-form">
+        <FormField label="Nome do produto *">
+          <FormInput name="nome" placeholder="Nome do produto" required />
+        </FormField>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Preco (Kz) *">
+            <FormInput name="preco" type="number" placeholder="5000" required />
+          </FormField>
+          <FormField label="Stock *">
+            <FormInput name="stock" type="number" placeholder="10" required />
+          </FormField>
+        </div>
+        <FormField label="Descricao">
+          <FormTextarea name="descricao" placeholder="Descreva o produto..." />
+        </FormField>
+        {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
+        <SubmitButton loading={loading}>Publicar Produto</SubmitButton>
+      </form>
+    </FormModal>
   );
 }
 

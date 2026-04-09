@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Search, MapPin, Users, Star, Bed } from 'lucide-react';
+import { Home, Search, MapPin, Users, Star, Bed, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
+import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
 
 export default function Alojamento() {
   const [properties, setProperties] = useState([]);
@@ -9,13 +10,17 @@ export default function Alojamento() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const fetchData = () => {
+    setLoading(true);
     api.listProperties()
       .then(data => setProperties(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const filtered = properties.filter(p =>
     (p.titulo || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -30,7 +35,13 @@ export default function Alojamento() {
 
   return (
     <div data-testid="alojamento-page">
-      <PageHeader title="Alojamento" subtitle={`${properties.length} propriedades`} />
+      <PageHeader title="Alojamento" subtitle={`${properties.length} propriedades`}
+        actions={
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg transition" data-testid="create-property-btn">
+            <Plus className="w-4 h-4" /> Publicar
+          </button>
+        }
+      />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-4 animate-fade-in">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
@@ -72,7 +83,84 @@ export default function Alojamento() {
           ))}
         </div>
       </div>
+      {showCreate && <CreatePropertyForm onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); fetchData(); }} />}
     </div>
+  );
+}
+
+function CreatePropertyForm({ onClose, onCreated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const fd = new FormData(e.target);
+    try {
+      await api.createProperty({
+        titulo: fd.get('titulo'),
+        descricao: fd.get('descricao') || null,
+        tipo: fd.get('tipo'),
+        endereco: fd.get('endereco'),
+        cidade: fd.get('cidade'),
+        provincia: fd.get('provincia'),
+        quartos: parseInt(fd.get('quartos')) || 1,
+        camas: parseInt(fd.get('camas')) || 1,
+        banheiros: parseInt(fd.get('banheiros')) || 1,
+        max_hospedes: parseInt(fd.get('max_hospedes')) || 2,
+        preco_noite: parseFloat(fd.get('preco_noite')),
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <FormModal title="Publicar Propriedade" onClose={onClose}>
+      <form onSubmit={handleSubmit} data-testid="create-property-form">
+        <FormField label="Titulo *">
+          <FormInput name="titulo" placeholder="Nome da propriedade" required />
+        </FormField>
+        <FormField label="Tipo *">
+          <FormSelect name="tipo" options={[
+            { value: 'casa', label: 'Casa' },
+            { value: 'apartamento', label: 'Apartamento' },
+            { value: 'quarto', label: 'Quarto' },
+            { value: 'villa', label: 'Villa' },
+            { value: 'hotel', label: 'Hotel' },
+          ]} />
+        </FormField>
+        <FormField label="Endereco *">
+          <FormInput name="endereco" placeholder="Endereco completo" required />
+        </FormField>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Cidade *">
+            <FormInput name="cidade" placeholder="Luanda" required />
+          </FormField>
+          <FormField label="Provincia *">
+            <FormInput name="provincia" placeholder="Luanda" required />
+          </FormField>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          <FormField label="Quartos"><FormInput name="quartos" type="number" defaultValue="1" /></FormField>
+          <FormField label="Camas"><FormInput name="camas" type="number" defaultValue="1" /></FormField>
+          <FormField label="WC"><FormInput name="banheiros" type="number" defaultValue="1" /></FormField>
+          <FormField label="Hospedes"><FormInput name="max_hospedes" type="number" defaultValue="2" /></FormField>
+        </div>
+        <FormField label="Preco por noite (Kz) *">
+          <FormInput name="preco_noite" type="number" placeholder="15000" required />
+        </FormField>
+        <FormField label="Descricao">
+          <FormTextarea name="descricao" placeholder="Descreva a propriedade..." />
+        </FormField>
+        {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
+        <SubmitButton loading={loading}>Publicar Propriedade</SubmitButton>
+      </form>
+    </FormModal>
   );
 }
 
@@ -88,20 +176,16 @@ function PropertyDetail({ property, onBack, formatPrice }) {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div className="bg-dark-800 rounded-lg p-3 text-center">
-              <p className="text-white font-bold text-lg">{property.quartos ?? 0}</p>
-              <p className="text-dark-400 text-xs">Quartos</p>
+              <p className="text-white font-bold text-lg">{property.quartos ?? 0}</p><p className="text-dark-400 text-xs">Quartos</p>
             </div>
             <div className="bg-dark-800 rounded-lg p-3 text-center">
-              <p className="text-white font-bold text-lg">{property.camas ?? 0}</p>
-              <p className="text-dark-400 text-xs">Camas</p>
+              <p className="text-white font-bold text-lg">{property.camas ?? 0}</p><p className="text-dark-400 text-xs">Camas</p>
             </div>
             <div className="bg-dark-800 rounded-lg p-3 text-center">
-              <p className="text-white font-bold text-lg">{property.banheiros ?? 0}</p>
-              <p className="text-dark-400 text-xs">Banheiros</p>
+              <p className="text-white font-bold text-lg">{property.banheiros ?? 0}</p><p className="text-dark-400 text-xs">Banheiros</p>
             </div>
             <div className="bg-dark-800 rounded-lg p-3 text-center">
-              <p className="text-white font-bold text-lg">{property.max_hospedes ?? 0}</p>
-              <p className="text-dark-400 text-xs">Hospedes</p>
+              <p className="text-white font-bold text-lg">{property.max_hospedes ?? 0}</p><p className="text-dark-400 text-xs">Hospedes</p>
             </div>
           </div>
           {property.descricao && <p className="text-dark-400 text-sm leading-relaxed">{property.descricao}</p>}

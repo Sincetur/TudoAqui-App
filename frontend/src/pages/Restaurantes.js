@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UtensilsCrossed, Search, Star, Clock, MapPin, Truck } from 'lucide-react';
+import { UtensilsCrossed, Search, Star, Clock, MapPin, Truck, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 
@@ -18,8 +18,7 @@ export default function Restaurantes() {
   }, []);
 
   const filtered = restaurants.filter(r =>
-    (r.nome || '').toLowerCase().includes(search.toLowerCase()) ||
-    (r.cidade || '').toLowerCase().includes(search.toLowerCase())
+    (r.nome || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const formatPrice = (v) => v ? `${Number(v).toLocaleString('pt-AO')} Kz` : '';
@@ -91,6 +90,7 @@ export default function Restaurantes() {
 function RestaurantDetail({ restaurant, onBack, formatPrice }) {
   const [menu, setMenu] = useState([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
+  const [cart, setCart] = useState({});
   const r = restaurant;
 
   useEffect(() => {
@@ -103,6 +103,23 @@ function RestaurantDetail({ restaurant, onBack, formatPrice }) {
       setLoadingMenu(false);
     }
   }, [r.id]);
+
+  const addToCart = (item) => {
+    setCart(prev => ({ ...prev, [item.id]: { ...item, qty: (prev[item.id]?.qty || 0) + 1 } }));
+  };
+
+  const removeFromCart = (itemId) => {
+    setCart(prev => {
+      const c = { ...prev };
+      if (c[itemId]?.qty > 1) c[itemId] = { ...c[itemId], qty: c[itemId].qty - 1 };
+      else delete c[itemId];
+      return c;
+    });
+  };
+
+  const cartItems = Object.values(cart);
+  const cartTotal = cartItems.reduce((t, i) => t + (i.preco_atual || i.preco) * i.qty, 0);
+  const cartCount = cartItems.reduce((t, i) => t + i.qty, 0);
 
   return (
     <div data-testid="restaurant-detail">
@@ -125,12 +142,9 @@ function RestaurantDetail({ restaurant, onBack, formatPrice }) {
               <p className="text-dark-400 text-xs">Entrega</p>
             </div>
             <div className="bg-dark-800 rounded-lg p-3 text-center">
-              <p className="text-white font-bold">{r.raio_entrega_km || 10} km</p>
-              <p className="text-dark-400 text-xs">Raio entrega</p>
+              <p className="text-white font-bold">{r.rating_medio || 5.0}</p>
+              <p className="text-dark-400 text-xs">Rating</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2 mt-3 text-dark-400 text-xs">
-            <MapPin className="w-3 h-3" />{r.endereco || r.cidade}
           </div>
         </div>
 
@@ -142,22 +156,61 @@ function RestaurantDetail({ restaurant, onBack, formatPrice }) {
             <p className="text-dark-500 text-sm">Menu nao disponivel.</p>
           )}
           {menu.map((cat, ci) => (
-            <div key={cat.id || ci} className="mb-4 last:mb-0">
+            <div key={cat.id || ci} className="mb-5 last:mb-0">
               <h4 className="text-dark-300 text-xs font-semibold uppercase tracking-wider mb-2">{cat.nome}</h4>
               <div className="space-y-2">
-                {(cat.items || []).map((item, ii) => (
-                  <div key={item.id || ii} className="flex items-center justify-between py-2 px-3 bg-dark-800 rounded-lg" data-testid={`menu-item-${ci}-${ii}`}>
-                    <div>
-                      <p className="text-white text-sm font-medium">{item.nome}</p>
-                      {item.descricao && <p className="text-dark-500 text-xs">{item.descricao}</p>}
+                {(cat.items || []).map((item, ii) => {
+                  const inCart = cart[item.id]?.qty || 0;
+                  return (
+                    <div key={item.id || ii} className="flex items-center justify-between py-2.5 px-3 bg-dark-800 rounded-lg" data-testid={`menu-item-${ci}-${ii}`}>
+                      <div className="flex-1 mr-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-white text-sm font-medium">{item.nome}</p>
+                          {item.popular && <Badge variant="accent">Popular</Badge>}
+                        </div>
+                        {item.descricao && <p className="text-dark-500 text-xs mt-0.5">{item.descricao}</p>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-accent-400 font-bold text-sm">{formatPrice(item.preco_atual || item.preco)}</span>
+                        {inCart > 0 ? (
+                          <div className="flex items-center gap-1.5 bg-primary-600 rounded-lg px-1">
+                            <button onClick={() => removeFromCart(item.id)} className="p-1 text-white hover:bg-primary-700 rounded" data-testid={`cart-minus-${ci}-${ii}`}>
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="text-white text-xs font-bold min-w-[16px] text-center">{inCart}</span>
+                            <button onClick={() => addToCart(item)} className="p-1 text-white hover:bg-primary-700 rounded" data-testid={`cart-plus-${ci}-${ii}`}>
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button onClick={() => addToCart(item)} className="p-1.5 bg-dark-700 hover:bg-primary-600 rounded-lg transition" data-testid={`add-to-cart-${ci}-${ii}`}>
+                            <Plus className="w-3.5 h-3.5 text-white" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-accent-400 font-bold text-sm ml-2">{formatPrice(item.preco_atual || item.preco)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
         </div>
+
+        {/* Cart summary */}
+        {cartCount > 0 && (
+          <div className="sticky bottom-20 md:bottom-4 bg-primary-600 rounded-xl p-4 flex items-center justify-between shadow-xl shadow-primary-600/20 animate-slide-up" data-testid="cart-summary">
+            <div>
+              <p className="text-white font-semibold text-sm flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4" /> {cartCount} {cartCount === 1 ? 'item' : 'itens'}
+              </p>
+              <p className="text-white/70 text-xs">{r.nome}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-white font-bold">{formatPrice(cartTotal)}</p>
+              <p className="text-white/70 text-xs">+ {formatPrice(r.taxa_entrega)} entrega</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

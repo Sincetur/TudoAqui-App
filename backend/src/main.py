@@ -177,6 +177,13 @@ async def root():
     }
 
 
+@app.post("/api/v1/seed", tags=["Admin"])
+async def seed_database():
+    """Popular base de dados com dados de demonstracao"""
+    from src.seed import run_seed
+    return await run_seed()
+
+
 # Incluir routers
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(drivers_router, prefix="/api/v1")

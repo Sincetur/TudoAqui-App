@@ -43,6 +43,7 @@ export const api = {
   // Alojamento
   listProperties: (params = '') => request(`/alojamento/properties${params}`),
   getProperty: (id) => request(`/alojamento/properties/${id}`),
+  createProperty: (data) => request('/alojamento/properties', { method: 'POST', body: JSON.stringify(data) }),
   checkAvailability: (id, checkin, checkout) => request(`/alojamento/properties/${id}/availability?checkin=${checkin}&checkout=${checkout}`),
   createBooking: (data) => request('/alojamento/bookings', { method: 'POST', body: JSON.stringify(data) }),
   listMyBookings: () => request('/alojamento/bookings/my'),
@@ -51,6 +52,7 @@ export const api = {
   // Turismo
   listExperiences: (params = '') => request(`/turismo/experiences${params}`),
   getExperience: (id) => request(`/turismo/experiences/${id}`),
+  createExperience: (data) => request('/turismo/experiences', { method: 'POST', body: JSON.stringify(data) }),
   listSchedules: (id) => request(`/turismo/experiences/${id}/schedules`),
   createTurismoBooking: (data) => request('/turismo/bookings', { method: 'POST', body: JSON.stringify(data) }),
   listMyTurismoBookings: () => request('/turismo/bookings/my'),

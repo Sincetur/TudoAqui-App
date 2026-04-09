@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MapPin, Clock, Tag, Search } from 'lucide-react';
+import { Calendar, MapPin, Clock, Tag, Search, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
+import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -9,13 +10,17 @@ export default function Events() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const fetchEvents = () => {
+    setLoading(true);
     api.listEvents()
       .then(data => setEvents(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchEvents(); }, []);
 
   const filtered = events.filter(e =>
     (e.titulo || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -31,9 +36,13 @@ export default function Events() {
       <PageHeader
         title="Eventos"
         subtitle={`${events.length} eventos disponiveis`}
+        actions={
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg transition" data-testid="create-event-btn">
+            <Plus className="w-4 h-4" /> Criar
+          </button>
+        }
       />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-4 animate-fade-in">
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
           <input
@@ -73,7 +82,72 @@ export default function Events() {
           ))}
         </div>
       </div>
+
+      {showCreate && <CreateEventForm onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); fetchEvents(); }} />}
     </div>
+  );
+}
+
+function CreateEventForm({ onClose, onCreated }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const fd = new FormData(e.target);
+    try {
+      await api.createEvent({
+        titulo: fd.get('titulo'),
+        descricao: fd.get('descricao') || null,
+        local: fd.get('local'),
+        data_evento: fd.get('data_evento'),
+        hora_evento: fd.get('hora_evento') + ':00',
+        categoria: fd.get('categoria') || null,
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <FormModal title="Criar Evento" onClose={onClose}>
+      <form onSubmit={handleSubmit} data-testid="create-event-form">
+        <FormField label="Titulo *">
+          <FormInput name="titulo" placeholder="Nome do evento" required />
+        </FormField>
+        <FormField label="Local *">
+          <FormInput name="local" placeholder="Local do evento" required />
+        </FormField>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Data *">
+            <FormInput name="data_evento" type="date" required />
+          </FormField>
+          <FormField label="Hora *">
+            <FormInput name="hora_evento" type="time" required />
+          </FormField>
+        </div>
+        <FormField label="Categoria">
+          <FormSelect name="categoria" placeholder="Selecionar..." options={[
+            { value: 'Musica', label: 'Musica' },
+            { value: 'Tecnologia', label: 'Tecnologia' },
+            { value: 'Desporto', label: 'Desporto' },
+            { value: 'Cultura', label: 'Cultura' },
+            { value: 'Entretenimento', label: 'Entretenimento' },
+            { value: 'Gastronomia', label: 'Gastronomia' },
+          ]} />
+        </FormField>
+        <FormField label="Descricao">
+          <FormTextarea name="descricao" placeholder="Descricao do evento..." rows={3} />
+        </FormField>
+        {error && <p className="text-red-400 text-sm mb-3" data-testid="form-error">{error}</p>}
+        <SubmitButton loading={loading}>Criar Evento</SubmitButton>
+      </form>
+    </FormModal>
   );
 }
 
@@ -108,11 +182,26 @@ function EventDetail({ event, onBack }) {
             <p className="text-dark-400 text-sm mt-4 leading-relaxed">{event.descricao}</p>
           )}
         </div>
-
         {event.status && (
           <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
             <h3 className="text-white font-semibold text-sm mb-2">Estado</h3>
-            <Badge variant={event.status === 'publicado' ? 'success' : 'warning'}>{event.status}</Badge>
+            <Badge variant={event.status === 'ativo' ? 'success' : 'warning'}>{event.status}</Badge>
+          </div>
+        )}
+        {event.ticket_types && event.ticket_types.length > 0 && (
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-5">
+            <h3 className="text-white font-semibold text-sm mb-3">Bilhetes</h3>
+            <div className="space-y-2">
+              {event.ticket_types.map((tt, i) => (
+                <div key={tt.id || i} className="flex items-center justify-between py-2 px-3 bg-dark-800 rounded-lg" data-testid={`ticket-type-${i}`}>
+                  <div>
+                    <p className="text-white text-sm font-medium">{tt.nome}</p>
+                    <p className="text-dark-500 text-xs">{tt.quantidade_disponivel || 0} disponiveis</p>
+                  </div>
+                  <span className="text-accent-400 font-bold text-sm">{Number(tt.preco).toLocaleString('pt-AO')} Kz</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
