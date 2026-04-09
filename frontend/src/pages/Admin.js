@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   Users, Calendar, ShoppingBag, Home, MapPin, Building2, UtensilsCrossed,
-  BarChart3, Shield, ChevronDown, Search, RefreshCw, ArrowUpCircle, CheckCircle, XCircle
+  BarChart3, Shield, ChevronDown, Search, RefreshCw, ArrowUpCircle, CheckCircle, XCircle,
+  CreditCard, Banknote, Clock
 } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, LoadingState, Badge } from '../components/Layout';
@@ -46,6 +47,7 @@ export default function Admin({ user }) {
   const tabs = [
     { key: 'overview', label: 'Visao Geral', icon: BarChart3 },
     { key: 'users', label: 'Utilizadores', icon: Users },
+    { key: 'payments', label: 'Pagamentos', icon: CreditCard },
     { key: 'upgrades', label: 'Upgrades', icon: ArrowUpCircle },
     { key: 'content', label: 'Conteudo', icon: ShoppingBag },
   ];
@@ -82,6 +84,7 @@ export default function Admin({ user }) {
 
         {!loading && tab === 'overview' && stats && <OverviewTab stats={stats} />}
         {!loading && tab === 'users' && <UsersTab />}
+        {!loading && tab === 'payments' && <PaymentsTab />}
         {!loading && tab === 'upgrades' && <UpgradesTab />}
         {!loading && tab === 'content' && <ContentTab />}
       </div>
@@ -412,6 +415,184 @@ function UpgradesTab() {
   );
 }
 
+
+
+function PaymentsTab() {
+  const [payments, setPayments] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [metodoFilter, setMetodoFilter] = useState('');
+  const [actionLoading, setActionLoading] = useState('');
+
+  const fetchData = () => {
+    setLoading(true);
+    const qs = [];
+    if (statusFilter) qs.push(`status_filter=${statusFilter}`);
+    if (metodoFilter) qs.push(`metodo=${metodoFilter}`);
+    const queryStr = qs.length ? `?${qs.join('&')}` : '';
+    Promise.all([
+      api.adminPayments(queryStr).catch(() => []),
+      api.adminPaymentStats().catch(() => null),
+    ]).then(([p, s]) => {
+      setPayments(Array.isArray(p) ? p : []);
+      setStats(s);
+    }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchData(); }, [statusFilter, metodoFilter]);
+
+  const formatPrice = (v) => v ? `${Number(v).toLocaleString('pt-AO')} Kz` : '0 Kz';
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-AO', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+
+  const handleConfirm = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.adminConfirmPayment(id, 'Confirmado pelo admin');
+      fetchData();
+    } catch (e) { alert(e.message); }
+    finally { setActionLoading(''); }
+  };
+
+  const handleReject = async (id) => {
+    setActionLoading(id);
+    try {
+      await api.adminRejectPayment(id, 'Rejeitado pelo admin');
+      fetchData();
+    } catch (e) { alert(e.message); }
+    finally { setActionLoading(''); }
+  };
+
+  const statusBadge = (s) => {
+    const map = { pendente: 'warning', confirmado: 'success', falhado: 'danger', iniciado: 'default', processando: 'primary', reembolsado: 'accent' };
+    return map[s] || 'default';
+  };
+
+  const metodoLabel = (m) => {
+    const map = { transferencia: 'Transferencia', dinheiro: 'Dinheiro', multicaixa: 'Multicaixa', mobilemoney: 'Mobile Money', wallet: 'Wallet' };
+    return map[m] || m;
+  };
+
+  return (
+    <div className="space-y-4" data-testid="admin-payments-tab">
+      {/* Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs">Total Pagamentos</p>
+            <p className="text-white text-xl font-bold mt-1">{stats.total}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs flex items-center gap-1"><Clock className="w-3 h-3 text-yellow-400" /> Pendentes</p>
+            <p className="text-yellow-400 text-xl font-bold mt-1">{stats.pendentes}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> Confirmados</p>
+            <p className="text-green-400 text-xl font-bold mt-1">{stats.confirmados}</p>
+          </div>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-4">
+            <p className="text-dark-400 text-xs">Receita Total</p>
+            <p className="text-accent-400 text-xl font-bold mt-1">{formatPrice(stats.receita_total)}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2">
+        <select
+          value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="px-3 py-2 bg-dark-900 border border-dark-800 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+          data-testid="payments-status-filter"
+        >
+          <option value="">Todos os estados</option>
+          <option value="pendente">Pendente</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="falhado">Falhado</option>
+          <option value="iniciado">Iniciado</option>
+        </select>
+        <select
+          value={metodoFilter} onChange={e => setMetodoFilter(e.target.value)}
+          className="px-3 py-2 bg-dark-900 border border-dark-800 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+          data-testid="payments-metodo-filter"
+        >
+          <option value="">Todos os metodos</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="dinheiro">Dinheiro</option>
+        </select>
+        <button onClick={fetchData} className="p-2 bg-dark-900 border border-dark-800 rounded-lg text-dark-400 hover:text-white transition" data-testid="payments-refresh">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Table */}
+      {loading ? <LoadingState /> : (
+        <div className="bg-dark-900 border border-dark-800 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full" data-testid="payments-table">
+              <thead>
+                <tr className="border-b border-dark-800">
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Referencia</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Metodo</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Valor</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Origem</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Estado</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Data</th>
+                  <th className="text-left text-dark-400 text-xs font-medium px-4 py-3">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p, i) => (
+                  <tr key={p.id} className="border-b border-dark-800/50 hover:bg-dark-800/30 transition" data-testid={`payment-row-${i}`}>
+                    <td className="px-4 py-3">
+                      <span className="text-white text-xs font-mono">{p.referencia}</span>
+                      {p.comprovativo_ref && (
+                        <p className="text-dark-500 text-xs mt-0.5">Comp: {p.comprovativo_ref}</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-1 text-dark-300 text-sm">
+                        {p.metodo === 'transferencia' ? <Building2 className="w-3 h-3" /> : <Banknote className="w-3 h-3" />}
+                        {metodoLabel(p.metodo)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-accent-400 font-bold text-sm">{formatPrice(p.valor_total)}</td>
+                    <td className="px-4 py-3 text-dark-300 text-xs">{p.origem_tipo}</td>
+                    <td className="px-4 py-3"><Badge variant={statusBadge(p.status)}>{p.status}</Badge></td>
+                    <td className="px-4 py-3 text-dark-400 text-xs">{formatDate(p.created_at)}</td>
+                    <td className="px-4 py-3">
+                      {p.status === 'pendente' && (
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleConfirm(p.id)}
+                            disabled={actionLoading === p.id}
+                            className="p-1.5 bg-green-500/15 text-green-400 hover:bg-green-500/25 rounded-lg transition disabled:opacity-50"
+                            data-testid={`confirm-payment-${i}`}
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleReject(p.id)}
+                            disabled={actionLoading === p.id}
+                            className="p-1.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 rounded-lg transition disabled:opacity-50"
+                            data-testid={`reject-payment-${i}`}
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                      {p.status !== 'pendente' && <span className="text-dark-600 text-xs">-</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {payments.length === 0 && <p className="text-dark-500 text-sm text-center py-8">Nenhum pagamento encontrado</p>}
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 function ContentTab() {

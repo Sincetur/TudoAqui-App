@@ -3,6 +3,7 @@ import { Calendar, MapPin, Clock, Tag, Search, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
+import CheckoutModal from '../components/CheckoutModal';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -152,6 +153,8 @@ function CreateEventForm({ onClose, onCreated }) {
 }
 
 function EventDetail({ event, onBack }) {
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
   return (
     <div data-testid="event-detail">
       <PageHeader title={event.titulo || 'Evento'} subtitle={event.categoria} onBack={onBack} />
@@ -198,13 +201,33 @@ function EventDetail({ event, onBack }) {
                     <p className="text-white text-sm font-medium">{tt.nome}</p>
                     <p className="text-dark-500 text-xs">{tt.quantidade_disponivel || 0} disponiveis</p>
                   </div>
-                  <span className="text-accent-400 font-bold text-sm">{Number(tt.preco).toLocaleString('pt-AO')} Kz</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-accent-400 font-bold text-sm">{Number(tt.preco).toLocaleString('pt-AO')} Kz</span>
+                    <button
+                      onClick={() => setSelectedTicket(tt)}
+                      className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-lg transition"
+                      data-testid={`buy-ticket-${i}`}
+                    >
+                      Comprar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
+
+      {selectedTicket && (
+        <CheckoutModal
+          origem_tipo="ticket"
+          origem_id={event.id}
+          valor={selectedTicket.preco}
+          descricao={`${event.titulo} - ${selectedTicket.nome}`}
+          onClose={() => setSelectedTicket(null)}
+          onSuccess={() => setSelectedTicket(null)}
+        />
+      )}
     </div>
   );
 }

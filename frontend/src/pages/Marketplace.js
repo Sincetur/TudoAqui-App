@@ -3,6 +3,7 @@ import { ShoppingBag, Search, Package, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, SubmitButton } from '../components/FormModal';
+import CheckoutModal from '../components/CheckoutModal';
 
 export default function Marketplace() {
   const [products, setProducts] = useState([]);
@@ -152,6 +153,8 @@ function CreateProductForm({ onClose, onCreated }) {
 }
 
 function ProductDetail({ product, onBack, formatPrice }) {
+  const [showCheckout, setShowCheckout] = useState(false);
+
   return (
     <div data-testid="product-detail">
       <PageHeader title={product.nome || 'Produto'} onBack={onBack} />
@@ -175,8 +178,28 @@ function ProductDetail({ product, onBack, formatPrice }) {
             <span>Visualizacoes: {product.visualizacoes ?? 0}</span>
             <span>Vendas: {product.vendas ?? 0}</span>
           </div>
+          {product.stock > 0 && (
+            <button
+              onClick={() => setShowCheckout(true)}
+              className="mt-4 w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition"
+              data-testid="buy-product-btn"
+            >
+              Comprar - {formatPrice(product.preco_atual || product.preco)}
+            </button>
+          )}
         </div>
       </div>
+
+      {showCheckout && (
+        <CheckoutModal
+          origem_tipo="marketplace"
+          origem_id={product.id}
+          valor={product.preco_atual || product.preco}
+          descricao={product.nome}
+          onClose={() => setShowCheckout(false)}
+          onSuccess={() => setShowCheckout(false)}
+        />
+      )}
     </div>
   );
 }

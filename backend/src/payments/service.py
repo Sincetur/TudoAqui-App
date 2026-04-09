@@ -33,12 +33,22 @@ class PaymentService:
         origem_tipo: OrigemTipo,
         origem_id: UUID,
         metodo: PaymentMethod,
-        valor: Decimal
+        valor: Decimal,
+        comprovativo_ref: str | None = None,
+        notas: str | None = None
     ) -> Payment:
         """Cria novo pagamento"""
         # Calcula taxa de serviço (se aplicável)
         taxa_servico = Decimal("0")
         valor_total = valor + taxa_servico
+        
+        # Define status inicial baseado no metodo
+        if metodo == PaymentMethod.DINHEIRO:
+            initial_status = PaymentStatus.PENDENTE.value
+        elif metodo == PaymentMethod.TRANSFERENCIA:
+            initial_status = PaymentStatus.PENDENTE.value
+        else:
+            initial_status = PaymentStatus.INICIADO.value
         
         payment = Payment(
             referencia=self.generate_reference(),
@@ -49,7 +59,9 @@ class PaymentService:
             valor=valor,
             taxa_servico=taxa_servico,
             valor_total=valor_total,
-            status=PaymentStatus.INICIADO.value
+            status=initial_status,
+            comprovativo_ref=comprovativo_ref,
+            notas=notas,
         )
         
         db.add(payment)
@@ -324,6 +336,96 @@ class PaymentService:
             "total_creditos": total_creditos,
             "total_debitos": total_debitos,
             "saldo": total_creditos - total_debitos
+        }
+    
+    async def submit_comprovativo(
+        self,
+        db: AsyncSession,
+        payment_id: UUID,
+        user_id: UUID,
+        comprovativo_ref: str,
+        notas: str | None = None
+    ) -> Payment:
+        """Submete comprovativo de transferencia"""
+        payment = await self.get_payment(db, payment_id)
+        if not payment:
+            raise ValueError("Pagamento nao encontrado")
+        if payment.user_id != user_id:
+            raise ValueError("Acesso negado")
+        if payment.metodo != PaymentMethod.TRANSFERENCIA.value:
+            raise ValueError("Apenas pagamentos por transferencia aceitam comprovativo")
+        
+        payment.comprovativo_ref = comprovativo_ref
+        if notas:
+            payment.notas = notas
+        payment.status = PaymentStatus.PENDENTE.value
+        
+        await db.commit()
+        await db.refresh(payment)
+        return payment
+    
+    async def get_all_payments(
+        self,
+        db: AsyncSession,
+        status_filter: str | None = None,
+        metodo_filter: str | None = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> list[Payment]:
+        """Lista todos os pagamentos (admin)"""
+        query = select(Payment).order_by(Payment.created_at.desc())
+        if status_filter:
+            query = query.where(Payment.status == status_filter)
+        if metodo_filter:
+            query = query.where(Payment.metodo == metodo_filter)
+        query = query.limit(limit).offset(offset)
+        result = await db.execute(query)
+        return result.scalars().all()
+    
+    async def get_payment_stats(self, db: AsyncSession) -> dict:
+        """Estatisticas de pagamentos"""
+        # Total por status
+        for status_val in [PaymentStatus.PENDENTE, PaymentStatus.CONFIRMADO, PaymentStatus.FALHADO]:
+            pass
+        
+        pendentes_result = await db.execute(
+            select(func.count()).select_from(Payment)
+            .where(Payment.status == PaymentStatus.PENDENTE.value)
+        )
+        pendentes = pendentes_result.scalar() or 0
+        
+        confirmados_result = await db.execute(
+            select(func.count()).select_from(Payment)
+            .where(Payment.status == PaymentStatus.CONFIRMADO.value)
+        )
+        confirmados = confirmados_result.scalar() or 0
+        
+        total_result = await db.execute(
+            select(func.count()).select_from(Payment)
+        )
+        total = total_result.scalar() or 0
+        
+        receita_result = await db.execute(
+            select(func.sum(Payment.valor_total))
+            .where(Payment.status == PaymentStatus.CONFIRMADO.value)
+        )
+        receita = float(receita_result.scalar() or 0)
+        
+        # Por metodo
+        metodo_stats = {}
+        for metodo in PaymentMethod:
+            m_result = await db.execute(
+                select(func.count()).select_from(Payment)
+                .where(Payment.metodo == metodo.value)
+            )
+            metodo_stats[metodo.value] = m_result.scalar() or 0
+        
+        return {
+            "total": total,
+            "pendentes": pendentes,
+            "confirmados": confirmados,
+            "receita_total": receita,
+            "por_metodo": metodo_stats,
         }
 
 

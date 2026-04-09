@@ -103,4 +103,18 @@ export const api = {
   updateProfile: (data) => request('/account/profile', { method: 'PUT', body: JSON.stringify(data) }),
   requestRoleUpgrade: (data) => request('/account/role-request', { method: 'POST', body: JSON.stringify(data) }),
   myRoleRequests: () => request('/account/role-requests'),
+
+  // Payments
+  getBankInfo: () => request('/payments/bank-info'),
+  getPaymentMethods: () => request('/payments/methods'),
+  createPayment: (data) => request('/payments', { method: 'POST', body: JSON.stringify(data) }),
+  listMyPayments: () => request('/payments'),
+  getPayment: (id) => request(`/payments/${id}`),
+  submitComprovativo: (id, data) => request(`/payments/${id}/comprovativo`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Admin Payments
+  adminPayments: (params = '') => request(`/payments/admin/all${params}`),
+  adminPaymentStats: () => request('/payments/admin/stats'),
+  adminConfirmPayment: (id, nota = '') => request(`/payments/${id}/confirm`, { method: 'PUT', body: JSON.stringify({ nota }) }),
+  adminRejectPayment: (id, nota = '') => request(`/payments/${id}/reject`, { method: 'PUT', body: JSON.stringify({ nota }) }),
 };

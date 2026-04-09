@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Package, MapPin, ArrowRight, Calculator } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
+import CheckoutModal from '../components/CheckoutModal';
 
 const statusColors = {
   pendente: 'warning',
@@ -20,6 +21,7 @@ export default function Entregas() {
   const [tab, setTab] = useState('lista');
   const [estimate, setEstimate] = useState(null);
   const [estimating, setEstimating] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   useEffect(() => {
     api.listMyDeliveries()
@@ -146,7 +148,25 @@ export default function Entregas() {
                     <span className="text-accent-400 font-bold">{formatPrice(estimate.total)}</span>
                   </div>
                 </div>
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  className="mt-3 w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition"
+                  data-testid="pay-delivery-btn"
+                >
+                  Pagar {formatPrice(estimate.total)}
+                </button>
               </div>
+            )}
+
+            {showCheckout && estimate && (
+              <CheckoutModal
+                origem_tipo="entrega"
+                origem_id="00000000-0000-0000-0000-000000000000"
+                valor={estimate.total}
+                descricao="Servico de entrega TUDOaqui"
+                onClose={() => setShowCheckout(false)}
+                onSuccess={() => { setShowCheckout(false); setEstimate(null); }}
+              />
             )}
           </div>
         )}

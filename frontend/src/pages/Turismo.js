@@ -3,6 +3,7 @@ import { MapPin, Search, Clock, Users, Star, Globe, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
+import CheckoutModal from '../components/CheckoutModal';
 
 export default function Turismo() {
   const [experiences, setExperiences] = useState([]);
@@ -157,6 +158,8 @@ function CreateExperienceForm({ onClose, onCreated }) {
 
 function ExperienceDetail({ experience, onBack, formatPrice }) {
   const e = experience;
+  const [showCheckout, setShowCheckout] = useState(false);
+
   return (
     <div data-testid="experience-detail">
       <PageHeader title={e.titulo || 'Experiencia'} onBack={onBack} />
@@ -209,8 +212,26 @@ function ExperienceDetail({ experience, onBack, formatPrice }) {
               </div>
             </div>
           )}
+          <button
+            onClick={() => setShowCheckout(true)}
+            className="mt-4 w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition"
+            data-testid="book-experience-btn"
+          >
+            Reservar - {formatPrice(e.preco)}/pessoa
+          </button>
         </div>
       </div>
+
+      {showCheckout && (
+        <CheckoutModal
+          origem_tipo="turismo"
+          origem_id={e.id}
+          valor={e.preco}
+          descricao={`Experiencia: ${e.titulo}`}
+          onClose={() => setShowCheckout(false)}
+          onSuccess={() => setShowCheckout(false)}
+        />
+      )}
     </div>
   );
 }

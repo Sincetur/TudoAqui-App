@@ -3,6 +3,7 @@ import { Home, Search, MapPin, Users, Star, Bed, Plus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
+import CheckoutModal from '../components/CheckoutModal';
 
 export default function Alojamento() {
   const [properties, setProperties] = useState([]);
@@ -165,6 +166,8 @@ function CreatePropertyForm({ onClose, onCreated }) {
 }
 
 function PropertyDetail({ property, onBack, formatPrice }) {
+  const [showCheckout, setShowCheckout] = useState(false);
+
   return (
     <div data-testid="property-detail">
       <PageHeader title={property.titulo || 'Propriedade'} onBack={onBack} />
@@ -197,8 +200,26 @@ function PropertyDetail({ property, onBack, formatPrice }) {
               {property.comodidades.map((c, i) => <Badge key={i}>{c}</Badge>)}
             </div>
           )}
+          <button
+            onClick={() => setShowCheckout(true)}
+            className="mt-4 w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition"
+            data-testid="book-property-btn"
+          >
+            Reservar - {formatPrice(property.preco_noite)}/noite
+          </button>
         </div>
       </div>
+
+      {showCheckout && (
+        <CheckoutModal
+          origem_tipo="alojamento"
+          origem_id={property.id}
+          valor={property.preco_noite}
+          descricao={`Reserva: ${property.titulo}`}
+          onClose={() => setShowCheckout(false)}
+          onSuccess={() => setShowCheckout(false)}
+        />
+      )}
     </div>
   );
 }

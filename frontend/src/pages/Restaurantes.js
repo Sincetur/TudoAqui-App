@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UtensilsCrossed, Search, Star, Clock, MapPin, Truck, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, EmptyState, LoadingState, ItemCard, Badge } from '../components/Layout';
+import CheckoutModal from '../components/CheckoutModal';
 
 export default function Restaurantes() {
   const [restaurants, setRestaurants] = useState([]);
@@ -91,6 +92,7 @@ function RestaurantDetail({ restaurant, onBack, formatPrice }) {
   const [menu, setMenu] = useState([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState({});
+  const [showCheckout, setShowCheckout] = useState(false);
   const r = restaurant;
 
   useEffect(() => {
@@ -205,11 +207,25 @@ function RestaurantDetail({ restaurant, onBack, formatPrice }) {
               </p>
               <p className="text-white/70 text-xs">{r.nome}</p>
             </div>
-            <div className="text-right">
-              <p className="text-white font-bold">{formatPrice(cartTotal)}</p>
-              <p className="text-white/70 text-xs">+ {formatPrice(r.taxa_entrega)} entrega</p>
-            </div>
+            <button
+              onClick={() => setShowCheckout(true)}
+              className="px-4 py-2 bg-white text-primary-600 font-bold text-sm rounded-lg hover:bg-white/90 transition"
+              data-testid="checkout-btn"
+            >
+              Pagar {formatPrice(cartTotal + (r.taxa_entrega || 0))}
+            </button>
           </div>
+        )}
+
+        {showCheckout && (
+          <CheckoutModal
+            origem_tipo="restaurante"
+            origem_id={r.id}
+            valor={cartTotal + (r.taxa_entrega || 0)}
+            descricao={`Pedido ${r.nome} - ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`}
+            onClose={() => setShowCheckout(false)}
+            onSuccess={() => { setCart({}); }}
+          />
         )}
       </div>
     </div>

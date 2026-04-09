@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Shield, Send, Clock, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { User, Shield, Send, Clock, CheckCircle, XCircle, ChevronRight, CreditCard, Building2, Banknote } from 'lucide-react';
 import { api } from '../api';
 import { PageHeader, LoadingState, Badge } from '../components/Layout';
 import FormModal, { FormField, FormInput, FormTextarea, FormSelect, SubmitButton } from '../components/FormModal';
@@ -28,6 +28,7 @@ const statusConfig = {
 export default function Account({ user, onProfileUpdate }) {
   const [profile, setProfile] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -37,9 +38,11 @@ export default function Account({ user, onProfileUpdate }) {
     Promise.all([
       api.getProfile().catch(() => null),
       api.myRoleRequests().catch(() => []),
-    ]).then(([p, r]) => {
+      api.listMyPayments().catch(() => []),
+    ]).then(([p, r, pay]) => {
       setProfile(p);
       setRequests(Array.isArray(r) ? r : []);
+      setPayments(Array.isArray(pay) ? pay : []);
     }).finally(() => setLoading(false));
   };
 
@@ -146,6 +149,33 @@ export default function Account({ user, onProfileUpdate }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+        {/* My Payments */}
+        {payments.length > 0 && (
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-5" data-testid="my-payments">
+            <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-primary-400" /> Meus Pagamentos
+            </h3>
+            <div className="space-y-2">
+              {payments.slice(0, 10).map((p, i) => (
+                <div key={p.id || i} className="flex items-center justify-between p-3 bg-dark-800 rounded-lg" data-testid={`my-payment-${i}`}>
+                  <div className="flex items-center gap-3">
+                    {p.metodo === 'transferencia' ? <Building2 className="w-4 h-4 text-blue-400" /> : <Banknote className="w-4 h-4 text-green-400" />}
+                    <div>
+                      <p className="text-white text-sm font-medium font-mono">{p.referencia}</p>
+                      <p className="text-dark-500 text-xs">{p.origem_tipo} - {new Date(p.created_at).toLocaleDateString('pt-AO')}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-accent-400 font-bold text-sm">{Number(p.valor_total).toLocaleString('pt-AO')} Kz</p>
+                    <Badge variant={p.status === 'confirmado' ? 'success' : p.status === 'pendente' ? 'warning' : p.status === 'falhado' ? 'danger' : 'default'}>
+                      {p.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

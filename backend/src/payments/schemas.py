@@ -18,6 +18,8 @@ class PaymentCreate(BaseModel):
     origem_id: UUID
     metodo: PaymentMethod
     valor: float = Field(..., gt=0)
+    comprovativo_ref: str | None = None
+    notas: str | None = None
 
 
 class PaymentResponse(BaseModel):
@@ -33,6 +35,9 @@ class PaymentResponse(BaseModel):
     valor_total: float
     status: PaymentStatus
     external_ref: str | None = None
+    comprovativo_ref: str | None = None
+    notas: str | None = None
+    admin_nota: str | None = None
     created_at: datetime
     confirmado_at: datetime | None = None
     
@@ -44,6 +49,31 @@ class PaymentConfirm(BaseModel):
     referencia: str
     external_ref: str | None = None
     external_status: str | None = None
+
+
+class PaymentSubmitComprovativo(BaseModel):
+    """Schema para submeter comprovativo de transferencia"""
+    comprovativo_ref: str
+    notas: str | None = None
+
+
+class AdminPaymentAction(BaseModel):
+    """Schema para accao admin sobre pagamento"""
+    nota: str | None = None
+
+
+# ============================================
+# Bank Info Schema
+# ============================================
+
+class BankInfoResponse(BaseModel):
+    """Dados bancarios para transferencia"""
+    banco: str
+    conta: str
+    iban: str
+    swift: str
+    titular: str
+    instrucoes: str
 
 
 # ============================================
@@ -103,7 +133,7 @@ class WalletTopUp(BaseModel):
 # ============================================
 
 class PaymentStats(BaseModel):
-    """Estatísticas de pagamentos"""
+    """Estatisticas de pagamentos"""
     total_recebido: float
     total_pago: float
     pendentes: int

@@ -19,6 +19,7 @@ class PaymentMethod(str, Enum):
     MOBILEMONEY = "mobilemoney"
     WALLET = "wallet"
     DINHEIRO = "dinheiro"
+    TRANSFERENCIA = "transferencia"
 
 
 class PaymentStatus(str, Enum):
@@ -36,6 +37,11 @@ class OrigemTipo(str, Enum):
     MARKETPLACE = "marketplace"
     BOOKING = "booking"
     EXPERIENCE = "experience"
+    ENTREGA = "entrega"
+    RESTAURANTE = "restaurante"
+    ALOJAMENTO = "alojamento"
+    TURISMO = "turismo"
+    REALESTATE = "realestate"
 
 
 class Payment(Base):
@@ -66,6 +72,11 @@ class Payment(Base):
     # Dados externos
     external_ref: Mapped[str | None] = mapped_column(String(200), nullable=True)
     external_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    
+    # Comprovativo (para transferencias)
+    comprovativo_ref: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    admin_nota: Mapped[str | None] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
