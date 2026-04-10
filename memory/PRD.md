@@ -9,8 +9,8 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 - Frontend Mobile: Flutter (multi-modulo) em `mobile/flutter/tudoaqui/`
 - Backend: FastAPI + SQLAlchemy + PostgreSQL + Redis
 - SMS: Africa's Talking (Sandbox)
-- Migrations: Alembic (configurado com autogenerate)
-- Testes: pytest (15+ testes modulos + auth + rides + endpoints)
+- Migrations: Alembic (2 migrations versionadas)
+- Testes: pytest (16 testes isolados + 15 testes endpoint = 31 total)
 - Deploy: Docker Compose + Nginx + Let's Encrypt SSL
 
 ## Implementado
@@ -18,71 +18,72 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 ### Core Backend
 - [x] Auth OTP, 7 roles + staff + admin, rate limiting (auto Redis/InMemory fallback)
 - [x] Seed Data Angola, Admin Panel (6 tabs), Account
-- [x] Alembic migrations configurado (29 tabelas detectadas)
-- [x] pytest test suite (15+ testes passam, iteration_9 100%)
+- [x] Alembic migrations (2 versoes: initial_schema + sync_all_models)
+- [x] pytest test suite (31 testes, test_isolated.py usa httpx.AsyncClient)
 - [x] Multicaixa webhook com validacao HMAC-SHA256
-- [x] Matching service com geo-filter e prioridade (40% distancia + 40% rating + 20% experiencia)
+- [x] Matching service integrado no rides/service.py (haversine + score 40/40/20)
 
 ### Sistema de Parceiros
 - [x] 7 tipos, config pagamento (Unitel Money + Transferencia + Cash), admin approval
-- [x] Partner model refactored para models.py (padrao consistente)
+- [x] Partner model em models.py (padrao consistente com outros modulos)
 
 ### Pagamentos
 - [x] Transferencia BAI, Unitel Money, Cash, admin confirm/reject
-- [x] Webhook Multicaixa com HMAC validation (X-Multicaixa-Signature)
+- [x] Webhook Multicaixa com HMAC validation
 
 ### Frontend Web (React PWA)
 - [x] 9 paginas + Admin (6 tabs), CheckoutModal, PWA
 
 ### Mobile Android TWA
-- [x] Projecto Android completo, signing via env vars (CI/CD)
+- [x] Projecto Android completo, signing via env vars
 
 ### Mobile Flutter App
 - [x] 7 modulos CRUD por role com API real
-- [x] URLs corrigidas: /entregas/driver/available, /start-pickup, /confirm-delivery, /realestate/leads
 - [x] Google Maps, GPS tracking, WebSocket real-time
-- [x] CartProvider global registado no main.dart
+- [x] CartProvider global no main.dart (MultiProvider)
 - [x] CartService + CheckoutScreen unificado (cash, transferencia, unitel money)
-- [x] Marketplace: botao "Adicionar ao Carrinho" + badge + checkout
-- [x] Restaurantes: botao "+" por item do menu + FAB checkout + badge
-- [x] Eventos: seletor de bilhetes + compra com purchaseTicket API
-- [x] Alojamento: date pickers (checkin/checkout) + contador adultos/criancas + reserva
-- [x] Turismo: seletor de horarios + contador participantes + reserva
+- [x] Marketplace: add-to-cart + badge + checkout
+- [x] Restaurantes: + por item do menu + FAB checkout
+- [x] Eventos: seletor bilhetes + purchaseTicket API
+- [x] Alojamento: date pickers + contador adultos/criancas
+- [x] Turismo: seletor horarios + contador participantes
+- [x] Imobiliario: checkout com CartProvider + contactar agente
+- [x] Home screen: dashboard com stats reais da API (eventos, produtos, restaurantes, experiencias)
+- [x] Motoqueiro: stats de entregas/ganhos via API (nao hardcoded)
+- [x] Proprietario: stats produtos/pedidos via API
+- [x] Guia: stats experiencias/reservas via API
+- [x] Agente: stats imoveis/experiencias via API
+- [x] Login screen: OTP via AuthService (sendOtp + verifyOtp)
 
 ### Seguranca e Infra
-- [x] API Keys removidas do codigo (env vars / manifest placeholders)
-- [x] Rate limiter auto-detect Redis com fallback InMemory
-- [x] Docker-compose raiz COM Redis (healthcheck + restart: unless-stopped)
-- [x] Docker-compose producao com Redis + PostgreSQL + Backend + Frontend + Nginx
-- [x] .env.example e .env.production.example documentados
-- [x] Alembic configurado com todos os modelos
-- [x] Gradle files completos para Flutter Android
-- [x] WS /motoqueiro/{token} adicionado como alias de /driver/
-- [x] test_all_modules.py URL hardcoded corrigida (usa env vars)
+- [x] API Keys removidas do codigo (env vars)
+- [x] Redis no docker-compose raiz com healthcheck + timeout 3s + start_period
+- [x] Redis no docker-compose producao com restart: unless-stopped
+- [x] .gitignore: test_reports/ + key.properties + *.keystore
+- [x] WS /motoqueiro/{token} como alias de /driver/
+- [x] test_all_modules.py e test_iteration9_endpoints.py URLs corrigidas (env vars)
+- [x] Testes isolados com httpx.AsyncClient (sem servidor activo)
 
-## Auditoria de Seguranca (2026-04-10)
+## Auditoria Completa (2026-04-10)
 | # | Item | Estado |
 |---|------|--------|
-| 1 | API Key exposta | RESOLVIDO |
-| 2 | Redis docker-compose raiz | RESOLVIDO (adicionado) |
-| 3 | RedisRateLimiter | RESOLVIDO (auto-detect) |
-| 4 | URLs erradas Flutter | RESOLVIDO |
-| 5 | /realestate/leads/my | RESOLVIDO |
-| 6 | /marketplace/categories | RESOLVIDO (endpoint existe e funciona) |
-| 7 | Multicaixa HMAC | RESOLVIDO |
-| 8 | Alembic | RESOLVIDO |
-| 9 | /ws/motoqueiro | RESOLVIDO (alias adicionado) |
-| 10 | Carrinho + checkout Flutter | RESOLVIDO (5 modulos integrados) |
-| 11 | Compra tickets Flutter | RESOLVIDO (purchaseTicket + CartItem.ticket) |
-| 12 | Unit tests | RESOLVIDO (15+ testes) |
-| 13 | URL hardcoded test_all_modules | RESOLVIDO (env var) |
-| 14 | Partner model em __init__.py | RESOLVIDO (movido para models.py) |
-| 15 | Matching service vazio | RESOLVIDO (geo-filter + score implementado) |
+| 1 | URL hardcoded test_iteration9 | RESOLVIDO |
+| 2 | test_reports/ no .gitignore | RESOLVIDO |
+| 3 | Matching integrado no rides | RESOLVIDO |
+| 4 | Alembic migrations SQL | RESOLVIDO (2 versoes) |
+| 5 | Login screen sem API | JA EXISTIA (sendOtp/verifyOtp) |
+| 6 | Home screen sem dados reais | RESOLVIDO (4 stats API) |
+| 7 | key.properties no .gitignore | RESOLVIDO |
+| 8 | Redis healthcheck timeout | RESOLVIDO (3s + start_period) |
+| 9 | Dashboards hardcoded | RESOLVIDO (motoqueiro API) |
+| 10 | Real Estate sem checkout | RESOLVIDO (CartProvider) |
+| 11 | Notifications FCM | P2 (backlog) |
+| 12 | Unit tests isolados | RESOLVIDO (16 testes) |
+| 13 | URL hardcoded test_all_modules | RESOLVIDO |
 
 ## Backlog
-- P2: Push Notifications (FCM)
+- P2: Push Notifications (FCM) - Firebase Admin SDK + flutter_local_notifications
 - P3: Multicaixa Express gateway real
 - P4: Modo offline (SQLite)
 - P5: Wallet B2B (Fase 2)
-- P6: Flutter widget tests
-- P7: Dashboards Flutter com dados reais da API (stats)
+- P6: Flutter widget tests (UI automation)
