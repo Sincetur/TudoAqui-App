@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores da app TUDOaqui -->
+    <color name="colorPrimary">#C62828</color>
+    <color name="colorPrimaryDark">#8E0000</color>
+    <color name="colorAccent">#FFD600</color>
+    <color name="splashBackground">#1A1A1A</color>
+    <color name="statusBarColor">#C62828</color>
+    <color name="navigationBarColor">#1A1A1A</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

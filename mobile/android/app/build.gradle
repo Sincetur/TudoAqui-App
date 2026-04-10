@@ -1,0 +1,60 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'ao.tudoaqui.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "ao.tudoaqui.app"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        // Dominio da PWA
+        manifestPlaceholders = [
+            hostName  : "app.tudoaqui.ao",
+            defaultUrl: "https://app.tudoaqui.ao",
+            launcherName: "TUDOaqui",
+            assetStatements: '[{ \\"relation\\": [\\"delegate_permission/common.handle_all_urls\\"], \\"target\\": { \\"namespace\\": \\"web\\", \\"site\\": \\"https://app.tudoaqui.ao\\" } }]'
+        ]
+    }
+
+    signingConfigs {
+        release {
+            // Configurar com os seus dados de assinatura
+            // storeFile file('keystore/tudoaqui-release.keystore')
+            // storePassword System.getenv("KEYSTORE_PASSWORD") ?: ''
+            // keyAlias 'tudoaqui'
+            // keyPassword System.getenv("KEY_PASSWORD") ?: ''
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.browser:browser:1.8.0'
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+
+    // Google Play Billing (para verificacao de assinatura)
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

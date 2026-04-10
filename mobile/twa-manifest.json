@@ -1,0 +1,55 @@
+{
+  "host": "app.tudoaqui.ao",
+  "name": "TUDOaqui",
+  "shortName": "TUDOaqui",
+  "launcherName": "TUDOaqui",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#C62828",
+  "navigationColor": "#1A1A1A",
+  "navigationColorDark": "#1A1A1A",
+  "navigationDividerColor": "#1A1A1A",
+  "navigationDividerColorDark": "#1A1A1A",
+  "backgroundColor": "#1A1A1A",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://app.tudoaqui.ao/logo512.png",
+  "maskableIconUrl": "https://app.tudoaqui.ao/logo192.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "keystore/tudoaqui-release.keystore",
+    "alias": "tudoaqui"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "Eventos",
+      "shortName": "Eventos",
+      "url": "/events",
+      "chosenIconUrl": "https://app.tudoaqui.ao/logo192.png"
+    },
+    {
+      "name": "Marketplace",
+      "shortName": "Market",
+      "url": "/marketplace",
+      "chosenIconUrl": "https://app.tudoaqui.ao/logo192.png"
+    },
+    {
+      "name": "Restaurantes",
+      "shortName": "Food",
+      "url": "/restaurantes",
+      "chosenIconUrl": "https://app.tudoaqui.ao/logo192.png"
+    }
+  ],
+  "generatorApp": "TUDOaqui-TWA-Builder",
+  "webManifestUrl": "https://app.tudoaqui.ao/manifest.json",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "packageId": "ao.tudoaqui.app",
+  "additionalTrustedOrigins": [
+    "https://tudoaqui.ao",
+    "https://api.tudoaqui.ao"
+  ]
+}
