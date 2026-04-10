@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # === Base de Dados ===
+  db:
+    image: postgres:16-alpine
+    container_name: tudoaqui-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tudoaqui_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: tudoaqui
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tudoaqui_user -d tudoaqui"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === Redis (rate limiter + WebSocket pub/sub + cache) ===
+  redis:
+    image: redis:7-alpine
+    container_name: tudoaqui-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === Backend API ===
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    container_name: tudoaqui-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tudoaqui_user:${DB_PASSWORD}@db:5432/tudoaqui
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      AFRICASTALKING_API_KEY: ${AFRICASTALKING_API_KEY:-}
+      AFRICASTALKING_USERNAME: ${AFRICASTALKING_USERNAME:-}
+      AFRICASTALKING_SANDBOX: ${AFRICASTALKING_SANDBOX:-false}
+      SMS_PROVIDER: ${SMS_PROVIDER:-africastalking}
+      CORS_ORIGINS: '["https://tudoaqui.ao","https://app.tudoaqui.ao","https://admin.tudoaqui.ao"]'
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: >
+      uvicorn src.main:app
+      --host 0.0.0.0
+      --port 8000
+      --workers 4
+      --proxy-headers
+      --forwarded-allow-ips='*'
+
+  # === Frontend Web ===
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    container_name: tudoaqui-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+
+  # === Nginx Reverse Proxy ===
+  nginx:
+    image: nginx:alpine
+    container_name: tudoaqui-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

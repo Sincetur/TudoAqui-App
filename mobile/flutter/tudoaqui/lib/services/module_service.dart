@@ -122,7 +122,7 @@ class ModuleService {
   }
 
   Future<List<dynamic>> listMyLeads() async {
-    final data = await _api.get('/realestate/leads/my');
+    final data = await _api.get('/realestate/leads');
     return data is List ? data : [];
   }
 
@@ -170,7 +170,7 @@ class ModuleService {
 
   // ========= DRIVERS/ENTREGAS MANAGEMENT =========
   Future<List<dynamic>> listPendingDeliveries(double lat, double lon) async {
-    final data = await _api.get('/entregas/pending?latitude=$lat&longitude=$lon');
+    final data = await _api.get('/entregas/driver/available?latitude=$lat&longitude=$lon');
     return data is List ? data : [];
   }
 
@@ -179,10 +179,18 @@ class ModuleService {
   }
 
   Future<Map<String, dynamic>> pickupDelivery(String id, {String? code}) async {
-    return await _api.post('/entregas/$id/pickup', body: code != null ? {'codigo': code} : null);
+    return await _api.post('/entregas/$id/start-pickup', body: code != null ? {'codigo': code} : null);
+  }
+
+  Future<Map<String, dynamic>> confirmPickup(String id, {String? code}) async {
+    return await _api.post('/entregas/$id/confirm-pickup', body: code != null ? {'codigo': code} : null);
+  }
+
+  Future<Map<String, dynamic>> startTransit(String id) async {
+    return await _api.post('/entregas/$id/start-transit');
   }
 
   Future<Map<String, dynamic>> completeDelivery(String id, {String? code}) async {
-    return await _api.post('/entregas/$id/deliver', body: code != null ? {'codigo': code} : null);
+    return await _api.post('/entregas/$id/confirm-delivery', body: code != null ? {'codigo': code} : null);
   }
 }

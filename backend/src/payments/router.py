@@ -3,7 +3,8 @@ TUDOaqui API - Payments Router
 """
 from uuid import UUID
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+import os
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
@@ -162,21 +163,52 @@ async def submit_comprovativo(
 
 @router.post("/webhook/multicaixa")
 async def multicaixa_webhook(
-    request: PaymentConfirm,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    """Webhook para confirmacao de pagamento Multicaixa."""
-    payment = await payment_service.get_payment_by_ref(db, request.referencia)
-    
+    """Webhook para confirmacao de pagamento Multicaixa com validacao HMAC."""
+    import hmac
+    import hashlib
+
+    # Validar assinatura HMAC-SHA256
+    multicaixa_secret = os.environ.get("MULTICAIXA_WEBHOOK_SECRET", "")
+    signature = request.headers.get("X-Multicaixa-Signature", "")
+
+    body_bytes = await request.body()
+
+    if multicaixa_secret:
+        expected = hmac.new(
+            multicaixa_secret.encode(),
+            body_bytes,
+            hashlib.sha256
+        ).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            raise HTTPException(status_code=403, detail="Assinatura HMAC invalida")
+
+    import json
+    try:
+        payload = json.loads(body_bytes)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Payload invalido")
+
+    referencia = payload.get("referencia")
+    external_ref = payload.get("external_ref")
+    external_status = payload.get("external_status")
+
+    if not referencia:
+        raise HTTPException(status_code=400, detail="Referencia em falta")
+
+    payment = await payment_service.get_payment_by_ref(db, referencia)
+
     if not payment:
         raise HTTPException(status_code=404, detail="Pagamento nao encontrado")
-    
+
     try:
         await payment_service.confirm_payment(
-            db, 
-            payment.id, 
-            request.external_ref,
-            request.external_status
+            db,
+            payment.id,
+            external_ref,
+            external_status
         )
         return {"status": "confirmed"}
     except ValueError as e:
