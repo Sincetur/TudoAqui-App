@@ -33,7 +33,7 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 - [x] Projecto Android completo, icones, splash, assetlinks
 - [x] Scripts build + ficha Play Store
 
-### Mobile Flutter App (NOVO)
+### Mobile Flutter App
 - [x] Projecto Flutter completo com 7 modulos por role
 - [x] Login OTP (+244) com auto-login e secure storage
 - [x] Dashboard Cliente: grid 8 modulos, search, promos, pagamentos, perfil
@@ -49,14 +49,28 @@ Cores: Vermelho, Amarelo, Preto, Branco.
 - [x] ApiService (HTTP + auth), AuthService (Provider state management)
 - [x] Modelos: UserModel, PartnerModel, PaymentModel
 
+### GPS & Google Maps Integration (NOVO - 2026-04-10)
+- [x] Backend: WebSocket persiste localizacao GPS na tabela ride_tracking
+- [x] Backend: REST endpoints GET/POST /rides/{id}/tracking (fallback WS)
+- [x] Backend: ws_router suporta motorista + motoqueiro + admin
+- [x] Flutter: LocationService (GPS com geolocator, tracking continuo)
+- [x] Flutter: WebSocketService (conexao WS, envio localizacao, join/leave ride)
+- [x] Flutter: RideService (API corridas: estimate, request, accept, start, finish, cancel)
+- [x] Flutter: RideModel + RideEstimate (modelos Dart)
+- [x] Flutter: MotoristaMapScreen (Google Maps com dark theme, markers, polylines, corrida activa, corridas pendentes)
+- [x] Flutter: motorista_home.dart integrado com mapa (botao "Abrir Mapa", stats reais do API)
+- [x] Android: AndroidManifest.xml com API key Google Maps
+- [x] iOS: AppDelegate.swift com API key Google Maps
+- [x] Flutter: api_config.dart com endpoints rides/drivers/ws
+- [x] Flutter: pubspec.yaml com web_socket_channel dependency
+- [x] Bug fix: entrega/router.py - adicionado import Delivery (lint error)
+
 ### Deploy
 - [x] Docker + Nginx para 4 dominios, scripts deploy/update/backup
 
 ## Backlog
-- P1: Integrar Flutter com endpoints reais (CRUD completo cada modulo)
-- P2: GPS + Google Maps (motorista/motoqueiro)
-- P3: WebSockets real-time (corridas, entregas)
-- P4: Push Notifications (FCM)
-- P5: Multicaixa Express (gateway real)
-- P6: Modo offline (SQLite)
-- P7: Wallet B2B (Fase 2)
+- P1: Sincronizar todos os modulos (Backend, Frontend React, e Flutter App)
+- P2: Push Notifications (FCM)
+- P3: Multicaixa Express (gateway real)
+- P4: Modo offline (SQLite)
+- P5: Wallet B2B (Fase 2)
