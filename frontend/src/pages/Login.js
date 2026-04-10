@@ -131,7 +131,7 @@ export default function Login({ onLogin }) {
         </div>
 
         <p className="text-center text-dark-600 text-xs mt-6">
-          TUDOAqui SuperApp v1.0
+          TUDOAqui SuperApp v1.0 | Nhimi Corporate | Sincesoft
         </p>
       </div>
     </div>

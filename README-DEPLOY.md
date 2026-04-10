@@ -1,151 +1,135 @@
-# TUDOaqui SuperApp - Guia de Deploy em Producao
+# TUDOaqui - Guia de Deploy para Producao
 
 ## Arquitectura
 
 ```
-                    Internet
-                       |
-                    [Nginx]
-                    /  |   \
-   tudoaqui.ao    api   admin
-   app.tudoaqui.ao     .tudoaqui.ao
-          |            |         |
-      [Frontend]   [Backend]  [Frontend]
-       (React)    (FastAPI)   (rota /admin)
-                       |
-                  [PostgreSQL]
+tudoaqui.ao         -> Frontend React (Landing + App)
+app.tudoaqui.ao     -> Frontend React (App directo)
+admin.tudoaqui.ao   -> Frontend React (Admin panel)
+api.tudoaqui.ao     -> Backend FastAPI (API REST)
 ```
 
-## Dominios Necessarios
+Todos os dominios do frontend usam a **mesma build React**. A diferenciacao e feita pela rota:
+- `/` -> Landing page (utilizadores nao autenticados)
+- `/login` -> Login OTP
+- `/admin` -> Admin panel (requer role admin)
+- `/*` -> Modulos da app
 
-| Dominio             | Servico               |
-|---------------------|-----------------------|
-| tudoaqui.ao         | Frontend PWA          |
-| app.tudoaqui.ao     | Frontend PWA          |
-| api.tudoaqui.ao     | Backend FastAPI       |
-| admin.tudoaqui.ao   | Admin Panel (React)   |
+---
 
-## Pre-requisitos no Servidor
+## 1. Deploy cPanel via SSH
 
-- Ubuntu 20.04+ ou Debian 11+
-- Minimo 2GB RAM, 20GB disco
-- Docker e Docker Compose instalados (o script instala automaticamente)
-- Portas 80 e 443 abertas no firewall
-- DNS dos 4 dominios a apontar para o IP do servidor
+### Pre-requisitos no servidor:
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+ (ou instalar via yum/apt)
+- Node.js 18+ (para build, ja incluido na build)
 
-## Passo a Passo
-
-### 1. Configurar DNS
-
-No seu registrar de dominio, criar os registos A:
-
-```
-A    tudoaqui.ao         ->  IP_DO_SERVIDOR
-A    app.tudoaqui.ao     ->  IP_DO_SERVIDOR
-A    api.tudoaqui.ao     ->  IP_DO_SERVIDOR
-A    admin.tudoaqui.ao   ->  IP_DO_SERVIDOR
-```
-
-### 2. Preparar Variaveis de Ambiente
-
-Copiar o ficheiro de exemplo e preencher com valores reais:
+### Passo a passo:
 
 ```bash
-cp deploy/.env.production .env
-nano .env
+# 1. No ambiente de desenvolvimento, gerar o pacote:
+bash /app/deploy/cpanel_deploy.sh
+
+# 2. Transferir para o servidor:
+scp ~/deploy_bundle/../tudoaqui_deploy.tar.gz tudoaqui@servidor:~/
+
+# 3. No servidor via SSH:
+ssh tudoaqui@servidor
+mkdir -p ~/deploy && cd ~/deploy
+tar -xzf ~/tudoaqui_deploy.tar.gz
+bash install_server.sh
 ```
 
-Gerar valores seguros:
+### Configuracao manual no cPanel:
+
+1. **PostgreSQL**:
+   - Criar base de dados: `tudoaqui`
+   - Criar utilizador: `tudoaqui_user`
+   - Atribuir permissoes
+
+2. **Proxy reverso para api.tudoaqui.ao**:
+   - No cPanel > Application Manager ou .htaccess:
+   ```apache
+   # .htaccess em public_html/api.tudoaqui.ao/
+   RewriteEngine On
+   RewriteRule ^(.*)$ http://127.0.0.1:8000/$1 [P,L]
+   ```
+
+3. **SSL**: Activar Let's Encrypt para todos os 4 dominios
+
+4. **Editar .env**: `~/tudoaqui_api/.env` com credenciais reais
+
+5. **Redis**: Se nao disponivel no cPanel:
+   ```bash
+   # Instalar Redis (se tem acesso root)
+   sudo apt install redis-server
+   sudo systemctl enable redis
+   ```
+
+---
+
+## 2. Deploy Play Store (Android)
+
+### Pre-requisitos:
+- Conta Google Play Developer ($25)
+- Flutter SDK 3.2+
+- Java 17+
+- Keystore de assinatura
+
+### Gerar keystore:
 ```bash
-# Gerar SECRET_KEY
-python3 -c "import secrets; print(secrets.token_hex(32))"
-
-# Gerar DB_PASSWORD
-python3 -c "import secrets; print(secrets.token_urlsafe(24))"
+keytool -genkey -v \
+  -keystore keystore/tudoaqui-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias tudoaqui \
+  -dname "CN=TUDOaqui, OU=Nhimi Corporate, O=Nhimi Corporate, L=Luanda, C=AO"
 ```
 
-### 3. Deploy Automatico (via SSH)
+### Configurar key.properties:
+```properties
+storePassword=SUA_SENHA
+keyPassword=SUA_SENHA
+keyAlias=tudoaqui
+storeFile=../../keystore/tudoaqui-release.jks
+```
 
+### Build:
 ```bash
-chmod +x deploy/deploy.sh
-./deploy/deploy.sh IP_DO_SERVIDOR root
+cd /app/mobile/flutter/tudoaqui
+flutter clean && flutter pub get
+flutter build appbundle --release  # AAB para Play Store
+flutter build apk --release --split-per-abi  # APK directo
 ```
 
-O script faz automaticamente:
-1. Instala Docker no servidor (se necessario)
-2. Envia todos os ficheiros via rsync
-3. Configura SSL com Let's Encrypt
-4. Faz build e inicia os containers
-5. Popula a base de dados com seed data
-6. Verifica se tudo esta a funcionar
+### Upload para Play Console:
+1. Ir a https://play.google.com/console
+2. Criar app > Preencher metadata (ver `/app/deploy/playstore/metadata.md`)
+3. Internal testing > Upload AAB
+4. Testar em dispositivos reais
+5. Production > Submit for review
 
-### 4. Criar Utilizador Admin
+---
 
-Apos o deploy, aceder ao servidor e promover um utilizador:
+## 3. Ficheiros Importantes
 
-```bash
-ssh root@IP_DO_SERVIDOR
-cd /opt/tudoaqui
-docker compose exec db psql -U tudoaqui_user -d tudoaqui -c \
-  "UPDATE users SET role='admin' WHERE telefone='+244912000000';"
-```
+| Ficheiro | Descricao |
+|----------|-----------|
+| `deploy/cpanel_deploy.sh` | Script que gera pacote de deploy |
+| `deploy/playstore/metadata.md` | Metadata para Google Play Store |
+| `deploy/build_playstore.sh` | Script de build APK/AAB |
+| `deploy/docker-compose.yml` | Docker Compose producao |
+| `frontend/build/` | Frontend compilado |
+| `backend/.env.production` | Template .env backend |
 
-### 5. Verificar
+---
 
-- https://tudoaqui.ao - App principal (PWA)
-- https://api.tudoaqui.ao/docs - Documentacao API
-- https://admin.tudoaqui.ao - Painel Admin
+## 4. Informacoes da Empresa
 
-## Scripts Utilitarios
+**Dono:** Nhimi Corporate (NIF: 5001193074)
+- Representante: Joao Nhimi (CEO)
+- Email: nhimi@nhimi.com | Tel: +244 924 865 667
 
-### Actualizar App (sem downtime)
-```bash
-./deploy/update.sh IP_DO_SERVIDOR root
-```
-
-### Backup da Base de Dados
-```bash
-./deploy/backup.sh IP_DO_SERVIDOR root
-```
-
-### Ver Logs
-```bash
-ssh root@IP_DO_SERVIDOR
-cd /opt/tudoaqui
-docker compose logs -f backend    # Logs do backend
-docker compose logs -f frontend   # Logs do frontend
-docker compose logs -f nginx      # Logs do nginx
-```
-
-### Reiniciar Servicos
-```bash
-ssh root@IP_DO_SERVIDOR
-cd /opt/tudoaqui
-docker compose restart             # Tudo
-docker compose restart backend     # So backend
-```
-
-## PWA - Progressive Web App
-
-A app esta configurada como PWA. Os utilizadores podem:
-1. Abrir tudoaqui.ao no Chrome/Safari
-2. Clicar em "Adicionar ao ecra inicial"
-3. Usar como app nativa (offline basico incluido)
-
-Ficheiros PWA:
-- `frontend/public/manifest.json` - Configuracao da PWA
-- `frontend/public/sw.js` - Service Worker (cache offline)
-- `frontend/public/logo192.png` e `logo512.png` - Icones
-
-## SSL (HTTPS)
-
-O certificado SSL e obtido automaticamente via Let's Encrypt durante o deploy.
-Renovacao automatica configurada no container `certbot` (a cada 12h verifica).
-
-## Seguranca
-
-- Rate limiting: 5 req/min para login, 30 req/s para API geral
-- Headers de seguranca: HSTS, X-Frame-Options, X-Content-Type-Options
-- CORS restrito aos dominios tudoaqui.ao
-- Gzip habilitado para compressao
-- Cache de assets estaticos (30 dias)
+**Desenvolvedor:** Sincesoft - Sinceridade Service (NIF: 2403104787)
+- Email: apoioaocliente@3s-ao.com | Tel: +244 951 064 945
+- Website: https://3s-ao.com
