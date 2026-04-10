@@ -125,3 +125,12 @@ test_reports/
 
 # === Flutter signing ===
 mobile/flutter/tudoaqui/android/key.properties
+-e 
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
