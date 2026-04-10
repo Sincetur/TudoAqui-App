@@ -5,6 +5,13 @@ import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../config/api_config.dart';
 import '../../widgets/common.dart';
+import 'eventos_screen.dart';
+import 'marketplace_screen.dart';
+import 'alojamento_screen.dart';
+import 'turismo_screen.dart';
+import 'imoveis_screen.dart';
+import 'entregas_screen.dart';
+import 'restaurantes_screen.dart';
 
 /// Home do Cliente - Dashboard principal com todos os modulos
 class ClienteHome extends StatefulWidget {
@@ -53,14 +60,14 @@ class _DashboardTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final modules = [
-      _ModuleItem('Eventos', Icons.event, AppTheme.primary, '/events'),
-      _ModuleItem('Marketplace', Icons.shopping_bag, AppTheme.accent, '/marketplace'),
-      _ModuleItem('Alojamento', Icons.hotel, Colors.blue, '/alojamento'),
-      _ModuleItem('Turismo', Icons.flight, Colors.green, '/turismo'),
-      _ModuleItem('Imobiliario', Icons.apartment, Colors.purple, '/realestate'),
-      _ModuleItem('Entregas', Icons.local_shipping, Colors.orange, '/entregas'),
-      _ModuleItem('Restaurantes', Icons.restaurant, Colors.red, '/restaurantes'),
-      _ModuleItem('Taxi', Icons.local_taxi, AppTheme.accent, '/taxi'),
+      _ModuleItem('Eventos', Icons.event, AppTheme.primary, const EventosScreen()),
+      _ModuleItem('Marketplace', Icons.shopping_bag, AppTheme.accent, const MarketplaceScreen()),
+      _ModuleItem('Alojamento', Icons.hotel, Colors.blue, const AlojamentoScreen()),
+      _ModuleItem('Turismo', Icons.flight, Colors.green, const TurismoScreen()),
+      _ModuleItem('Imobiliario', Icons.apartment, Colors.purple, const ImoveisScreen()),
+      _ModuleItem('Entregas', Icons.local_shipping, Colors.orange, const EntregasScreen()),
+      _ModuleItem('Restaurantes', Icons.restaurant, Colors.red, const RestaurantesScreen()),
+      _ModuleItem('Taxi', Icons.local_taxi, AppTheme.accent, null),
     ];
 
     return SafeArea(
@@ -129,7 +136,11 @@ class _DashboardTab extends StatelessWidget {
                 (context, index) {
                   final m = modules[index];
                   return GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      if (m.screen != null) {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => m.screen!));
+                      }
+                    },
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -267,8 +278,8 @@ class _ModuleItem {
   final String label;
   final IconData icon;
   final Color color;
-  final String route;
-  _ModuleItem(this.label, this.icon, this.color, this.route);
+  final Widget? screen;
+  _ModuleItem(this.label, this.icon, this.color, this.screen);
 }
 
 class _PromoCard extends StatelessWidget {
