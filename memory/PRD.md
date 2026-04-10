@@ -5,73 +5,58 @@ SuperApp modular para Angola. Logo: TUDOAqui. Slogan: a sua vida em um so lugar.
 Cores: Vermelho, Amarelo, Preto, Branco.
 
 ## Stack
-- Frontend: React + TailwindCSS + Lucide React + PWA
+- Frontend Web: React + TailwindCSS + Lucide React + PWA
+- Frontend Mobile: Flutter (multi-modulo)
 - Backend: FastAPI + SQLAlchemy + PostgreSQL
 - SMS: Africa's Talking (Sandbox)
 - Deploy: Docker Compose + Nginx + Let's Encrypt SSL
-- Mobile: Android TWA (Trusted Web Activity)
 
 ## Implementado
 
-### Core
-- [x] Auth OTP (telefone), 7 roles + staff + admin, rate limiting
+### Core Backend
+- [x] Auth OTP, 7 roles + staff + admin, rate limiting
 - [x] Roles: Motorista, Motoqueiro, Proprietario, Guia Turista, Agente Imobiliario, Agente de Viagem, Staff, Admin
-- [x] Seed Data Angola
-- [x] Admin Panel (6 tabs: overview, users, parceiros, pagamentos, upgrades, conteudo)
-- [x] Account (perfil, upgrade, parceiro, pagamentos)
+- [x] Seed Data Angola, Admin Panel (6 tabs), Account (perfil, upgrade, parceiro, pagamentos)
 
-### Modulos Frontend (9 Paginas + Admin)
-- [x] Login OTP, Dashboard, Eventos, Marketplace, Alojamento, Turismo, Imobiliario, Entregas, Restaurantes
-- [x] CheckoutModal reutilizavel com suporte parceiros
-
-### Sistema de Parceiros (7 tipos)
-- [x] Motorista, Motoqueiro, Proprietario, Staff, Guia Turista, Agente Imobiliario, Agente de Viagem
-- [x] Config pagamento: Unitel Money + Transferencia Bancaria + Dinheiro
-- [x] Admin: listar, aprovar, suspender, rejeitar
-- [x] Cliente paga directamente ao parceiro
+### Sistema de Parceiros
+- [x] 7 tipos, config pagamento (Unitel Money + Transferencia + Cash), admin approval
 
 ### Pagamentos
-- [x] Transferencia Bancaria BAI (TUDOaqui)
-- [x] Unitel Money (parceiro)
-- [x] Cash (dinheiro)
-- [x] Admin: confirmar/rejeitar pagamentos
+- [x] Transferencia BAI, Unitel Money, Cash, admin confirm/reject
 
-### Mobile Android (TWA)
-- [x] Projecto Android completo (Gradle, AndroidManifest, resources)
-- [x] Icones em 5 resolucoes (mdpi a xxxhdpi) + Play Store 512x512
-- [x] Splash screen TUDOaqui (fundo preto, logo vermelho)
-- [x] Cores nativas (statusbar vermelho, navbar preto)
-- [x] Digital Asset Links (assetlinks.json) para verificacao TWA
-- [x] Scripts: generate-keystore.sh, build-apk.sh
-- [x] Ficha Play Store pronta (descricao, palavras-chave, assets)
-- [x] Guia completo README-BUILD.md
-- [x] twa-manifest.json com shortcuts (Eventos, Marketplace, Restaurantes)
-- [x] Permissoes: Internet, Camera, Localizacao, Notificacoes
-- [x] Deep links para app.tudoaqui.ao
-- [x] Nginx configurado para servir assetlinks.json
-
-### PWA + Deploy
+### Frontend Web (React PWA)
+- [x] 9 paginas + Admin (6 tabs)
+- [x] CheckoutModal com suporte parceiros
 - [x] PWA (manifest, SW, icones)
-- [x] Docker + Nginx para 4 dominios
-- [x] Scripts deploy/update/backup
 
-## API Endpoints
-- Auth: login, verify-otp, me
-- Account: profile, role-request
-- Admin: stats, users, role-requests, payments, partners
-- Payments: bank-info, methods, create, list, comprovativo, admin/all, confirm, reject
-- Partners: tipos, register, me, me/payment, {id}/payment-info, admin/all, admin/stats, admin/{id}/approve|suspend|reject
-- Modulos: events, marketplace, alojamento, turismo, realestate, restaurantes, entregas
+### Mobile Android TWA
+- [x] Projecto Android completo, icones, splash, assetlinks
+- [x] Scripts build + ficha Play Store
 
-## Mobile Config
-- Package: ao.tudoaqui.app
-- Min SDK: 23 (Android 6.0)
-- Target SDK: 34
-- Dominio: app.tudoaqui.ao
-- Conta Play Store: sincesoft1@gmail.com
+### Mobile Flutter App (NOVO)
+- [x] Projecto Flutter completo com 7 modulos por role
+- [x] Login OTP (+244) com auto-login e secure storage
+- [x] Dashboard Cliente: grid 8 modulos, search, promos, pagamentos, perfil
+- [x] Dashboard Motorista: toggle online/offline, stats corridas/ganhos, procura corridas
+- [x] Dashboard Motoqueiro: toggle online/offline, stats entregas/ganhos
+- [x] Dashboard Proprietario: pedidos, produtos/catalogo, receita, avaliacao
+- [x] Dashboard Guia Turista: experiencias, reservas, receita
+- [x] Dashboard Agente Imobiliario: imoveis, clientes, receita
+- [x] Dashboard Agente de Viagem: pacotes, clientes, receita
+- [x] Routing automatico por role (main.dart)
+- [x] Tema dark TUDOaqui (vermelho + amarelo + preto)
+- [x] Widgets reutilizaveis: StatusBadge, TCard, StatCard, PrimaryButton, EmptyState
+- [x] ApiService (HTTP + auth), AuthService (Provider state management)
+- [x] Modelos: UserModel, PartnerModel, PaymentModel
+
+### Deploy
+- [x] Docker + Nginx para 4 dominios, scripts deploy/update/backup
 
 ## Backlog
-- P1: Integracao Multicaixa Express / Mobile Money (gateway real)
-- P2: Versao iOS (Apple Developer + Mac necessario)
-- P3: Wallet B2B (Fase 2)
-- P4: Push Notifications Firebase
+- P1: Integrar Flutter com endpoints reais (CRUD completo cada modulo)
+- P2: GPS + Google Maps (motorista/motoqueiro)
+- P3: WebSockets real-time (corridas, entregas)
+- P4: Push Notifications (FCM)
+- P5: Multicaixa Express (gateway real)
+- P6: Modo offline (SQLite)
+- P7: Wallet B2B (Fase 2)
