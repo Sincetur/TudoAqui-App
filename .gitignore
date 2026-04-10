@@ -83,3 +83,12 @@ Thumbs.db
 # === Dados sensíveis ===
 # memory/ - apenas excluir se contiver dados reais
 # memory/test_credentials.md é mantido (dados fictícios apenas)
+-e 
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
