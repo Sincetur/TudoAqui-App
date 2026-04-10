@@ -14,6 +14,7 @@ from src.config import settings
 from src.tuendi.rides.models import Ride, RideStatus, RideTracking, Rating
 from src.tuendi.drivers.models import Driver, DriverStatus
 from src.tuendi.schemas import RideRequestCreate, RideEstimateResponse
+from src.tuendi.matching import matching_service
 from src.users.models import User
 
 
@@ -58,41 +59,27 @@ class RideService:
         longitude: float,
         raio_metros: int = None
     ) -> list[Driver]:
-        """Busca motoristas próximos disponíveis"""
-        raio = raio_metros or settings.RAIO_BUSCA_MOTORISTAS
-        raio_graus = raio / 111000  # Aproximação grosseira
-        
+        """Busca motoristas próximos via MatchingService (geo-filter + score)"""
+        raio_km = (raio_metros or settings.RAIO_BUSCA_MOTORISTAS) / 1000
+        candidates = await matching_service.find_nearest_drivers(
+            db, latitude, longitude, radius_km=raio_km, limit=20
+        )
+        if not candidates:
+            return []
+        driver_ids = [UUID(c["driver_id"]) for c in candidates]
         result = await db.execute(
             select(Driver)
-            .join(User, Driver.user_id == User.id)
-            .where(and_(
-                Driver.online.is_(True),
-                Driver.status == DriverStatus.APROVADO.value,
-                User.status == "ativo",
-                Driver.latitude.isnot(None),
-                Driver.longitude.isnot(None),
-                Driver.latitude.between(latitude - raio_graus, latitude + raio_graus),
-                Driver.longitude.between(longitude - raio_graus, longitude + raio_graus)
-            ))
+            .where(Driver.id.in_(driver_ids))
             .options(joinedload(Driver.user))
         )
-        drivers = result.scalars().all()
-        
-        # Filtra por distância real
-        nearby = []
-        for driver in drivers:
-            dist = self.calculate_distance(
-                latitude, longitude,
-                float(driver.latitude), float(driver.longitude)
-            ) * 1000  # Converte para metros
-            
-            if dist <= raio:
-                driver._distance = dist
-                nearby.append(driver)
-        
-        # Ordena por distância
-        nearby.sort(key=lambda d: d._distance)
-        return nearby
+        drivers = {str(d.id): d for d in result.scalars().all()}
+        ordered = []
+        for c in candidates:
+            d = drivers.get(c["driver_id"])
+            if d:
+                d._distance = c["distance_km"] * 1000
+                ordered.append(d)
+        return ordered
     
     async def estimate_ride(
         self, 

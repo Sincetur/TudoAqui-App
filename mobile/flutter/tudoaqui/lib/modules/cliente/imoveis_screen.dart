@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/module_service.dart';
+import '../../services/cart_service.dart';
+import '../../modules/common/checkout_screen.dart';
 import '../../widgets/common.dart';
 
 class ImoveisScreen extends StatefulWidget {
@@ -106,10 +109,13 @@ class _ImovelDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.read<CartProvider>();
     final caract = (imovel['caracteristicas'] as List?)?.cast<String>() ?? [];
+    final precoVenda = imovel['preco_venda'];
+    final precoAluguer = imovel['preco_arrendamento'];
     String price = '';
-    if (imovel['preco_venda'] != null) price = '${imovel['preco_venda'].toStringAsFixed(0)} Kz';
-    if (imovel['preco_arrendamento'] != null) price += '${price.isNotEmpty ? " / " : ""}${imovel['preco_arrendamento'].toStringAsFixed(0)} Kz/mes';
+    if (precoVenda != null) price = '${precoVenda.toStringAsFixed(0)} Kz';
+    if (precoAluguer != null) price += '${price.isNotEmpty ? " / " : ""}${precoAluguer.toStringAsFixed(0)} Kz/mes';
 
     return Scaffold(
       backgroundColor: AppTheme.dark900,
@@ -148,9 +154,39 @@ class _ImovelDetailScreen extends StatelessWidget {
                 child: Text(c, style: const TextStyle(color: AppTheme.dark300, fontSize: 12)))).toList()),
           ],
           const SizedBox(height: 20),
-          PrimaryButton(label: 'Contactar Agente', icon: Icons.phone, onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contacto do agente disponivel na web'), backgroundColor: AppTheme.info));
-          }),
+          if (precoVenda != null) ...[
+            PrimaryButton(label: 'Reservar Imovel', icon: Icons.shopping_cart, onPressed: () {
+              cart.clear();
+              cart.addItem(
+                CartItem(
+                  id: imovel['id'].toString(),
+                  name: imovel['titulo'] ?? 'Imovel',
+                  price: precoVenda.toDouble(),
+                  type: CartItemType.produto,
+                  meta: {'property_id': imovel['id']?.toString(), 'tipo': 'venda'},
+                ),
+                contextId: imovel['id']?.toString(),
+              );
+              Navigator.push(context, MaterialPageRoute(
+                builder: (_) => const CheckoutScreen(titulo: 'Reserva Imovel'),
+              ));
+            }),
+            const SizedBox(height: 10),
+          ],
+          OutlinedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Lead enviado ao agente'), backgroundColor: AppTheme.success),
+              );
+            },
+            icon: const Icon(Icons.phone, color: AppTheme.accent),
+            label: const Text('Contactar Agente', style: TextStyle(color: AppTheme.accent)),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              side: const BorderSide(color: AppTheme.accent),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
         ]),
       ),
     );

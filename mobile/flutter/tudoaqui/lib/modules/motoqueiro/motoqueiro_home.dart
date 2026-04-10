@@ -57,11 +57,45 @@ class _MotoqueiroHomeState extends State<MotoqueiroHome> {
   }
 }
 
-class _MotoqueiroMainTab extends StatelessWidget {
+class _MotoqueiroMainTab extends StatefulWidget {
   final bool online;
   final ValueChanged<bool> onToggle;
   final AuthService auth;
   const _MotoqueiroMainTab({required this.online, required this.onToggle, required this.auth});
+  @override
+  State<_MotoqueiroMainTab> createState() => _MotoqueiroMainTabState();
+}
+
+class _MotoqueiroMainTabState extends State<_MotoqueiroMainTab> {
+  final _svc = ModuleService();
+  int _entregasHoje = 0;
+  int _totalEntregas = 0;
+  String _ganhos = '0';
+  String _avaliacao = '--';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    try {
+      final entregas = await _svc.listMyDeliveries();
+      final hoje = DateTime.now();
+      int hojeCont = 0;
+      for (final e in entregas) {
+        final dt = e['created_at'] ?? '';
+        if (dt.toString().startsWith('${hoje.year}-${hoje.month.toString().padLeft(2, '0')}-${hoje.day.toString().padLeft(2, '0')}')) {
+          hojeCont++;
+        }
+      }
+      if (mounted) setState(() {
+        _totalEntregas = entregas.length;
+        _entregasHoje = hojeCont;
+      });
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,15 +125,15 @@ class _MotoqueiroMainTab extends StatelessWidget {
           ]),
           const SizedBox(height: 20),
           Row(children: [
-            Expanded(child: StatCard(label: 'Entregas Hoje', value: '0', icon: Icons.local_shipping, color: Colors.orange)),
+            Expanded(child: StatCard(label: 'Entregas Hoje', value: '$_entregasHoje', icon: Icons.local_shipping, color: Colors.orange)),
             const SizedBox(width: 12),
-            Expanded(child: StatCard(label: 'Ganhos Hoje', value: '0 Kz', icon: Icons.account_balance_wallet, color: AppTheme.success)),
+            Expanded(child: StatCard(label: 'Ganhos Hoje', value: '$_ganhos Kz', icon: Icons.account_balance_wallet, color: AppTheme.success)),
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            Expanded(child: StatCard(label: 'Avaliacao', value: '4.7', icon: Icons.star, color: AppTheme.accent)),
+            Expanded(child: StatCard(label: 'Avaliacao', value: _avaliacao, icon: Icons.star, color: AppTheme.accent)),
             const SizedBox(width: 12),
-            Expanded(child: StatCard(label: 'Total', value: '0', icon: Icons.check_circle, color: AppTheme.info)),
+            Expanded(child: StatCard(label: 'Total', value: '$_totalEntregas', icon: Icons.check_circle, color: AppTheme.info)),
           ]),
           const SizedBox(height: 24),
           if (!online)

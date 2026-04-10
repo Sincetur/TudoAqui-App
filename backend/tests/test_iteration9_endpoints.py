@@ -8,7 +8,7 @@ import requests
 import os
 import subprocess
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://read-store-15.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('TEST_API_URL', os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8000')).rstrip('/')
 ADMIN_PHONE = "+244912000000"
 
 

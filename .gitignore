@@ -119,3 +119,9 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# === Test Reports ===
+test_reports/
+
+# === Flutter signing ===
+mobile/flutter/tudoaqui/android/key.properties

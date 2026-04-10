@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../config/api_config.dart';
+import '../../services/module_service.dart';
 import '../../widgets/common.dart';
 import 'eventos_screen.dart';
 import 'marketplace_screen.dart';
@@ -53,9 +54,46 @@ class _ClienteHomeState extends State<ClienteHome> {
   }
 }
 
-class _DashboardTab extends StatelessWidget {
+class _DashboardTab extends StatefulWidget {
   final dynamic user;
   const _DashboardTab({this.user});
+  @override
+  State<_DashboardTab> createState() => _DashboardTabState();
+}
+
+class _DashboardTabState extends State<_DashboardTab> {
+  final _svc = ModuleService();
+  int _eventos = 0;
+  int _produtos = 0;
+  int _restaurantes = 0;
+  int _experiencias = 0;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    try {
+      final results = await Future.wait([
+        _svc.listEvents(),
+        _svc.listProducts(),
+        _svc.listRestaurants(),
+        _svc.listExperiences(),
+      ]);
+      if (mounted) setState(() {
+        _eventos = results[0].length;
+        _produtos = results[1].length;
+        _restaurantes = results[2].length;
+        _experiencias = results[3].length;
+        _loaded = true;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loaded = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +198,21 @@ class _DashboardTab extends StatelessWidget {
                 },
                 childCount: modules.length,
               ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _loaded ? Row(children: [
+                Expanded(child: StatCard(label: 'Eventos', value: '$_eventos', icon: Icons.event, color: AppTheme.primary)),
+                const SizedBox(width: 8),
+                Expanded(child: StatCard(label: 'Produtos', value: '$_produtos', icon: Icons.shopping_bag, color: AppTheme.accent)),
+                const SizedBox(width: 8),
+                Expanded(child: StatCard(label: 'Restaurantes', value: '$_restaurantes', icon: Icons.restaurant, color: Colors.red)),
+                const SizedBox(width: 8),
+                Expanded(child: StatCard(label: 'Turismo', value: '$_experiencias', icon: Icons.flight, color: Colors.green)),
+              ]) : const Center(child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator(color: AppTheme.accent, strokeWidth: 2))),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
