@@ -3,27 +3,17 @@ TUDOaqui API - WebSocket Router
 Endpoints WebSocket para comunicação em tempo real
 """
 from uuid import UUID
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import get_db
+from src.database import async_session as async_session_factory
 from src.auth.service import auth_service
 from src.common.websocket import ws_manager, WSMessage
+from src.tuendi.rides.service import ride_service
+from src.tuendi.drivers.service import driver_service
 
 
 router = APIRouter(prefix="/ws", tags=["WebSocket"])
-
-
-async def get_user_from_token(token: str, db: AsyncSession) -> dict | None:
-    """Valida token e retorna dados do utilizador"""
-    payload = auth_service.decode_token(token)
-    if not payload:
-        return None
-    
-    return {
-        "user_id": UUID(payload.get("sub")),
-        "role": payload.get("role")
-    }
 
 
 @router.websocket("/client/{token}")
@@ -31,38 +21,23 @@ async def websocket_client(
     websocket: WebSocket,
     token: str
 ):
-    """
-    WebSocket para clientes.
-    
-    Recebe:
-    - Atualizações de status da corrida
-    - Localização do motorista
-    - Notificações
-    
-    Envia:
-    - Ping/pong para manter conexão
-    """
-    # Valida token
+    """WebSocket para clientes - recebe tracking e status da corrida"""
     payload = auth_service.decode_token(token)
     if not payload:
-        await websocket.close(code=4001, reason="Token inválido")
+        await websocket.close(code=4001, reason="Token invalido")
         return
-    
+
     user_id = UUID(payload.get("sub"))
-    
-    # Conecta
     await ws_manager.connect(websocket, user_id, "client")
-    
+
     try:
         while True:
-            # Recebe mensagens do cliente
             data = await websocket.receive_json()
-            
             msg_type = data.get("type")
-            
+
             if msg_type == "ping":
                 await ws_manager.send_personal(user_id, {"type": "pong"})
-            
+
             elif msg_type == "join_ride":
                 ride_id = UUID(data.get("ride_id"))
                 ws_manager.join_ride(user_id, ride_id)
@@ -70,15 +45,15 @@ async def websocket_client(
                     "type": "joined_ride",
                     "ride_id": str(ride_id)
                 })
-            
+
             elif msg_type == "leave_ride":
                 ride_id = UUID(data.get("ride_id"))
                 ws_manager.leave_ride(user_id, ride_id)
-    
+
     except WebSocketDisconnect:
         ws_manager.disconnect(user_id)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        print(f"WS client error: {e}")
         ws_manager.disconnect(user_id)
 
 
@@ -87,76 +62,77 @@ async def websocket_driver(
     websocket: WebSocket,
     token: str
 ):
-    """
-    WebSocket para motoristas.
-    
-    Recebe:
-    - Novas corridas próximas
-    - Atualizações de corrida aceite
-    - Notificações
-    
-    Envia:
-    - Localização atual
-    - Status online/offline
-    """
-    # Valida token
+    """WebSocket para motoristas - envia localização, recebe corridas"""
     payload = auth_service.decode_token(token)
     if not payload:
-        await websocket.close(code=4001, reason="Token inválido")
+        await websocket.close(code=4001, reason="Token invalido")
         return
-    
+
     user_id = UUID(payload.get("sub"))
     role = payload.get("role")
-    
-    if role != "motorista":
-        await websocket.close(code=4003, reason="Não é motorista")
+
+    if role not in ("motorista", "motoqueiro", "admin"):
+        await websocket.close(code=4003, reason="Role nao autorizado")
         return
-    
-    # Conecta
+
     await ws_manager.connect(websocket, user_id, "driver")
-    
+
     try:
         while True:
-            # Recebe mensagens do motorista
             data = await websocket.receive_json()
-            
             msg_type = data.get("type")
-            
+
             if msg_type == "ping":
                 await ws_manager.send_personal(user_id, {"type": "pong"})
-            
+
             elif msg_type == "location_update":
-                # Atualiza localização e broadcast para corrida ativa
                 lat = data.get("latitude")
                 lon = data.get("longitude")
                 bearing = data.get("bearing")
+                speed = data.get("speed")
                 ride_id = data.get("ride_id")
-                
+
+                # Persist driver location to DB
+                try:
+                    async with async_session_factory() as db:
+                        driver = await driver_service.get_driver_by_user(db, user_id)
+                        if driver:
+                            await driver_service.update_location(db, driver.id, lat, lon)
+
+                            # If active ride, persist tracking point
+                            if ride_id:
+                                await ride_service.add_tracking_point(
+                                    db, UUID(ride_id), lat, lon, speed, bearing
+                                )
+                except Exception as e:
+                    print(f"WS location persist error: {e}")
+
+                # Broadcast to ride group
                 if ride_id:
                     await ws_manager.broadcast_to_ride(
                         UUID(ride_id),
                         WSMessage.driver_location(UUID(ride_id), lat, lon, bearing),
                         exclude=user_id
                     )
-            
+
             elif msg_type == "join_ride":
                 ride_id = UUID(data.get("ride_id"))
                 ws_manager.join_ride(user_id, ride_id)
-            
+
             elif msg_type == "leave_ride":
                 ride_id = UUID(data.get("ride_id"))
                 ws_manager.leave_ride(user_id, ride_id)
-    
+
     except WebSocketDisconnect:
         ws_manager.disconnect(user_id)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        print(f"WS driver error: {e}")
         ws_manager.disconnect(user_id)
 
 
 @router.get("/status")
 async def websocket_status():
-    """Retorna status das conexões WebSocket"""
+    """Retorna status das conexoes WebSocket"""
     return {
         "total_connections": len(ws_manager.active_connections),
         "online_drivers": ws_manager.get_online_drivers_count(),

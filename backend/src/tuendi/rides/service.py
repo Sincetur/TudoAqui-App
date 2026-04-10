@@ -390,6 +390,20 @@ class RideService:
         
         return point
 
+    async def get_tracking_points(
+        self,
+        db: AsyncSession,
+        ride_id: UUID
+    ) -> list[RideTracking]:
+        """Obtém todos os pontos de tracking de uma corrida"""
+        result = await db.execute(
+            select(RideTracking)
+            .where(RideTracking.ride_id == ride_id)
+            .order_by(RideTracking.recorded_at.asc())
+        )
+        return result.scalars().all()
+
+
 
 # Instância global
 ride_service = RideService()

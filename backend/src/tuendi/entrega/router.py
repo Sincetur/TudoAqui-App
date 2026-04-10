@@ -9,7 +9,7 @@ from src.database import get_db
 from src.users.models import User, UserRole
 from src.auth.dependencies import get_current_user, require_roles
 from src.tuendi.drivers.models import Driver
-from src.tuendi.entrega.models import DeliveryStatus, DeliveryType, DeliveryPriority
+from src.tuendi.entrega.models import Delivery, DeliveryStatus, DeliveryType, DeliveryPriority
 from src.tuendi.entrega.schemas import (
     DeliveryEstimateRequest, DeliveryEstimateResponse,
     DeliveryCreate, DeliveryResponse, DeliveryDetailResponse, DeliveryListResponse,
@@ -327,7 +327,7 @@ async def update_location(
 # Helpers
 # ============================================
 
-def _delivery_to_response(delivery: "Delivery") -> DeliveryResponse:
+def _delivery_to_response(delivery: Delivery) -> DeliveryResponse:
     """Converte Delivery para resposta"""
     return DeliveryResponse(
         id=delivery.id,
@@ -366,7 +366,7 @@ def _delivery_to_response(delivery: "Delivery") -> DeliveryResponse:
     )
 
 
-def _delivery_to_detail_response(delivery: "Delivery") -> DeliveryDetailResponse:
+def _delivery_to_detail_response(delivery: Delivery) -> DeliveryDetailResponse:
     """Converte Delivery para resposta detalhada"""
     base = _delivery_to_response(delivery)
     

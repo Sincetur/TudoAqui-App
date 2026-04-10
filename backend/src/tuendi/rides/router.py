@@ -346,3 +346,68 @@ async def get_driver_history(
     
     rides = await ride_service.get_driver_rides(db, driver.id, limit, offset)
     return [RideResponse.model_validate(r) for r in rides]
+
+
+
+# ============================================
+# Tracking GPS
+# ============================================
+
+@router.get("/{ride_id}/tracking")
+async def get_ride_tracking(
+    ride_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Obtém histórico de tracking GPS de uma corrida."""
+    ride = await ride_service.get_ride(db, ride_id)
+    if not ride:
+        raise HTTPException(status_code=404, detail="Corrida nao encontrada")
+
+    is_client = ride.cliente_id == current_user.id
+    is_driver = ride.motorista and ride.motorista.user_id == current_user.id
+    is_admin = current_user.role == UserRole.ADMIN.value
+    if not (is_client or is_driver or is_admin):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
+    points = await ride_service.get_tracking_points(db, ride_id)
+    return {
+        "ride_id": str(ride_id),
+        "points": [
+            {
+                "latitude": float(p.latitude),
+                "longitude": float(p.longitude),
+                "velocidade": float(p.velocidade) if p.velocidade else None,
+                "bearing": float(p.bearing) if p.bearing else None,
+                "recorded_at": p.recorded_at.isoformat()
+            }
+            for p in points
+        ]
+    }
+
+
+@router.post("/{ride_id}/tracking")
+async def add_tracking_point(
+    ride_id: UUID,
+    latitude: float = Query(...),
+    longitude: float = Query(...),
+    speed: float = Query(None),
+    bearing: float = Query(None),
+    current_user: User = Depends(require_roles(UserRole.MOTORISTA, UserRole.ADMIN)),
+    db: AsyncSession = Depends(get_db)
+):
+    """Adiciona ponto de tracking GPS (REST fallback para quando WS nao disponivel)."""
+    ride = await ride_service.get_ride(db, ride_id)
+    if not ride:
+        raise HTTPException(status_code=404, detail="Corrida nao encontrada")
+
+    if not ride.motorista or ride.motorista.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
+    point = await ride_service.add_tracking_point(db, ride_id, latitude, longitude, speed, bearing)
+    return {
+        "status": "ok",
+        "latitude": float(point.latitude),
+        "longitude": float(point.longitude),
+        "recorded_at": point.recorded_at.isoformat()
+    }

@@ -53,8 +53,36 @@ class ApiConfig {
   static String restauranteMenu(String id) => '/restaurantes/$id/menu';
   static const String entregaEstimate = '/entregas/estimate';
 
+  // Endpoints Rides (Corridas)
+  static const String ridesEstimate = '/rides/estimate';
+  static const String ridesRequest = '/rides/request';
+  static const String ridesCurrent = '/rides/current';
+  static const String ridesPending = '/rides/pending/nearby';
+  static const String ridesHistoryClient = '/rides/history/client';
+  static const String ridesHistoryDriver = '/rides/history/driver';
+  static String rideById(String id) => '/rides/$id';
+  static String rideAccept(String id) => '/rides/$id/accept';
+  static String rideStart(String id) => '/rides/$id/start';
+  static String rideFinish(String id) => '/rides/$id/finish';
+  static String rideCancel(String id) => '/rides/$id/cancel';
+  static String rideTracking(String id) => '/rides/$id/tracking';
+  static String rideRate(String id) => '/rides/$id/rate';
+
+  // Endpoints Drivers (Motoristas)
+  static const String driverRegister = '/drivers/register';
+  static const String driverMe = '/drivers/me';
+  static const String driverOnline = '/drivers/me/online';
+  static const String driverLocation = '/drivers/me/location';
+  static const String driverStats = '/drivers/me/stats';
+
   // Admin
   static const String adminStats = '/admin/stats';
   static const String adminUsers = '/admin/users';
   static String adminUserRole(String id) => '/admin/users/$id/role';
+
+  // WebSocket
+  static String wsDriver(String token) =>
+      '${baseUrl.replaceFirst("https://", "wss://").replaceFirst("http://", "ws://")}/ws/driver/$token';
+  static String wsClient(String token) =>
+      '${baseUrl.replaceFirst("https://", "wss://").replaceFirst("http://", "ws://")}/ws/client/$token';
 }
