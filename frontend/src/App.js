@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { api } from './api';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
@@ -65,6 +67,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<LandingPage onGoToApp={() => navigate('/login')} />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/privacidade" element={<PrivacyPolicy onBack={() => navigate('/')} />} />
+        <Route path="/termos" element={<TermsOfService onBack={() => navigate('/')} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );

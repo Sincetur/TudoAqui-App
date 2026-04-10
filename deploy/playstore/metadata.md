@@ -71,8 +71,8 @@ Desenvolvido por Sincesoft (Sinceridade Service) para Nhimi Corporate.
   - [ ] Tablet 10" (opcional)
 - [ ] Icone 512x512 (high-res)
 - [ ] Feature graphic 1024x500
-- [ ] Politica de privacidade (URL publica)
-- [ ] Termos de servico (URL publica)
+- [ ] Politica de privacidade (URL publica): https://tudoaqui.ao/privacidade
+- [ ] Termos de servico (URL publica): https://tudoaqui.ao/termos
 - [ ] Declaracao de conteudo preenchida
 - [ ] Questionario de classificacao etaria
 - [ ] Paises e precos configurados (Angola, gratis)

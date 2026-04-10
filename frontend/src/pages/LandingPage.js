@@ -34,6 +34,10 @@ export default function LandingPage({ onGoToApp }) {
     setMobileMenu(false);
   };
 
+  const goTo = (path) => {
+    window.location.href = path;
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white" data-testid="landing-page">
       {/* Navbar */}
@@ -339,21 +343,29 @@ export default function LandingPage({ onGoToApp }) {
 
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-[#262626] bg-[#0f0f0f]">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-[#dc2626] flex items-center justify-center">
-              <span className="text-white text-[10px] font-black">T</span>
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-[#dc2626] flex items-center justify-center">
+                <span className="text-white text-[10px] font-black">T</span>
+              </div>
+              <span className="text-white font-black text-xs">TUDO<span className="text-[#eab308]">Aqui</span></span>
             </div>
-            <span className="text-white font-black text-xs">TUDO<span className="text-[#eab308]">Aqui</span></span>
+            <div className="flex gap-6">
+              <button onClick={() => goTo('/privacidade')} className="text-[#a3a3a3] hover:text-white text-xs transition" data-testid="footer-privacy-link">
+                Politica de Privacidade
+              </button>
+              <button onClick={() => goTo('/termos')} className="text-[#a3a3a3] hover:text-white text-xs transition" data-testid="footer-terms-link">
+                Termos de Servico
+              </button>
+              <a href="https://3s-ao.com" target="_blank" rel="noopener noreferrer" className="text-[#a3a3a3] hover:text-white text-xs transition">
+                3s-ao.com
+              </a>
+            </div>
           </div>
           <p className="text-[#a3a3a3] text-[10px] text-center">
             2025 TUDOaqui. Nhimi Corporate (NIF: 5001193074) | Desenvolvido por Sincesoft (NIF: 2403104787)
           </p>
-          <div className="flex gap-4">
-            <a href="https://3s-ao.com" target="_blank" rel="noopener noreferrer" className="text-[#a3a3a3] hover:text-white text-xs">
-              3s-ao.com
-            </a>
-          </div>
         </div>
       </footer>
     </div>

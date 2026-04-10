@@ -66,7 +66,7 @@ echo "[4/6] Gerando configuracoes..."
 cat > "$DEPLOY_DIR/backend/.env.production" << 'ENVEOF'
 # === TUDOaqui Backend - Producao ===
 # PREENCHER ANTES DO DEPLOY!
-DATABASE_URL=postgresql+asyncpg://tudoaqui_user:SUA_SENHA_DB@localhost:5432/tudoaqui
+DATABASE_URL=postgresql+asyncpg://tudoaqu1_app:SUA_SENHA_DB@localhost:5432/tudoaqu1_tudoaqui
 REDIS_URL=redis://localhost:6379/0
 SECRET_KEY=GERAR_COM_openssl_rand_hex_64
 DEBUG=false

@@ -20,39 +20,26 @@ Cores: Vermelho (#dc2626), Amarelo (#eab308), Preto, Branco.
 - `admin.tudoaqui.ao` -> Admin
 - `api.tudoaqui.ao` -> Backend API
 
+## DB Producao
+- PostgreSQL: user `tudoaqu1_app`, DB `tudoaqu1_tudoaqui`
+
 ## Implementado
 
 ### Landing Page
-- [x] Hero, stats (8 modulos, 18 provincias), about
-- [x] 8 modulos com icones e descricao
+- [x] Hero, stats, about, 8 modulos
 - [x] Equipa: Nhimi Corporate + Sincesoft + 7 membros
-- [x] Investidores: 5.400.000,00 Kz = 0,5% participacao
-- [x] Contacto: 3 cards (email, tel, suporte)
-- [x] Footer com NIFs
-- [x] Navbar com smooth scroll + mobile hamburger
-- [x] Botao "Entrar" -> /login
+- [x] Investidores: 5.400.000,00 Kz = 0,5%
+- [x] Contacto: 3 cards
+- [x] **Politica de Privacidade** (/privacidade) - 11 seccoes completas
+- [x] **Termos de Servico** (/termos) - 14 seccoes completas
+- [x] Footer com links privacidade + termos + NIFs
 
-### Core Backend
-- [x] Auth OTP, 7 roles + staff + admin, rate limiting
-- [x] Alembic migrations (2 versoes)
-- [x] pytest (16 testes isolados + 15 endpoint)
-- [x] Matching service integrado no rides (haversine + score)
-
-### Deploy Preparado
-- [x] `deploy/cpanel_deploy.sh` - Script completo cPanel SSH
-- [x] `deploy/build_playstore.sh` - Build APK/AAB
-- [x] `deploy/playstore/metadata.md` - Metadata Play Store
-- [x] `README-DEPLOY.md` - Guia completo
-- [x] Frontend build producao (2.2MB)
-- [x] .htaccess SPA + cache + gzip
-
-### Mobile Flutter App
-- [x] 7 modulos CRUD + carrinho + checkout
-- [x] GPS, Maps, WebSocket, CartProvider
-- [x] applicationId: ao.tudoaqui.app
+### Core Backend (15+ modulos, 31 testes)
+### Mobile Flutter (7 modulos + carrinho + checkout + GPS)
+### Deploy preparado (cPanel + Play Store)
 
 ## Backlog
 - P2: Push Notifications (FCM)
-- P3: Multicaixa Express gateway real
+- P3: Multicaixa Express gateway
 - P4: Modo offline (SQLite)
-- P5: Wallet B2B (Fase 2)
+- P5: Wallet B2B
