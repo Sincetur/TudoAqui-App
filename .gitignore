@@ -1,36 +1,85 @@
--e 
-# Environment files
+# =============================================
+# TUDOaqui SuperApp - .gitignore
+# =============================================
+
+# === Ambiente e Secrets ===
+!*.example
+.env
+.env.*
 *.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+!.env.example
+deploy/.env.production
+deploy/.env.*
+!deploy/.env.production.example
+
+# === Keystores e certificados ===
+*.keystore
+*.jks
+*.p12
+*.pfx
+keystore/
+*.mobileprovision
+*.cer
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+.venv/
+venv/
+.uv/
+
+# === Node / React ===
+node_modules/
+frontend/build/
+frontend/.cache/
+.parcel-cache/
+
+# === Flutter / Dart ===
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.g.dart
+*.freezed.dart
+
+# === Android ===
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/flutter/tudoaqui/android/.gradle/
+mobile/flutter/tudoaqui/android/app/build/
+mobile/flutter/tudoaqui/android/local.properties
+*.apk
+*.aab
+
+# === iOS ===
+mobile/flutter/tudoaqui/ios/Pods/
+mobile/flutter/tudoaqui/ios/.symlinks/
+mobile/flutter/tudoaqui/ios/Flutter/Flutter.framework/
+mobile/flutter/tudoaqui/ios/Flutter/Flutter.podspec
+*.xcworkspace/xcuserdata/
+
+# === Docker ===
+docker-compose.override.yml
+
+# === Logs ===
+*.log
+logs/
+
+# === IDEs ===
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# === Dados sensíveis ===
+# memory/ - apenas excluir se contiver dados reais
+# memory/test_credentials.md é mantido (dados fictícios apenas)

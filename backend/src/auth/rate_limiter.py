@@ -166,11 +166,28 @@ class RedisRateLimiter:
             return await self._fallback.check_rate_limit(key, limit, window)
 
 
-# Instância global (usar InMemory para MVP, Redis para produção)
-rate_limiter = InMemoryRateLimiter()
+# Instância global — usa Redis se disponível, cai para memória como fallback
+def _create_rate_limiter():
+    """
+    Tenta criar RedisRateLimiter.
+    Se Redis não estiver disponível (ex: desenvolvimento sem Docker),
+    usa InMemoryRateLimiter como fallback automático.
+    """
+    try:
+        from src.config import settings
+        import redis.asyncio as aioredis
+        redis_client = aioredis.Redis.from_url(
+            settings.REDIS_URL,
+            encoding="utf-8",
+            decode_responses=False,
+            socket_connect_timeout=2,
+            socket_timeout=2,
+        )
+        logger.info(f"Rate limiter: Redis ({settings.REDIS_URL})")
+        return RedisRateLimiter(redis_client)
+    except Exception as e:
+        logger.warning(f"Rate limiter: Redis indisponível ({e}), usando InMemory (não distribuído)")
+        return InMemoryRateLimiter()
 
 
-# Para usar com Redis em produção:
-# from redis.asyncio import Redis
-# redis_client = Redis.from_url(settings.REDIS_URL)
-# rate_limiter = RedisRateLimiter(redis_client)
+rate_limiter = _create_rate_limiter()

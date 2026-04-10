@@ -1,0 +1,5 @@
+# Copiar para local.properties e preencher
+# NUNCA commitar local.properties
+flutter.sdk=/home/SEU_USER/flutter
+sdk.dir=/home/SEU_USER/Android/Sdk
+GOOGLE_MAPS_API_KEY=SUA_GOOGLE_MAPS_KEY_AQUI
