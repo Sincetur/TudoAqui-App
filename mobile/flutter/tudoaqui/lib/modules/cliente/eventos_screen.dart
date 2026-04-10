@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/module_service.dart';
+import '../../services/cart_service.dart';
+import '../../modules/common/checkout_screen.dart';
 import '../../widgets/common.dart';
 
 class EventosScreen extends StatefulWidget {
@@ -134,53 +137,149 @@ class _EventCard extends StatelessWidget {
   }
 }
 
-class _EventDetailScreen extends StatelessWidget {
+class _EventDetailScreen extends StatefulWidget {
   final Map<String, dynamic> event;
   final ModuleService svc;
   const _EventDetailScreen({required this.event, required this.svc});
+  @override
+  State<_EventDetailScreen> createState() => _EventDetailScreenState();
+}
 
+class _EventDetailScreenState extends State<_EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final tickets = (event['ticket_types'] as List?) ?? [];
+    final cart = context.watch<CartProvider>();
+    final tickets = (widget.event['ticket_types'] as List?) ?? [];
+
     return Scaffold(
       backgroundColor: AppTheme.dark900,
-      appBar: AppBar(title: Text(event['titulo'] ?? 'Evento'), backgroundColor: AppTheme.dark800),
+      appBar: AppBar(
+        title: Text(widget.event['titulo'] ?? 'Evento'),
+        backgroundColor: AppTheme.dark800,
+        actions: [
+          if (!cart.isEmpty)
+            _CartBadge(
+              count: cart.count,
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => const CheckoutScreen(titulo: 'Compra de Bilhetes'),
+              )),
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(event['titulo'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(widget.event['titulo'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
-              _InfoRow(Icons.place, event['local'] ?? ''),
-              _InfoRow(Icons.calendar_today, event['data_evento'] ?? ''),
-              _InfoRow(Icons.access_time, event['hora_evento'] ?? ''),
-              if (event['descricao'] != null) ...[
+              _InfoRow(Icons.place, widget.event['local'] ?? ''),
+              _InfoRow(Icons.calendar_today, widget.event['data_evento'] ?? ''),
+              _InfoRow(Icons.access_time, widget.event['hora_evento'] ?? ''),
+              if (widget.event['descricao'] != null) ...[
                 const SizedBox(height: 12),
-                Text(event['descricao'], style: const TextStyle(color: AppTheme.dark300, fontSize: 13)),
+                Text(widget.event['descricao'], style: const TextStyle(color: AppTheme.dark300, fontSize: 13)),
               ],
             ])),
             if (tickets.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Text('Bilhetes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
-              ...tickets.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: TCard(child: Row(children: [
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(t['nome'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                    Text('Disponiveis: ${t['quantidade_disponivel'] ?? 0}', style: const TextStyle(color: AppTheme.dark400, fontSize: 12)),
-                  ])),
-                  Text('${(t['preco'] ?? 0).toStringAsFixed(0)} Kz', style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 16)),
-                ])),
+              ...tickets.map((t) => _TicketTypeCard(
+                ticket: t,
+                onAdd: () {
+                  cart.addItem(
+                    CartItem(
+                      id: t['id'].toString(),
+                      name: '${widget.event['titulo']} - ${t['nome']}',
+                      price: (t['preco'] ?? 0).toDouble(),
+                      type: CartItemType.ticket,
+                      meta: {'event_id': widget.event['id']?.toString()},
+                    ),
+                    contextId: widget.event['id']?.toString(),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Bilhete ${t['nome']} adicionado'),
+                      backgroundColor: AppTheme.success,
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
               )),
             ],
           ],
         ),
       ),
+      floatingActionButton: cart.isEmpty ? null : FloatingActionButton.extended(
+        backgroundColor: AppTheme.primary,
+        icon: const Icon(Icons.confirmation_number, color: Colors.white),
+        label: Text('Comprar (${cart.count}) - ${cart.subtotal.toStringAsFixed(0)} Kz',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(
+          builder: (_) => const CheckoutScreen(titulo: 'Compra de Bilhetes'),
+        )),
+      ),
     );
   }
+}
+
+class _TicketTypeCard extends StatelessWidget {
+  final Map<String, dynamic> ticket;
+  final VoidCallback onAdd;
+  const _TicketTypeCard({required this.ticket, required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    final disponivel = (ticket['quantidade_disponivel'] ?? 0) as int;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: TCard(child: Row(children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(ticket['nome'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          Text('Disponiveis: $disponivel', style: const TextStyle(color: AppTheme.dark400, fontSize: 12)),
+        ])),
+        Text('${(ticket['preco'] ?? 0).toStringAsFixed(0)} Kz', style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onTap: disponivel > 0 ? onAdd : null,
+          child: Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              color: disponivel > 0 ? AppTheme.primary.withOpacity(0.15) : AppTheme.dark700,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.add, color: disponivel > 0 ? AppTheme.primary : AppTheme.dark500, size: 20),
+          ),
+        ),
+      ])),
+    );
+  }
+}
+
+class _CartBadge extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+  const _CartBadge({required this.count, required this.onTap});
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Stack(clipBehavior: Clip.none, children: [
+        const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
+        Positioned(
+          right: -6, top: -4,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
+            child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ]),
+    ),
+  );
 }
 
 class _InfoRow extends StatelessWidget {

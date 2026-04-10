@@ -12,7 +12,7 @@ services:
   # === PostgreSQL ===
   db:
     image: postgres:15-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: tudoaqui
       POSTGRES_USER: tudoaqui_user
@@ -25,17 +25,35 @@ services:
       timeout: 5s
       retries: 5
 
+  # === Redis (rate limiter + cache) ===
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # === Backend FastAPI ===
   backend:
     build:
       context: ./backend
       dockerfile: ../deploy/Dockerfile.backend
-    restart: always
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql+asyncpg://tudoaqui_user:${DB_PASSWORD}@db:5432/tudoaqui
+      REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: "false"
       CORS_ORIGINS: '["https://tudoaqui.ao","https://app.tudoaqui.ao","https://admin.tudoaqui.ao"]'
@@ -86,6 +104,7 @@ services:
 
 volumes:
   pgdata:
+  redis_data:
   certbot-etc:
   certbot-var:
   webroot:

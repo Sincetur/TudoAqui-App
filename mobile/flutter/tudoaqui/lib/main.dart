@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'config/theme.dart';
 import 'services/auth_service.dart';
+import 'services/cart_service.dart';
 import 'modules/auth/login_screen.dart';
 import 'modules/cliente/home_screen.dart';
 import 'modules/motorista/motorista_home.dart';
@@ -28,8 +29,11 @@ class TUDOaquiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthService(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
       child: MaterialApp(
         title: 'TUDOaqui',
         debugShowCheckedModeBanner: false,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/module_service.dart';
+import '../../services/cart_service.dart';
+import '../../modules/common/checkout_screen.dart';
 import '../../widgets/common.dart';
 
 class RestaurantesScreen extends StatefulWidget {
@@ -126,11 +129,47 @@ class _RestMenuScreenState extends State<_RestMenuScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
+  void _addToCart(Map<String, dynamic> item) {
+    final cart = context.read<CartProvider>();
+    final restId = widget.rest['id'].toString();
+    cart.addItem(
+      CartItem(
+        id: item['id'].toString(),
+        name: item['nome'] ?? 'Item',
+        price: (item['preco'] ?? 0).toDouble(),
+        type: CartItemType.menuItem,
+        meta: {'restaurant_id': restId, 'categoria': item['categoria']},
+      ),
+      contextId: restId,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${item['nome']} adicionado'),
+        backgroundColor: AppTheme.success,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+
     return Scaffold(
       backgroundColor: AppTheme.dark900,
-      appBar: AppBar(title: Text(widget.rest['nome'] ?? 'Menu'), backgroundColor: AppTheme.dark800),
+      appBar: AppBar(
+        title: Text(widget.rest['nome'] ?? 'Menu'),
+        backgroundColor: AppTheme.dark800,
+        actions: [
+          if (!cart.isEmpty)
+            _CartBadge(
+              count: cart.count,
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => const CheckoutScreen(titulo: 'Checkout Restaurante'),
+              )),
+            ),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Colors.red))
           : _menu.isEmpty
@@ -155,12 +194,54 @@ class _RestMenuScreenState extends State<_RestMenuScreen> {
                           if (item['categoria'] != null) StatusBadge(label: item['categoria'], variant: 'primary'),
                         ])),
                         Text('${(item['preco'] ?? 0).toStringAsFixed(0)} Kz', style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 15)),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _addToCart(item),
+                          child: Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(color: AppTheme.primary.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+                            child: const Icon(Icons.add, color: AppTheme.primary, size: 20),
+                          ),
+                        ),
                       ])),
                     );
                   },
                 ),
+      floatingActionButton: cart.isEmpty ? null : FloatingActionButton.extended(
+        backgroundColor: AppTheme.primary,
+        icon: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
+        label: Text('Checkout (${cart.count}) - ${cart.subtotal.toStringAsFixed(0)} Kz',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(
+          builder: (_) => const CheckoutScreen(titulo: 'Checkout Restaurante'),
+        )),
+      ),
     );
   }
+}
+
+class _CartBadge extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+  const _CartBadge({required this.count, required this.onTap});
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Stack(clipBehavior: Clip.none, children: [
+        const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
+        Positioned(
+          right: -6, top: -4,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
+            child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ]),
+    ),
+  );
 }
 
 class _Search extends StatelessWidget {

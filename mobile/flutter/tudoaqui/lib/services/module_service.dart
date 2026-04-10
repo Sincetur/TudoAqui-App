@@ -144,6 +144,15 @@ class ModuleService {
     return await _api.get('/entregas/$id');
   }
 
+  // ========= EVENTOS - Compra de Tickets =========
+  Future<List<dynamic>> purchaseTicket(String ticketTypeId, int quantidade) async {
+    final data = await _api.post('/events/tickets/purchase', body: {
+      'ticket_type_id': ticketTypeId,
+      'quantidade': quantidade,
+    });
+    return data is List ? data : [data];
+  }
+
   // ========= RESTAURANTES =========
   Future<List<dynamic>> listRestaurants() async {
     final data = await _api.get(ApiConfig.restaurantes);

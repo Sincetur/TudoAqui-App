@@ -130,6 +130,15 @@ async def websocket_driver(
         ws_manager.disconnect(user_id)
 
 
+@router.websocket("/motoqueiro/{token}")
+async def websocket_motoqueiro(
+    websocket: WebSocket,
+    token: str
+):
+    """WebSocket para motoqueiros - alias de /driver/ com role motoqueiro"""
+    await websocket_driver(websocket, token)
+
+
 @router.get("/status")
 async def websocket_status():
     """Retorna status das conexoes WebSocket"""

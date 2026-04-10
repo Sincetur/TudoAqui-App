@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/module_service.dart';
+import '../../services/cart_service.dart';
+import '../../modules/common/checkout_screen.dart';
 import '../../widgets/common.dart';
 
 class MarketplaceScreen extends StatefulWidget {
@@ -36,9 +39,22 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
     return Scaffold(
       backgroundColor: AppTheme.dark900,
-      appBar: AppBar(title: const Text('Marketplace'), backgroundColor: AppTheme.dark800),
+      appBar: AppBar(
+        title: const Text('Marketplace'),
+        backgroundColor: AppTheme.dark800,
+        actions: [
+          if (!cart.isEmpty)
+            _CartBadge(
+              count: cart.count,
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => const CheckoutScreen(titulo: 'Checkout Marketplace'),
+              )),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -116,6 +132,9 @@ class _ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.read<CartProvider>();
+    final price = (product['preco_atual'] ?? product['preco'] ?? 0).toDouble();
+
     return Scaffold(
       backgroundColor: AppTheme.dark900,
       appBar: AppBar(title: Text(product['nome'] ?? 'Produto'), backgroundColor: AppTheme.dark800),
@@ -136,7 +155,7 @@ class _ProductDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(product['nome'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
             const SizedBox(height: 8),
-            Text('${(product['preco'] ?? product['preco_atual'] ?? 0).toStringAsFixed(0)} Kz', style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 24)),
+            Text('${price.toStringAsFixed(0)} Kz', style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 24)),
             if (product['descricao'] != null) ...[
               const SizedBox(height: 12),
               Text(product['descricao'], style: const TextStyle(color: AppTheme.dark300, fontSize: 14)),
@@ -145,14 +164,64 @@ class _ProductDetailScreen extends StatelessWidget {
             if (product['stock'] != null)
               Text('Stock: ${product['stock']}', style: const TextStyle(color: AppTheme.dark400, fontSize: 12)),
             const SizedBox(height: 20),
-            PrimaryButton(label: 'Comprar', icon: Icons.shopping_cart, onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Funcionalidade de checkout disponivel na web'), backgroundColor: AppTheme.info));
-            }),
+            PrimaryButton(
+              label: 'Adicionar ao Carrinho',
+              icon: Icons.add_shopping_cart,
+              onPressed: () {
+                cart.addItem(
+                  CartItem(
+                    id: product['id'].toString(),
+                    name: product['nome'] ?? 'Produto',
+                    price: price,
+                    type: CartItemType.produto,
+                    meta: {'seller_id': product['seller_id']?.toString()},
+                  ),
+                  contextId: product['seller_id']?.toString(),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${product['nome']} adicionado ao carrinho'),
+                    backgroundColor: AppTheme.success,
+                    action: SnackBarAction(
+                      label: 'Checkout',
+                      textColor: Colors.white,
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => const CheckoutScreen(titulo: 'Checkout Marketplace'),
+                      )),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _CartBadge extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+  const _CartBadge({required this.count, required this.onTap});
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 12),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Stack(clipBehavior: Clip.none, children: [
+        const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
+        Positioned(
+          right: -6, top: -4,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
+            child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ]),
+    ),
+  );
 }
 
 class _SearchBox extends StatelessWidget {
