@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Drivers Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -152,10 +153,10 @@ async def get_my_stats(
 # Endpoints Admin
 # ============================================
 
-@router.get("", response_model=list[DriverResponse])
+@router.get("", response_model=List[DriverResponse])
 async def list_drivers(
-    status: DriverStatus | None = None,
-    online: bool | None = None,
+    status: Optional[DriverStatus] = None,
+    online: Optional[bool] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.ADMIN)),

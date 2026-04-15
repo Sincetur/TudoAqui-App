@@ -2,6 +2,7 @@
 TUDOaqui API - User Schemas
 """
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 from src.users.models import UserRole, UserStatus
@@ -14,8 +15,8 @@ from src.users.models import UserRole, UserStatus
 class UserBase(BaseModel):
     """Schema base de utilizador"""
     telefone: str = Field(..., min_length=9, max_length=20, examples=["+244923456789"])
-    nome: str | None = Field(None, max_length=120, examples=["João Silva"])
-    email: str | None = Field(None, max_length=150, examples=["joao@email.com"])
+    nome: Optional[str] = Field(None, max_length=120, examples=["João Silva"])
+    email: Optional[str] = Field(None, max_length=150, examples=["joao@email.com"])
 
 
 class UserCreate(UserBase):
@@ -25,9 +26,9 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     """Schema para atualizar utilizador"""
-    nome: str | None = Field(None, max_length=120)
-    email: str | None = Field(None, max_length=150)
-    avatar_url: str | None = None
+    nome: Optional[str] = Field(None, max_length=120)
+    email: Optional[str] = Field(None, max_length=150)
+    avatar_url: Optional[str] = None
 
 
 class UserResponse(UserBase):
@@ -35,7 +36,7 @@ class UserResponse(UserBase):
     id: UUID
     role: UserRole
     status: UserStatus
-    avatar_url: str | None = None
+    avatar_url: Optional[str] = None
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -53,6 +54,12 @@ class UserProfile(UserResponse):
 class LoginRequest(BaseModel):
     """Request para iniciar login"""
     telefone: str = Field(..., min_length=9, max_length=20, examples=["+244923456789"])
+
+
+class AdminLoginRequest(BaseModel):
+    """Request para login admin por password"""
+    telefone: str = Field(..., min_length=9, max_length=20, examples=["+244912000000"])
+    password: str = Field(..., min_length=4, examples=["admin123"])
 
 
 class OTPVerifyRequest(BaseModel):
@@ -95,4 +102,4 @@ class MessageResponse(BaseModel):
 class ErrorResponse(BaseModel):
     """Response de erro"""
     detail: str
-    error_code: str | None = None
+    error_code: Optional[str] = None

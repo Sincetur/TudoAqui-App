@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Turismo Router
 """
+from typing import List, Optional
 from uuid import UUID
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -27,11 +28,11 @@ router = APIRouter(prefix="/turismo", tags=["Turismo"])
 # Experiences - Público
 # ============================================
 
-@router.get("/experiences", response_model=list[ExperienceListResponse])
+@router.get("/experiences", response_model=List[ExperienceListResponse])
 async def list_experiences(
-    cidade: str | None = None,
-    tipo: ExperienceType | None = None,
-    preco_max: float | None = None,
+    cidade: Optional[str] = None,
+    tipo: Optional[ExperienceType] = None,
+    preco_max: Optional[float] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -94,10 +95,10 @@ async def get_experience(
     )
 
 
-@router.get("/experiences/{experience_id}/schedules", response_model=list[ScheduleResponse])
+@router.get("/experiences/{experience_id}/schedules", response_model=List[ScheduleResponse])
 async def list_schedules(
     experience_id: UUID,
-    data_inicio: date | None = None,
+    data_inicio: Optional[date] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """Lista horários disponíveis."""
@@ -118,7 +119,7 @@ async def list_schedules(
     ]
 
 
-@router.get("/experiences/{experience_id}/reviews", response_model=list[ExperienceReviewResponse])
+@router.get("/experiences/{experience_id}/reviews", response_model=List[ExperienceReviewResponse])
 async def list_reviews(
     experience_id: UUID,
     limit: int = Query(20, ge=1, le=100),
@@ -156,7 +157,7 @@ async def create_experience(
     return await get_experience(exp.id, db)
 
 
-@router.get("/experiences/my/list", response_model=list[ExperienceResponse])
+@router.get("/experiences/my/list", response_model=List[ExperienceResponse])
 async def list_my_experiences(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -319,7 +320,7 @@ async def create_booking(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/bookings/my", response_model=list[ExperienceBookingResponse])
+@router.get("/bookings/my", response_model=List[ExperienceBookingResponse])
 async def list_my_bookings(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -379,9 +380,9 @@ async def create_review(
 # Bookings - Anfitrião (Check-in)
 # ============================================
 
-@router.get("/bookings/host", response_model=list[ExperienceBookingResponse])
+@router.get("/bookings/host", response_model=List[ExperienceBookingResponse])
 async def list_host_bookings(
-    status: ExperienceBookingStatus | None = None,
+    status: Optional[ExperienceBookingStatus] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),

@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Events Schemas
 """
+from typing import List, Optional
 from datetime import datetime, date, time
 from uuid import UUID
 from decimal import Decimal
@@ -15,15 +16,15 @@ from src.events.models import EventStatus, TicketStatus
 class EventBase(BaseModel):
     """Schema base de evento"""
     titulo: str = Field(..., min_length=3, max_length=150)
-    descricao: str | None = Field(None, max_length=2000)
+    descricao: Optional[str] = Field(None, max_length=2000)
     local: str = Field(..., min_length=3, max_length=150)
-    local_latitude: float | None = Field(None, ge=-90, le=90)
-    local_longitude: float | None = Field(None, ge=-180, le=180)
+    local_latitude: Optional[float] = Field(None, ge=-90, le=90)
+    local_longitude: Optional[float] = Field(None, ge=-180, le=180)
     data_evento: date
     hora_evento: time
-    data_fim: date | None = None
-    imagem_url: str | None = None
-    categoria: str | None = Field(None, max_length=50)
+    data_fim: Optional[date] = None
+    imagem_url: Optional[str] = None
+    categoria: Optional[str] = Field(None, max_length=50)
 
 
 class EventCreate(EventBase):
@@ -33,17 +34,17 @@ class EventCreate(EventBase):
 
 class EventUpdate(BaseModel):
     """Schema para atualizar evento"""
-    titulo: str | None = Field(None, max_length=150)
-    descricao: str | None = None
-    local: str | None = Field(None, max_length=150)
-    local_latitude: float | None = None
-    local_longitude: float | None = None
-    data_evento: date | None = None
-    hora_evento: time | None = None
-    data_fim: date | None = None
-    imagem_url: str | None = None
-    categoria: str | None = None
-    status: EventStatus | None = None
+    titulo: Optional[str] = Field(None, max_length=150)
+    descricao: Optional[str] = None
+    local: Optional[str] = Field(None, max_length=150)
+    local_latitude: Optional[float] = None
+    local_longitude: Optional[float] = None
+    data_evento: Optional[date] = None
+    hora_evento: Optional[time] = None
+    data_fim: Optional[date] = None
+    imagem_url: Optional[str] = None
+    categoria: Optional[str] = None
+    status: Optional[EventStatus] = None
 
 
 class EventResponse(EventBase):
@@ -58,7 +59,7 @@ class EventResponse(EventBase):
 
 class EventDetailResponse(EventResponse):
     """Schema detalhado de evento com tipos de ticket"""
-    ticket_types: list["TicketTypeResponse"] = []
+    ticket_types: List["TicketTypeResponse"] = []
     total_vendido: int = 0
     receita_total: float = 0
 
@@ -70,7 +71,7 @@ class EventDetailResponse(EventResponse):
 class TicketTypeBase(BaseModel):
     """Schema base de tipo de ticket"""
     nome: str = Field(..., min_length=2, max_length=50)
-    descricao: str | None = None
+    descricao: Optional[str] = None
     preco: float = Field(..., ge=0)
     quantidade_total: int = Field(..., ge=1)
     max_por_compra: int = Field(10, ge=1, le=50)
@@ -83,12 +84,12 @@ class TicketTypeCreate(TicketTypeBase):
 
 class TicketTypeUpdate(BaseModel):
     """Schema para atualizar tipo de ticket"""
-    nome: str | None = Field(None, max_length=50)
-    descricao: str | None = None
-    preco: float | None = Field(None, ge=0)
-    quantidade_total: int | None = Field(None, ge=1)
-    max_por_compra: int | None = Field(None, ge=1, le=50)
-    ativo: bool | None = None
+    nome: Optional[str] = Field(None, max_length=50)
+    descricao: Optional[str] = None
+    preco: Optional[float] = Field(None, ge=0)
+    quantidade_total: Optional[int] = Field(None, ge=1)
+    max_por_compra: Optional[int] = Field(None, ge=1, le=50)
+    ativo: Optional[bool] = None
 
 
 class TicketTypeResponse(TicketTypeBase):
@@ -120,7 +121,7 @@ class TicketResponse(BaseModel):
     qr_code: str
     status: TicketStatus
     created_at: datetime
-    used_at: datetime | None = None
+    used_at: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -139,7 +140,7 @@ class TicketValidationResponse(BaseModel):
     """Resposta da validação de ticket"""
     valid: bool
     message: str
-    ticket: TicketDetailResponse | None = None
+    ticket: Optional[TicketDetailResponse] = None
 
 
 # ============================================
@@ -149,16 +150,16 @@ class TicketValidationResponse(BaseModel):
 class CheckInRequest(BaseModel):
     """Request para fazer check-in"""
     qr_code: str = Field(..., min_length=10)
-    device_info: str | None = None
+    device_info: Optional[str] = None
 
 
 class CheckInResponse(BaseModel):
     """Resposta do check-in"""
     success: bool
     message: str
-    ticket: TicketDetailResponse | None = None
-    checkin_id: UUID | None = None
-    scanned_at: datetime | None = None
+    ticket: Optional[TicketDetailResponse] = None
+    checkin_id: Optional[UUID] = None
+    scanned_at: Optional[datetime] = None
 
 
 # ============================================

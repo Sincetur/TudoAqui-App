@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Payments Service
 """
+from typing import List, Optional
 import secrets
 from datetime import datetime, timezone
 from uuid import UUID
@@ -34,8 +35,8 @@ class PaymentService:
         origem_id: UUID,
         metodo: PaymentMethod,
         valor: Decimal,
-        comprovativo_ref: str | None = None,
-        notas: str | None = None
+        comprovativo_ref: Optional[str] = None,
+        notas: Optional[str] = None
     ) -> Payment:
         """Cria novo pagamento"""
         # Calcula taxa de serviço (se aplicável)
@@ -78,14 +79,14 @@ class PaymentService:
         
         return payment
     
-    async def get_payment(self, db: AsyncSession, payment_id: UUID) -> Payment | None:
+    async def get_payment(self, db: AsyncSession, payment_id: UUID) -> Optional[Payment]:
         """Obtém pagamento por ID"""
         result = await db.execute(
             select(Payment).where(Payment.id == payment_id)
         )
         return result.scalar_one_or_none()
     
-    async def get_payment_by_ref(self, db: AsyncSession, referencia: str) -> Payment | None:
+    async def get_payment_by_ref(self, db: AsyncSession, referencia: str) -> Optional[Payment]:
         """Obtém pagamento por referência"""
         result = await db.execute(
             select(Payment).where(Payment.referencia == referencia)
@@ -96,8 +97,8 @@ class PaymentService:
         self,
         db: AsyncSession,
         payment_id: UUID,
-        external_ref: str | None = None,
-        external_status: str | None = None
+        external_ref: Optional[str] = None,
+        external_status: Optional[str] = None
     ) -> Payment:
         """Confirma pagamento e processa ledger"""
         payment = await self.get_payment(db, payment_id)
@@ -125,7 +126,7 @@ class PaymentService:
         self,
         db: AsyncSession,
         payment_id: UUID,
-        reason: str | None = None
+        reason: Optional[str] = None
     ) -> Payment:
         """Marca pagamento como falhado"""
         payment = await self.get_payment(db, payment_id)
@@ -237,7 +238,7 @@ class PaymentService:
     # Wallet Methods
     # ============================================
     
-    async def get_wallet(self, db: AsyncSession, user_id: UUID) -> Wallet | None:
+    async def get_wallet(self, db: AsyncSession, user_id: UUID) -> Optional[Wallet]:
         """Obtém carteira do utilizador"""
         result = await db.execute(
             select(Wallet).where(Wallet.user_id == user_id)
@@ -282,7 +283,7 @@ class PaymentService:
         user_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Payment]:
+    ) -> List[Payment]:
         """Lista pagamentos do utilizador"""
         result = await db.execute(
             select(Payment)
@@ -299,7 +300,7 @@ class PaymentService:
         user_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[LedgerEntry]:
+    ) -> List[LedgerEntry]:
         """Lista entradas do ledger do utilizador"""
         result = await db.execute(
             select(LedgerEntry)
@@ -344,7 +345,7 @@ class PaymentService:
         payment_id: UUID,
         user_id: UUID,
         comprovativo_ref: str,
-        notas: str | None = None
+        notas: Optional[str] = None
     ) -> Payment:
         """Submete comprovativo de transferencia"""
         payment = await self.get_payment(db, payment_id)
@@ -367,11 +368,11 @@ class PaymentService:
     async def get_all_payments(
         self,
         db: AsyncSession,
-        status_filter: str | None = None,
-        metodo_filter: str | None = None,
+        status_filter: Optional[str] = None,
+        metodo_filter: Optional[str] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Payment]:
+    ) -> List[Payment]:
         """Lista todos os pagamentos (admin)"""
         query = select(Payment).order_by(Payment.created_at.desc())
         if status_filter:

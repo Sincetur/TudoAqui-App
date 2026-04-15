@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Real Estate Schemas
 """
+from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
@@ -14,13 +15,13 @@ from src.realestate.models import PropertyTypeRE, TransactionType, PropertyStatu
 class AgentBase(BaseModel):
     """Schema base de agente"""
     nome_profissional: str = Field(..., min_length=2, max_length=120)
-    bio: str | None = None
-    foto_url: str | None = None
-    numero_licenca: str | None = None
-    telefone_profissional: str | None = None
-    email_profissional: str | None = None
-    provincias: list[str] | None = None
-    especialidades: list[str] | None = None
+    bio: Optional[str] = None
+    foto_url: Optional[str] = None
+    numero_licenca: Optional[str] = None
+    telefone_profissional: Optional[str] = None
+    email_profissional: Optional[str] = None
+    provincias: Optional[List[str]] = None
+    especialidades: Optional[List[str]] = None
 
 
 class AgentCreate(AgentBase):
@@ -30,14 +31,14 @@ class AgentCreate(AgentBase):
 
 class AgentUpdate(BaseModel):
     """Schema para atualizar agente"""
-    nome_profissional: str | None = None
-    bio: str | None = None
-    foto_url: str | None = None
-    numero_licenca: str | None = None
-    telefone_profissional: str | None = None
-    email_profissional: str | None = None
-    provincias: list[str] | None = None
-    especialidades: list[str] | None = None
+    nome_profissional: Optional[str] = None
+    bio: Optional[str] = None
+    foto_url: Optional[str] = None
+    numero_licenca: Optional[str] = None
+    telefone_profissional: Optional[str] = None
+    email_profissional: Optional[str] = None
+    provincias: Optional[List[str]] = None
+    especialidades: Optional[List[str]] = None
 
 
 class AgentResponse(AgentBase):
@@ -61,29 +62,29 @@ class AgentResponse(AgentBase):
 class REPropertyBase(BaseModel):
     """Schema base de imóvel"""
     titulo: str = Field(..., min_length=3, max_length=150)
-    descricao: str | None = None
+    descricao: Optional[str] = None
     tipo: PropertyTypeRE = PropertyTypeRE.APARTAMENTO
     tipo_transacao: TransactionType = TransactionType.VENDA
     endereco: str = Field(..., min_length=5)
-    bairro: str | None = None
+    bairro: Optional[str] = None
     cidade: str = Field(..., min_length=2, max_length=100)
     provincia: str = Field(..., min_length=2, max_length=100)
-    latitude: float | None = Field(None, ge=-90, le=90)
-    longitude: float | None = Field(None, ge=-180, le=180)
-    preco_venda: float | None = None
-    preco_arrendamento: float | None = None
-    condominio: float | None = None
-    area_total: int | None = None
-    area_util: int | None = None
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+    preco_venda: Optional[float] = None
+    preco_arrendamento: Optional[float] = None
+    condominio: Optional[float] = None
+    area_total: Optional[int] = None
+    area_util: Optional[int] = None
     quartos: int = Field(0, ge=0)
     suites: int = Field(0, ge=0)
     banheiros: int = Field(0, ge=0)
     vagas_garagem: int = Field(0, ge=0)
-    ano_construcao: int | None = None
-    caracteristicas: list[str] | None = None
-    imagens: list[str] | None = None
-    video_url: str | None = None
-    tour_virtual_url: str | None = None
+    ano_construcao: Optional[int] = None
+    caracteristicas: Optional[List[str]] = None
+    imagens: Optional[List[str]] = None
+    video_url: Optional[str] = None
+    tour_virtual_url: Optional[str] = None
     destaque: bool = False
 
 
@@ -94,32 +95,32 @@ class REPropertyCreate(REPropertyBase):
 
 class REPropertyUpdate(BaseModel):
     """Schema para atualizar imóvel"""
-    titulo: str | None = None
-    descricao: str | None = None
-    tipo: PropertyTypeRE | None = None
-    tipo_transacao: TransactionType | None = None
-    endereco: str | None = None
-    bairro: str | None = None
-    cidade: str | None = None
-    provincia: str | None = None
-    latitude: float | None = None
-    longitude: float | None = None
-    preco_venda: float | None = None
-    preco_arrendamento: float | None = None
-    condominio: float | None = None
-    area_total: int | None = None
-    area_util: int | None = None
-    quartos: int | None = None
-    suites: int | None = None
-    banheiros: int | None = None
-    vagas_garagem: int | None = None
-    ano_construcao: int | None = None
-    caracteristicas: list[str] | None = None
-    imagens: list[str] | None = None
-    video_url: str | None = None
-    tour_virtual_url: str | None = None
-    destaque: bool | None = None
-    status: PropertyStatusRE | None = None
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    tipo: Optional[PropertyTypeRE] = None
+    tipo_transacao: Optional[TransactionType] = None
+    endereco: Optional[str] = None
+    bairro: Optional[str] = None
+    cidade: Optional[str] = None
+    provincia: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    preco_venda: Optional[float] = None
+    preco_arrendamento: Optional[float] = None
+    condominio: Optional[float] = None
+    area_total: Optional[int] = None
+    area_util: Optional[int] = None
+    quartos: Optional[int] = None
+    suites: Optional[int] = None
+    banheiros: Optional[int] = None
+    vagas_garagem: Optional[int] = None
+    ano_construcao: Optional[int] = None
+    caracteristicas: Optional[List[str]] = None
+    imagens: Optional[List[str]] = None
+    video_url: Optional[str] = None
+    tour_virtual_url: Optional[str] = None
+    destaque: Optional[bool] = None
+    status: Optional[PropertyStatusRE] = None
 
 
 class REPropertyResponse(REPropertyBase):
@@ -141,12 +142,12 @@ class REPropertyListResponse(BaseModel):
     tipo: PropertyTypeRE
     tipo_transacao: TransactionType
     cidade: str
-    bairro: str | None
-    preco_venda: float | None
-    preco_arrendamento: float | None
+    bairro: Optional[str]
+    preco_venda: Optional[float]
+    preco_arrendamento: Optional[float]
     quartos: int
-    area_util: int | None
-    imagem_principal: str | None = None
+    area_util: Optional[int]
+    imagem_principal: Optional[str] = None
     destaque: bool
     
     model_config = ConfigDict(from_attributes=True)
@@ -155,8 +156,8 @@ class REPropertyListResponse(BaseModel):
 class REPropertyDetailResponse(REPropertyResponse):
     """Schema detalhado com info do agente"""
     agent_nome: str
-    agent_telefone: str | None
-    agent_foto: str | None
+    agent_telefone: Optional[str]
+    agent_foto: Optional[str]
 
 
 # ============================================
@@ -168,32 +169,32 @@ class LeadCreate(BaseModel):
     property_id: UUID
     nome: str = Field(..., min_length=2, max_length=120)
     telefone: str = Field(..., min_length=9)
-    email: str | None = None
-    mensagem: str | None = None
+    email: Optional[str] = None
+    mensagem: Optional[str] = None
     tipo_interesse: str = "informacao"
 
 
 class LeadUpdate(BaseModel):
     """Schema para atualizar lead"""
-    status: LeadStatus | None = None
-    notas_agente: str | None = None
-    visita_agendada: datetime | None = None
+    status: Optional[LeadStatus] = None
+    notas_agente: Optional[str] = None
+    visita_agendada: Optional[datetime] = None
 
 
 class LeadResponse(BaseModel):
     """Schema de resposta de lead"""
     id: UUID
     property_id: UUID
-    user_id: UUID | None
+    user_id: Optional[UUID]
     agent_id: UUID
     nome: str
     telefone: str
-    email: str | None
-    mensagem: str | None
+    email: Optional[str]
+    mensagem: Optional[str]
     tipo_interesse: str
     status: LeadStatus
-    notas_agente: str | None
-    visita_agendada: datetime | None
+    notas_agente: Optional[str]
+    visita_agendada: Optional[datetime]
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -215,7 +216,7 @@ class FavoriteResponse(BaseModel):
     id: UUID
     property_id: UUID
     created_at: datetime
-    property: REPropertyListResponse | None = None
+    property: Optional[REPropertyListResponse] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -226,15 +227,15 @@ class FavoriteResponse(BaseModel):
 
 class REPropertySearchParams(BaseModel):
     """Parâmetros de busca"""
-    cidade: str | None = None
-    provincia: str | None = None
-    bairro: str | None = None
-    tipo: PropertyTypeRE | None = None
-    tipo_transacao: TransactionType | None = None
-    preco_min: float | None = None
-    preco_max: float | None = None
-    quartos_min: int | None = None
-    area_min: int | None = None
+    cidade: Optional[str] = None
+    provincia: Optional[str] = None
+    bairro: Optional[str] = None
+    tipo: Optional[PropertyTypeRE] = None
+    tipo_transacao: Optional[TransactionType] = None
+    preco_min: Optional[float] = None
+    preco_max: Optional[float] = None
+    quartos_min: Optional[int] = None
+    area_min: Optional[int] = None
 
 
 # ============================================

@@ -2,6 +2,7 @@
 TUDOaqui API - Real Estate Models
 Módulo Real Estate: Imobiliário
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -72,19 +73,19 @@ class RealEstateAgent(Base):
     )
     
     nome_profissional: Mapped[str] = mapped_column(String(120), nullable=False)
-    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
-    foto_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    foto_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Licença
-    numero_licenca: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    numero_licenca: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
     # Contato profissional
-    telefone_profissional: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    email_profissional: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    telefone_profissional: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    email_profissional: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     
     # Área de atuação
-    provincias: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Array de províncias
-    especialidades: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Tipos de imóvel
+    provincias: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # Array de províncias
+    especialidades: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # Tipos de imóvel
     
     # Stats
     rating_medio: Mapped[Decimal] = mapped_column(Numeric(3, 2), default=5.00)
@@ -93,7 +94,7 @@ class RealEstateAgent(Base):
     
     # Plano de subscrição
     plano: Mapped[str] = mapped_column(String(30), default="basic")  # basic, pro, premium
-    plano_expira_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    plano_expira_em: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=AgentStatus.PENDENTE)
     
@@ -132,40 +133,40 @@ class RealEstateProperty(Base):
     
     # Detalhes básicos
     titulo: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     tipo: Mapped[str] = mapped_column(String(30), default=PropertyTypeRE.APARTAMENTO)
     tipo_transacao: Mapped[str] = mapped_column(String(20), default=TransactionType.VENDA)
     
     # Localização
     endereco: Mapped[str] = mapped_column(Text, nullable=False)
-    bairro: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    bairro: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     cidade: Mapped[str] = mapped_column(String(100), nullable=False)
     provincia: Mapped[str] = mapped_column(String(100), nullable=False)
-    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     # Preços
-    preco_venda: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
-    preco_arrendamento: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
-    condominio: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_venda: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 2), nullable=True)
+    preco_arrendamento: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
+    condominio: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     # Características
-    area_total: Mapped[int | None] = mapped_column(Integer, nullable=True)  # m²
-    area_util: Mapped[int | None] = mapped_column(Integer, nullable=True)  # m²
+    area_total: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # m²
+    area_util: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # m²
     quartos: Mapped[int] = mapped_column(Integer, default=0)
     suites: Mapped[int] = mapped_column(Integer, default=0)
     banheiros: Mapped[int] = mapped_column(Integer, default=0)
     vagas_garagem: Mapped[int] = mapped_column(Integer, default=0)
     
-    ano_construcao: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ano_construcao: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     # Características extras (JSON)
-    caracteristicas: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    caracteristicas: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Imagens
-    imagens: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    video_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    tour_virtual_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    imagens: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    video_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tour_virtual_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Stats
     visualizacoes: Mapped[int] = mapped_column(Integer, default=0)
@@ -206,7 +207,7 @@ class Lead(Base):
         ForeignKey("real_estate_properties.id", ondelete="CASCADE"),
         nullable=False
     )
-    user_id: Mapped[UUID | None] = mapped_column(
+    user_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("users.id"),
         nullable=True  # Pode ser lead anónimo
@@ -220,9 +221,9 @@ class Lead(Base):
     # Dados do lead
     nome: Mapped[str] = mapped_column(String(120), nullable=False)
     telefone: Mapped[str] = mapped_column(String(20), nullable=False)
-    email: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     
-    mensagem: Mapped[str | None] = mapped_column(Text, nullable=True)
+    mensagem: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Interesse
     tipo_interesse: Mapped[str] = mapped_column(String(20), default="informacao")  # informacao, visita, proposta
@@ -230,10 +231,10 @@ class Lead(Base):
     status: Mapped[str] = mapped_column(String(20), default=LeadStatus.NOVO)
     
     # Notas internas do agente
-    notas_agente: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas_agente: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Data de visita agendada
-    visita_agendada: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    visita_agendada: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

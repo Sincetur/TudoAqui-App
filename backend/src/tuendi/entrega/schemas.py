@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Entrega Schemas
 """
+from typing import Optional
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
@@ -16,7 +17,7 @@ class LocationData(BaseModel):
     endereco: str = Field(..., min_length=5)
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
-    referencia: str | None = None
+    referencia: Optional[str] = None
     contato_nome: str = Field(..., min_length=2, max_length=120)
     contato_telefone: str = Field(..., min_length=9)
 
@@ -29,7 +30,7 @@ class DeliveryEstimateRequest(BaseModel):
     destino_longitude: float = Field(..., ge=-180, le=180)
     tipo: DeliveryType = DeliveryType.PACOTE_PEQUENO
     prioridade: DeliveryPriority = DeliveryPriority.NORMAL
-    peso_estimado: float | None = None
+    peso_estimado: Optional[float] = None
 
 
 class DeliveryEstimateResponse(BaseModel):
@@ -47,13 +48,13 @@ class DeliveryCreate(BaseModel):
     tipo: DeliveryType = DeliveryType.PACOTE_PEQUENO
     prioridade: DeliveryPriority = DeliveryPriority.NORMAL
     descricao: str = Field(..., min_length=5, max_length=500)
-    peso_estimado: float | None = None
+    peso_estimado: Optional[float] = None
     
     # Origem
     origem_endereco: str = Field(..., min_length=5)
     origem_latitude: float = Field(..., ge=-90, le=90)
     origem_longitude: float = Field(..., ge=-180, le=180)
-    origem_referencia: str | None = None
+    origem_referencia: Optional[str] = None
     origem_contato_nome: str = Field(..., min_length=2, max_length=120)
     origem_contato_telefone: str = Field(..., min_length=9)
     
@@ -61,36 +62,36 @@ class DeliveryCreate(BaseModel):
     destino_endereco: str = Field(..., min_length=5)
     destino_latitude: float = Field(..., ge=-90, le=90)
     destino_longitude: float = Field(..., ge=-180, le=180)
-    destino_referencia: str | None = None
+    destino_referencia: Optional[str] = None
     destino_contato_nome: str = Field(..., min_length=2, max_length=120)
     destino_contato_telefone: str = Field(..., min_length=9)
     
     # Instruções
-    instrucoes_recolha: str | None = None
-    instrucoes_entrega: str | None = None
+    instrucoes_recolha: Optional[str] = None
+    instrucoes_entrega: Optional[str] = None
 
 
 class DeliveryResponse(BaseModel):
     """Schema de resposta de entrega"""
     id: UUID
     sender_id: UUID
-    driver_id: UUID | None
+    driver_id: Optional[UUID]
     tipo: DeliveryType
     prioridade: DeliveryPriority
     descricao: str
-    peso_estimado: float | None
+    peso_estimado: Optional[float]
     
     origem_endereco: str
     origem_latitude: float
     origem_longitude: float
-    origem_referencia: str | None
+    origem_referencia: Optional[str]
     origem_contato_nome: str
     origem_contato_telefone: str
     
     destino_endereco: str
     destino_latitude: float
     destino_longitude: float
-    destino_referencia: str | None
+    destino_referencia: Optional[str]
     destino_contato_nome: str
     destino_contato_telefone: str
     
@@ -100,28 +101,28 @@ class DeliveryResponse(BaseModel):
     taxa_peso: float
     total: float
     
-    instrucoes_recolha: str | None
-    instrucoes_entrega: str | None
+    instrucoes_recolha: Optional[str]
+    instrucoes_entrega: Optional[str]
     
-    codigo_recolha: str | None
-    codigo_entrega: str | None
+    codigo_recolha: Optional[str]
+    codigo_entrega: Optional[str]
     
     status: DeliveryStatus
     created_at: datetime
-    aceite_at: datetime | None
-    recolhido_at: datetime | None
-    entregue_at: datetime | None
+    aceite_at: Optional[datetime]
+    recolhido_at: Optional[datetime]
+    entregue_at: Optional[datetime]
     
     model_config = ConfigDict(from_attributes=True)
 
 
 class DeliveryDetailResponse(DeliveryResponse):
     """Resposta detalhada com info do motorista"""
-    driver_nome: str | None = None
-    driver_telefone: str | None = None
-    driver_foto: str | None = None
-    driver_veiculo: str | None = None
-    driver_placa: str | None = None
+    driver_nome: Optional[str] = None
+    driver_telefone: Optional[str] = None
+    driver_foto: Optional[str] = None
+    driver_veiculo: Optional[str] = None
+    driver_placa: Optional[str] = None
 
 
 class DeliveryListResponse(BaseModel):
@@ -146,9 +147,9 @@ class TrackingResponse(BaseModel):
     """Histórico de tracking"""
     id: UUID
     status: str
-    descricao: str | None
-    latitude: float | None
-    longitude: float | None
+    descricao: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -161,13 +162,13 @@ class TrackingResponse(BaseModel):
 class ConfirmRecolhaRequest(BaseModel):
     """Confirmar recolha"""
     codigo: str = Field(..., min_length=4, max_length=6)
-    foto_url: str | None = None
+    foto_url: Optional[str] = None
 
 
 class ConfirmEntregaRequest(BaseModel):
     """Confirmar entrega"""
     codigo: str = Field(..., min_length=4, max_length=6)
-    foto_url: str | None = None
+    foto_url: Optional[str] = None
 
 
 class UpdateLocationRequest(BaseModel):

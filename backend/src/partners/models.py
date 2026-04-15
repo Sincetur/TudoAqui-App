@@ -2,6 +2,7 @@
 TUDOaqui API - Partner Models
 Sistema de parceiros com dados de pagamento
 """
+from typing import Optional
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -25,19 +26,19 @@ class Partner(Base):
 
     # Info do negocio
     nome_negocio: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
-    provincia: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    cidade: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    provincia: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    cidade: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Dados de pagamento - Unitel Money
-    unitel_money_numero: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    unitel_money_titular: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    unitel_money_numero: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    unitel_money_titular: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
 
     # Dados de pagamento - Transferencia Bancaria
-    banco_nome: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    banco_conta: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    banco_iban: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    banco_titular: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    banco_nome: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    banco_conta: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    banco_iban: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    banco_titular: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
 
     # Metodos aceites
     aceita_unitel_money: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -46,14 +47,14 @@ class Partner(Base):
 
     # Aprovacao
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pendente")  # pendente, aprovado, suspenso, rejeitado
-    admin_nota: Mapped[str | None] = mapped_column(Text, nullable=True)
-    approved_by: Mapped[uuid.UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
-    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    admin_nota: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[Optional[uuid.UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Taxa mensal
     plano: Mapped[str] = mapped_column(String(30), default="basico")  # basico, profissional, premium
     taxa_mensal: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
-    proximo_pagamento: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    proximo_pagamento: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     pagamento_em_dia: Mapped[bool] = mapped_column(Boolean, default=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

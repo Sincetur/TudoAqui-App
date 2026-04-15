@@ -2,6 +2,7 @@
 TUDOaqui API - Events Models
 Módulo de Eventos: Tickets + QR + Check-in
 """
+from typing import Optional
 from datetime import datetime, date, time
 from enum import Enum
 from uuid import UUID
@@ -45,17 +46,17 @@ class Event(Base):
     )
     
     titulo: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     local: Mapped[str] = mapped_column(String(150), nullable=False)
-    local_latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    local_longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    local_latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    local_longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     data_evento: Mapped[date] = mapped_column(Date, nullable=False)
     hora_evento: Mapped[time] = mapped_column(Time, nullable=False)
-    data_fim: Mapped[date | None] = mapped_column(Date, nullable=True)
+    data_fim: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     
-    imagem_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    categoria: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    imagem_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    categoria: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=EventStatus.RASCUNHO)
     
@@ -93,7 +94,7 @@ class TicketType(Base):
     )
     
     nome: Mapped[str] = mapped_column(String(50), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     preco: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     quantidade_total: Mapped[int] = mapped_column(Integer, nullable=False)
     quantidade_vendida: Mapped[int] = mapped_column(Integer, default=0)
@@ -150,7 +151,7 @@ class Ticket(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # Relationships
     ticket_type = relationship("TicketType", back_populates="tickets")
@@ -187,7 +188,7 @@ class CheckIn(Base):
         nullable=False
     )
     
-    device_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    device_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     scanned_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

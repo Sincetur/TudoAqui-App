@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Drivers Service
 """
+from typing import List, Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from decimal import Decimal
@@ -64,7 +65,7 @@ class DriverService:
         
         return driver
     
-    async def get_driver(self, db: AsyncSession, driver_id: UUID) -> Driver | None:
+    async def get_driver(self, db: AsyncSession, driver_id: UUID) -> Optional[Driver]:
         """Obtém motorista por ID"""
         result = await db.execute(
             select(Driver)
@@ -73,7 +74,7 @@ class DriverService:
         )
         return result.scalar_one_or_none()
     
-    async def get_driver_by_user(self, db: AsyncSession, user_id: UUID) -> Driver | None:
+    async def get_driver_by_user(self, db: AsyncSession, user_id: UUID) -> Optional[Driver]:
         """Obtém motorista pelo user_id"""
         result = await db.execute(
             select(Driver)
@@ -191,11 +192,11 @@ class DriverService:
     async def list_drivers(
         self,
         db: AsyncSession,
-        status: DriverStatus | None = None,
-        online: bool | None = None,
+        status: Optional[DriverStatus] = None,
+        online: Optional[bool] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Driver]:
+    ) -> List[Driver]:
         """Lista motoristas com filtros"""
         query = select(Driver).options(joinedload(Driver.user))
         

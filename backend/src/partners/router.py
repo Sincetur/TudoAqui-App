@@ -2,6 +2,7 @@
 TUDOaqui API - Partner Router
 Endpoints para parceiros: registo, config pagamento, admin gestao
 """
+from typing import Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -40,36 +41,36 @@ PARTNER_TIPO_IDS = [t["id"] for t in PARTNER_TIPOS]
 class PartnerRegister(BaseModel):
     tipo: str
     nome_negocio: str
-    descricao: str | None = None
-    provincia: str | None = None
-    cidade: str | None = None
+    descricao: Optional[str] = None
+    provincia: Optional[str] = None
+    cidade: Optional[str] = None
     aceita_dinheiro: bool = True
 
 
 class PartnerPaymentConfig(BaseModel):
     # Unitel Money
-    unitel_money_numero: str | None = None
-    unitel_money_titular: str | None = None
+    unitel_money_numero: Optional[str] = None
+    unitel_money_titular: Optional[str] = None
     aceita_unitel_money: bool = False
     # Transferencia
-    banco_nome: str | None = None
-    banco_conta: str | None = None
-    banco_iban: str | None = None
-    banco_titular: str | None = None
+    banco_nome: Optional[str] = None
+    banco_conta: Optional[str] = None
+    banco_iban: Optional[str] = None
+    banco_titular: Optional[str] = None
     aceita_transferencia: bool = False
     # Cash
     aceita_dinheiro: bool = True
 
 
 class PartnerUpdate(BaseModel):
-    nome_negocio: str | None = None
-    descricao: str | None = None
-    provincia: str | None = None
-    cidade: str | None = None
+    nome_negocio: Optional[str] = None
+    descricao: Optional[str] = None
+    provincia: Optional[str] = None
+    cidade: Optional[str] = None
 
 
 class AdminPartnerAction(BaseModel):
-    nota: str | None = None
+    nota: Optional[str] = None
 
 
 def partner_to_dict(p: Partner, include_payment=False) -> dict:

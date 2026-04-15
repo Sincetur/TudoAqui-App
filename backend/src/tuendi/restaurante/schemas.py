@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Restaurante Schemas
 """
+from typing import List, Optional
 from datetime import datetime, time
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
@@ -14,21 +15,21 @@ from src.tuendi.restaurante.models import RestaurantStatus, MenuItemStatus, Food
 class RestaurantBase(BaseModel):
     """Schema base de restaurante"""
     nome: str = Field(..., min_length=2, max_length=120)
-    descricao: str | None = None
-    logo_url: str | None = None
-    banner_url: str | None = None
+    descricao: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
     endereco: str = Field(..., min_length=5)
     cidade: str = Field(..., min_length=2, max_length=100)
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
     hora_abertura: time = time(8, 0)
     hora_fecho: time = time(22, 0)
-    dias_funcionamento: list[int] | None = None  # 0=Dom, 1=Seg, etc
+    dias_funcionamento: Optional[List[int]] = None  # 0=Dom, 1=Seg, etc
     raio_entrega_km: int = Field(10, ge=1, le=50)
     tempo_preparo_min: int = Field(30, ge=5, le=120)
     pedido_minimo: float = 0
     taxa_entrega: float = 0
-    categorias: list[str] | None = None
+    categorias: Optional[List[str]] = None
     telefone: str = Field(..., min_length=9)
 
 
@@ -39,24 +40,24 @@ class RestaurantCreate(RestaurantBase):
 
 class RestaurantUpdate(BaseModel):
     """Schema para atualizar restaurante"""
-    nome: str | None = None
-    descricao: str | None = None
-    logo_url: str | None = None
-    banner_url: str | None = None
-    endereco: str | None = None
-    cidade: str | None = None
-    latitude: float | None = None
-    longitude: float | None = None
-    hora_abertura: time | None = None
-    hora_fecho: time | None = None
-    dias_funcionamento: list[int] | None = None
-    raio_entrega_km: int | None = None
-    tempo_preparo_min: int | None = None
-    pedido_minimo: float | None = None
-    taxa_entrega: float | None = None
-    categorias: list[str] | None = None
-    telefone: str | None = None
-    aberto: bool | None = None
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    hora_abertura: Optional[time] = None
+    hora_fecho: Optional[time] = None
+    dias_funcionamento: Optional[List[int]] = None
+    raio_entrega_km: Optional[int] = None
+    tempo_preparo_min: Optional[int] = None
+    pedido_minimo: Optional[float] = None
+    taxa_entrega: Optional[float] = None
+    categorias: Optional[List[str]] = None
+    telefone: Optional[str] = None
+    aberto: Optional[bool] = None
 
 
 class RestaurantResponse(RestaurantBase):
@@ -77,13 +78,13 @@ class RestaurantListResponse(BaseModel):
     """Lista simplificada"""
     id: UUID
     nome: str
-    logo_url: str | None
-    categorias: list[str] | None
+    logo_url: Optional[str]
+    categorias: Optional[List[str]]
     rating_medio: float
     tempo_preparo_min: int
     taxa_entrega: float
     aberto: bool
-    distancia_km: float | None = None
+    distancia_km: Optional[float] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -95,7 +96,7 @@ class RestaurantListResponse(BaseModel):
 class MenuCategoryBase(BaseModel):
     """Schema base de categoria"""
     nome: str = Field(..., min_length=2, max_length=80)
-    descricao: str | None = None
+    descricao: Optional[str] = None
     ordem: int = 0
 
 
@@ -107,7 +108,7 @@ class MenuCategoryResponse(MenuCategoryBase):
     id: UUID
     restaurant_id: UUID
     ativo: bool
-    items: list["MenuItemResponse"] = []
+    items: List["MenuItemResponse"] = []
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -115,13 +116,13 @@ class MenuCategoryResponse(MenuCategoryBase):
 class MenuItemBase(BaseModel):
     """Schema base de item"""
     nome: str = Field(..., min_length=2, max_length=120)
-    descricao: str | None = None
-    imagem_url: str | None = None
+    descricao: Optional[str] = None
+    imagem_url: Optional[str] = None
     preco: float = Field(..., gt=0)
-    preco_promocional: float | None = None
-    tempo_preparo_min: int | None = None
-    opcoes: list[dict] | None = None  # [{nome, opcoes: [{nome, preco_adicional}]}]
-    info_nutricional: dict | None = None
+    preco_promocional: Optional[float] = None
+    tempo_preparo_min: Optional[int] = None
+    opcoes: Optional[List[dict]] = None  # [{nome, opcoes: [{nome, preco_adicional}]}]
+    info_nutricional: Optional[dict] = None
     popular: bool = False
 
 
@@ -130,17 +131,17 @@ class MenuItemCreate(MenuItemBase):
 
 
 class MenuItemUpdate(BaseModel):
-    nome: str | None = None
-    descricao: str | None = None
-    imagem_url: str | None = None
-    preco: float | None = None
-    preco_promocional: float | None = None
-    tempo_preparo_min: int | None = None
-    opcoes: list[dict] | None = None
-    info_nutricional: dict | None = None
-    popular: bool | None = None
-    status: MenuItemStatus | None = None
-    category_id: UUID | None = None
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    imagem_url: Optional[str] = None
+    preco: Optional[float] = None
+    preco_promocional: Optional[float] = None
+    tempo_preparo_min: Optional[int] = None
+    opcoes: Optional[List[dict]] = None
+    info_nutricional: Optional[dict] = None
+    popular: Optional[bool] = None
+    status: Optional[MenuItemStatus] = None
+    category_id: Optional[UUID] = None
 
 
 class MenuItemResponse(MenuItemBase):
@@ -161,20 +162,20 @@ class OrderItemCreate(BaseModel):
     """Item do pedido"""
     menu_item_id: UUID
     quantidade: int = Field(..., ge=1, le=50)
-    opcoes_selecionadas: list[dict] | None = None
-    notas: str | None = None
+    opcoes_selecionadas: Optional[List[dict]] = None
+    notas: Optional[str] = None
 
 
 class FoodOrderCreate(BaseModel):
     """Schema para criar pedido"""
     restaurant_id: UUID
-    items: list[OrderItemCreate]
+    items: List[OrderItemCreate]
     endereco_entrega: str = Field(..., min_length=5)
     latitude_entrega: float = Field(..., ge=-90, le=90)
     longitude_entrega: float = Field(..., ge=-180, le=180)
-    referencia_entrega: str | None = None
+    referencia_entrega: Optional[str] = None
     telefone_contato: str = Field(..., min_length=9)
-    notas: str | None = None
+    notas: Optional[str] = None
 
 
 class OrderItemResponse(BaseModel):
@@ -184,8 +185,8 @@ class OrderItemResponse(BaseModel):
     quantidade: int
     preco_unitario: float
     subtotal: float
-    opcoes_selecionadas: list[dict] | None
-    notas: str | None
+    opcoes_selecionadas: Optional[List[dict]]
+    notas: Optional[str]
     item_nome: str
     
     model_config = ConfigDict(from_attributes=True)
@@ -196,27 +197,27 @@ class FoodOrderResponse(BaseModel):
     id: UUID
     customer_id: UUID
     restaurant_id: UUID
-    driver_id: UUID | None
+    driver_id: Optional[UUID]
     endereco_entrega: str
     latitude_entrega: float
     longitude_entrega: float
-    referencia_entrega: str | None
+    referencia_entrega: Optional[str]
     subtotal: float
     taxa_entrega: float
     desconto: float
     total: float
     telefone_contato: str
-    notas: str | None
+    notas: Optional[str]
     tempo_preparo_estimado: int
-    tempo_entrega_estimado: int | None
-    codigo_entrega: str | None
+    tempo_entrega_estimado: Optional[int]
+    codigo_entrega: Optional[str]
     status: FoodOrderStatus
     created_at: datetime
-    aceite_at: datetime | None
-    pronto_at: datetime | None
-    recolhido_at: datetime | None
-    entregue_at: datetime | None
-    items: list[OrderItemResponse] = []
+    aceite_at: Optional[datetime]
+    pronto_at: Optional[datetime]
+    recolhido_at: Optional[datetime]
+    entregue_at: Optional[datetime]
+    items: List[OrderItemResponse] = []
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -225,8 +226,8 @@ class FoodOrderDetailResponse(FoodOrderResponse):
     """Resposta detalhada"""
     restaurant_nome: str
     restaurant_telefone: str
-    driver_nome: str | None = None
-    driver_telefone: str | None = None
+    driver_nome: Optional[str] = None
+    driver_telefone: Optional[str] = None
 
 
 class FoodOrderListResponse(BaseModel):
@@ -247,9 +248,9 @@ class FoodOrderListResponse(BaseModel):
 
 class ReviewCreate(BaseModel):
     nota_comida: int = Field(..., ge=1, le=5)
-    nota_entrega: int | None = Field(None, ge=1, le=5)
+    nota_entrega: Optional[int] = Field(None, ge=1, le=5)
     nota_geral: int = Field(..., ge=1, le=5)
-    comentario: str | None = Field(None, max_length=1000)
+    comentario: Optional[str] = Field(None, max_length=1000)
 
 
 class ReviewResponse(BaseModel):
@@ -257,11 +258,11 @@ class ReviewResponse(BaseModel):
     restaurant_id: UUID
     user_id: UUID
     nota_comida: int
-    nota_entrega: int | None
+    nota_entrega: Optional[int]
     nota_geral: int
-    comentario: str | None
+    comentario: Optional[str]
     created_at: datetime
-    user_nome: str | None = None
+    user_nome: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 

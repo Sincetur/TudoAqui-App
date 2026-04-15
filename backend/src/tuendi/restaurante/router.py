@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Restaurante Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,12 +27,12 @@ router = APIRouter(prefix="/restaurantes", tags=["Tuendi Restaurante"])
 # Restaurants - Público
 # ============================================
 
-@router.get("", response_model=list[RestaurantListResponse])
+@router.get("", response_model=List[RestaurantListResponse])
 async def list_restaurants(
-    cidade: str | None = None,
-    categoria: str | None = None,
-    latitude: float | None = Query(None, ge=-90, le=90),
-    longitude: float | None = Query(None, ge=-180, le=180),
+    cidade: Optional[str] = None,
+    categoria: Optional[str] = None,
+    latitude: Optional[float] = Query(None, ge=-90, le=90),
+    longitude: Optional[float] = Query(None, ge=-180, le=180),
     raio_km: float = Query(10, ge=1, le=50),
     aberto_agora: bool = False,
     limit: int = Query(20, ge=1, le=100),
@@ -73,7 +74,7 @@ async def get_restaurant(
     return _restaurant_to_response(restaurant)
 
 
-@router.get("/{restaurant_id}/menu", response_model=list[MenuCategoryResponse])
+@router.get("/{restaurant_id}/menu", response_model=List[MenuCategoryResponse])
 async def get_menu(
     restaurant_id: UUID,
     db: AsyncSession = Depends(get_db)
@@ -283,7 +284,7 @@ async def create_order(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/orders/my", response_model=list[FoodOrderListResponse])
+@router.get("/orders/my", response_model=List[FoodOrderListResponse])
 async def list_my_orders(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -352,9 +353,9 @@ async def create_review(
 # Orders - Restaurante
 # ============================================
 
-@router.get("/my/orders", response_model=list[FoodOrderResponse])
+@router.get("/my/orders", response_model=List[FoodOrderResponse])
 async def list_restaurant_orders(
-    status: FoodOrderStatus | None = None,
+    status: Optional[FoodOrderStatus] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
@@ -373,7 +374,7 @@ async def list_restaurant_orders(
 async def update_order_status(
     order_id: UUID,
     status: FoodOrderStatus,
-    motivo: str | None = None,
+    motivo: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):

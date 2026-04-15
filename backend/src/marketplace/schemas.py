@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Marketplace Schemas
 """
+from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
@@ -14,11 +15,11 @@ from src.marketplace.models import SellerStatus, ProductStatus, OrderStatus
 class SellerBase(BaseModel):
     """Schema base de vendedor"""
     nome_loja: str = Field(..., min_length=2, max_length=120)
-    descricao: str | None = None
-    logo_url: str | None = None
-    endereco: str | None = None
-    cidade: str | None = None
-    provincia: str | None = None
+    descricao: Optional[str] = None
+    logo_url: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    provincia: Optional[str] = None
     taxa_entrega_base: float = 0
     tempo_preparacao_min: int = 30
 
@@ -30,14 +31,14 @@ class SellerCreate(SellerBase):
 
 class SellerUpdate(BaseModel):
     """Schema para atualizar vendedor"""
-    nome_loja: str | None = None
-    descricao: str | None = None
-    logo_url: str | None = None
-    endereco: str | None = None
-    cidade: str | None = None
-    provincia: str | None = None
-    taxa_entrega_base: float | None = None
-    tempo_preparacao_min: int | None = None
+    nome_loja: Optional[str] = None
+    descricao: Optional[str] = None
+    logo_url: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    provincia: Optional[str] = None
+    taxa_entrega_base: Optional[float] = None
+    tempo_preparacao_min: Optional[int] = None
 
 
 class SellerResponse(SellerBase):
@@ -59,16 +60,16 @@ class SellerResponse(SellerBase):
 class ProductBase(BaseModel):
     """Schema base de produto"""
     nome: str = Field(..., min_length=2, max_length=150)
-    descricao: str | None = None
+    descricao: Optional[str] = None
     preco: float = Field(..., gt=0)
-    preco_promocional: float | None = None
+    preco_promocional: Optional[float] = None
     stock: int = Field(0, ge=0)
     stock_minimo: int = 5
-    imagens: list[str] | None = None
-    atributos: dict | None = None
-    peso_kg: float | None = None
+    imagens: Optional[List[str]] = None
+    atributos: Optional[dict] = None
+    peso_kg: Optional[float] = None
     destaque: bool = False
-    category_id: UUID | None = None
+    category_id: Optional[UUID] = None
 
 
 class ProductCreate(ProductBase):
@@ -78,18 +79,18 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     """Schema para atualizar produto"""
-    nome: str | None = None
-    descricao: str | None = None
-    preco: float | None = None
-    preco_promocional: float | None = None
-    stock: int | None = None
-    stock_minimo: int | None = None
-    imagens: list[str] | None = None
-    atributos: dict | None = None
-    peso_kg: float | None = None
-    destaque: bool | None = None
-    category_id: UUID | None = None
-    status: ProductStatus | None = None
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    preco: Optional[float] = None
+    preco_promocional: Optional[float] = None
+    stock: Optional[int] = None
+    stock_minimo: Optional[int] = None
+    imagens: Optional[List[str]] = None
+    atributos: Optional[dict] = None
+    peso_kg: Optional[float] = None
+    destaque: Optional[bool] = None
+    category_id: Optional[UUID] = None
+    status: Optional[ProductStatus] = None
 
 
 class ProductResponse(ProductBase):
@@ -125,12 +126,12 @@ class OrderItemCreate(BaseModel):
 class OrderCreate(BaseModel):
     """Schema para criar pedido"""
     seller_id: UUID
-    items: list[OrderItemCreate]
+    items: List[OrderItemCreate]
     endereco_entrega: str = Field(..., min_length=10)
-    latitude_entrega: float | None = None
-    longitude_entrega: float | None = None
+    latitude_entrega: Optional[float] = None
+    longitude_entrega: Optional[float] = None
     telefone_contato: str = Field(..., min_length=9)
-    notas: str | None = None
+    notas: Optional[str] = None
 
 
 class OrderItemResponse(BaseModel):
@@ -141,7 +142,7 @@ class OrderItemResponse(BaseModel):
     preco_unitario: float
     subtotal: float
     produto_nome: str
-    produto_imagem: str | None
+    produto_imagem: Optional[str]
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -157,13 +158,13 @@ class OrderResponse(BaseModel):
     total: float
     endereco_entrega: str
     telefone_contato: str
-    notas: str | None
+    notas: Optional[str]
     status: OrderStatus
     created_at: datetime
-    pago_at: datetime | None
-    enviado_at: datetime | None
-    entregue_at: datetime | None
-    items: list[OrderItemResponse] = []
+    pago_at: Optional[datetime]
+    enviado_at: Optional[datetime]
+    entregue_at: Optional[datetime]
+    items: List[OrderItemResponse] = []
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -181,9 +182,9 @@ class CategoryResponse(BaseModel):
     """Schema de categoria"""
     id: UUID
     nome: str
-    descricao: str | None
-    icone: str | None
-    parent_id: UUID | None
+    descricao: Optional[str]
+    icone: Optional[str]
+    parent_id: Optional[UUID]
     ordem: int
     
     model_config = ConfigDict(from_attributes=True)
@@ -196,7 +197,7 @@ class CategoryResponse(BaseModel):
 class ReviewCreate(BaseModel):
     """Schema para criar avaliação"""
     nota: int = Field(..., ge=1, le=5)
-    comentario: str | None = Field(None, max_length=1000)
+    comentario: Optional[str] = Field(None, max_length=1000)
 
 
 class ReviewResponse(BaseModel):
@@ -205,7 +206,7 @@ class ReviewResponse(BaseModel):
     product_id: UUID
     user_id: UUID
     nota: int
-    comentario: str | None
+    comentario: Optional[str]
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)

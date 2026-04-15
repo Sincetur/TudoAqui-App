@@ -2,6 +2,7 @@
 TUDOaqui API - Auth Router
 """
 import phonenumbers
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,6 +12,7 @@ from src.config import settings
 from src.users.models import User
 from src.users.schemas import (
     LoginRequest, 
+    AdminLoginRequest,
     OTPVerifyRequest, 
     TokenResponse, 
     RefreshTokenRequest,
@@ -86,11 +88,52 @@ async def login(
     )
 
 
+@router.post("/admin-login", response_model=TokenResponse)
+async def admin_login(
+    request: AdminLoginRequest,
+    req: Request,
+    user_agent: Optional[str] = Header(None),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Login de administrador por telefone + password.
+    
+    - **telefone**: Numero de telefone do admin (+244...)
+    - **password**: Password do admin
+    """
+    client_ip = req.client.host if req.client else "unknown"
+    if not await rate_limiter.check_rate_limit(f"admin-login:{client_ip}", limit=5, window=60):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas tentativas. Aguarde 1 minuto."
+        )
+    
+    telefone = validate_and_format_phone(request.telefone)
+    
+    user = await auth_service.authenticate_admin(db, telefone, request.password)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciais invalidas ou utilizador nao e admin"
+        )
+    
+    access_token, expires = auth_service.create_access_token(user.id, user.role)
+    refresh = await auth_service.create_refresh_token(db, user.id, user_agent)
+    
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh.token,
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserResponse.model_validate(user)
+    )
+
+
 @router.post("/verify-otp", response_model=TokenResponse)
 async def verify_otp(
     request: OTPVerifyRequest,
     req: Request,
-    user_agent: str | None = Header(None),
+    user_agent: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """

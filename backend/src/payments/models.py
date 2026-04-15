@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Payment Models
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -70,13 +71,13 @@ class Payment(Base):
     status: Mapped[str] = mapped_column(String(20), default=PaymentStatus.INICIADO)
     
     # Dados externos
-    external_ref: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    external_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    external_ref: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    external_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
     # Comprovativo (para transferencias)
-    comprovativo_ref: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
-    admin_nota: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comprovativo_ref: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    admin_nota: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
@@ -87,7 +88,7 @@ class Payment(Base):
         server_default=func.now(),
         onupdate=func.now()
     )
-    confirmado_at: Mapped[datetime | None] = mapped_column(
+    confirmado_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), 
         nullable=True
     )
@@ -105,21 +106,21 @@ class LedgerEntry(Base):
         primary_key=True, 
         default=uuid.uuid4
     )
-    payment_id: Mapped[UUID | None] = mapped_column(
+    payment_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("payments.id"),
         nullable=True
     )
     origem_tipo: Mapped[str] = mapped_column(String(20), nullable=False)
     origem_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
-    beneficiario_id: Mapped[UUID | None] = mapped_column(
+    beneficiario_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("users.id"),
         nullable=True  # NULL = plataforma
     )
     tipo: Mapped[str] = mapped_column(String(10), nullable=False)  # credito | debito
     valor: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

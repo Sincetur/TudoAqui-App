@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Events Service
 """
+from typing import List, Optional, Tuple
 import hashlib
 import secrets
 from datetime import datetime, timezone
@@ -52,7 +53,7 @@ class EventService:
         
         return event
     
-    async def get_event(self, db: AsyncSession, event_id: UUID) -> Event | None:
+    async def get_event(self, db: AsyncSession, event_id: UUID) -> Optional[Event]:
         """Obtém evento por ID"""
         result = await db.execute(
             select(Event)
@@ -64,11 +65,11 @@ class EventService:
     async def list_events(
         self,
         db: AsyncSession,
-        status: EventStatus | None = None,
-        categoria: str | None = None,
+        status: Optional[EventStatus] = None,
+        categoria: Optional[str] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Event]:
+    ) -> List[Event]:
         """Lista eventos públicos"""
         query = select(Event).options(joinedload(Event.ticket_types))
         
@@ -97,7 +98,7 @@ class EventService:
         organizer_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Event]:
+    ) -> List[Event]:
         """Lista eventos do organizador"""
         result = await db.execute(
             select(Event)
@@ -243,7 +244,7 @@ class EventService:
         buyer_id: UUID,
         ticket_type_id: UUID,
         quantidade: int
-    ) -> list[Ticket]:
+    ) -> List[Ticket]:
         """Compra tickets"""
         # Busca tipo de ticket com lock
         result = await db.execute(
@@ -303,7 +304,7 @@ class EventService:
         user_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Ticket]:
+    ) -> List[Ticket]:
         """Lista tickets do usuário"""
         result = await db.execute(
             select(Ticket)
@@ -326,7 +327,7 @@ class EventService:
         db: AsyncSession,
         qr_code: str,
         event_id: UUID
-    ) -> tuple[bool, str, Ticket | None]:
+    ) -> Tuple[bool, str, Optional[Ticket]]:
         """
         Valida QR code do ticket.
         Retorna: (válido, mensagem, ticket)
@@ -366,8 +367,8 @@ class EventService:
         qr_code: str,
         event_id: UUID,
         staff_id: UUID,
-        device_info: str | None = None
-    ) -> tuple[bool, str, CheckIn | None]:
+        device_info: Optional[str] = None
+    ) -> Tuple[bool, str, Optional[CheckIn]]:
         """
         Realiza check-in do ticket.
         Retorna: (sucesso, mensagem, checkin)

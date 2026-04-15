@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Notification Models
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -38,7 +39,7 @@ class Notification(Base):
     titulo: Mapped[str] = mapped_column(String(200), nullable=False)
     mensagem: Mapped[str] = mapped_column(Text, nullable=False)
     tipo: Mapped[str] = mapped_column(String(30), nullable=False)
-    dados: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    dados: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     lida: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

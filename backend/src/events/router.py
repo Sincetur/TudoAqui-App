@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Events Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,9 +35,9 @@ router = APIRouter(prefix="/events", tags=["Eventos"])
 # Eventos Públicos
 # ============================================
 
-@router.get("", response_model=list[EventResponse])
+@router.get("", response_model=List[EventResponse])
 async def list_events(
-    categoria: str | None = None,
+    categoria: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -114,7 +115,7 @@ async def create_event(
     return EventResponse.model_validate(event)
 
 
-@router.get("/my/events", response_model=list[EventResponse])
+@router.get("/my/events", response_model=List[EventResponse])
 async def list_my_events(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -303,7 +304,7 @@ async def update_ticket_type(
 # Compra de Tickets
 # ============================================
 
-@router.post("/tickets/purchase", response_model=list[TicketResponse], status_code=status.HTTP_201_CREATED)
+@router.post("/tickets/purchase", response_model=List[TicketResponse], status_code=status.HTTP_201_CREATED)
 async def purchase_tickets(
     request: TicketPurchaseRequest,
     current_user: User = Depends(get_current_user),
@@ -326,7 +327,7 @@ async def purchase_tickets(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/tickets/my", response_model=list[TicketResponse])
+@router.get("/tickets/my", response_model=List[TicketResponse])
 async def get_my_tickets(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),

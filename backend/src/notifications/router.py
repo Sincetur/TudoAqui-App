@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Notifications Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,7 +24,7 @@ class NotificationResponse(BaseModel):
     titulo: str
     mensagem: str
     tipo: str
-    dados: dict | None = None
+    dados: Optional[dict] = None
     lida: bool
     created_at: datetime
     
@@ -40,7 +41,7 @@ class MarkReadResponse(BaseModel):
 
 
 # Endpoints
-@router.get("", response_model=list[NotificationResponse])
+@router.get("", response_model=List[NotificationResponse])
 async def list_notifications(
     unread_only: bool = Query(False),
     limit: int = Query(50, ge=1, le=100),

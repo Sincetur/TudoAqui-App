@@ -49,6 +49,42 @@ async def lifespan(app: FastAPI):
             pass  # Table will be created by create_all above
     
     print("✅ Base de dados conectada")
+    
+    # Ensure admin has password
+    from src.database import async_session
+    from src.users.models import User, UserRole
+    from src.auth.service import AuthService
+    async with async_session() as session:
+        from sqlalchemy import select, text
+        # Add password_hash column if not exists
+        try:
+            await session.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)"
+            ))
+            await session.commit()
+        except Exception:
+            await session.rollback()
+        
+        result = await session.execute(
+            select(User).where(User.telefone == "+244912000000")
+        )
+        admin = result.scalar_one_or_none()
+        if admin and not admin.password_hash:
+            admin.password_hash = AuthService.hash_password("TUDOaqui@2026")
+            await session.commit()
+            print("✅ Admin password configurada")
+        elif not admin:
+            admin = User(
+                telefone="+244912000000",
+                nome="Admin TUDOaqui",
+                role=UserRole.ADMIN.value,
+                status="ativo",
+                password_hash=AuthService.hash_password("TUDOaqui@2026")
+            )
+            session.add(admin)
+            await session.commit()
+            print("✅ Admin criado com password")
+    
     print("📍 Servidor: http://localhost:8000")
     print("📚 Docs: http://localhost:8000/docs")
     

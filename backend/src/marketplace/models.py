@@ -2,6 +2,7 @@
 TUDOaqui API - Marketplace Models
 Módulo Marketplace: Multi-vendedor B2C/B2B
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -55,13 +56,13 @@ class Seller(Base):
     )
     
     nome_loja: Mapped[str] = mapped_column(String(120), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
-    logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    logo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Localização
-    endereco: Mapped[str | None] = mapped_column(Text, nullable=True)
-    cidade: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    provincia: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    endereco: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    cidade: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    provincia: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     # Configurações
     taxa_entrega_base: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
@@ -101,9 +102,9 @@ class ProductCategory(Base):
         default=uuid.uuid4
     )
     nome: Mapped[str] = mapped_column(String(100), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
-    icone: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    parent_id: Mapped[UUID | None] = mapped_column(
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    icone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    parent_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("product_categories.id"),
         nullable=True
@@ -126,29 +127,29 @@ class Product(Base):
         ForeignKey("sellers.id", ondelete="CASCADE"),
         nullable=False
     )
-    category_id: Mapped[UUID | None] = mapped_column(
+    category_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("product_categories.id"),
         nullable=True
     )
     
     nome: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     preco: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    preco_promocional: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_promocional: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     stock: Mapped[int] = mapped_column(Integer, default=0)
     stock_minimo: Mapped[int] = mapped_column(Integer, default=5)
     
     # Imagens (JSON array de URLs)
-    imagens: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    imagens: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Atributos (cor, tamanho, etc)
-    atributos: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    atributos: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Peso para cálculo de frete (kg)
-    peso_kg: Mapped[Decimal | None] = mapped_column(Numeric(8, 3), nullable=True)
+    peso_kg: Mapped[Optional[Decimal]] = mapped_column(Numeric(8, 3), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=ProductStatus.ATIVO)
     destaque: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -212,15 +213,15 @@ class MarketplaceOrder(Base):
     
     # Entrega
     endereco_entrega: Mapped[str] = mapped_column(Text, nullable=False)
-    latitude_entrega: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude_entrega: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    latitude_entrega: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude_entrega: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     # Contato
     telefone_contato: Mapped[str] = mapped_column(String(20), nullable=False)
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Integração Tuendi Entrega
-    tuendi_entrega_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    tuendi_entrega_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=OrderStatus.PENDENTE)
     
@@ -229,10 +230,10 @@ class MarketplaceOrder(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    pago_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    enviado_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    entregue_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelado_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    pago_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    enviado_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    entregue_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelado_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # Relationships
     buyer = relationship("User", backref="marketplace_orders")
@@ -266,7 +267,7 @@ class OrderItem(Base):
     
     # Snapshot do produto no momento da compra
     produto_nome: Mapped[str] = mapped_column(String(150), nullable=False)
-    produto_imagem: Mapped[str | None] = mapped_column(Text, nullable=True)
+    produto_imagem: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Relationships
     order = relationship("MarketplaceOrder", back_populates="items")
@@ -292,14 +293,14 @@ class ProductReview(Base):
         ForeignKey("users.id"),
         nullable=False
     )
-    order_id: Mapped[UUID | None] = mapped_column(
+    order_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("marketplace_orders.id"),
         nullable=True
     )
     
     nota: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
-    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comentario: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

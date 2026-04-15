@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Real Estate Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,9 +26,9 @@ router = APIRouter(prefix="/realestate", tags=["Imobiliário"])
 # Agents - Público
 # ============================================
 
-@router.get("/agents", response_model=list[AgentResponse])
+@router.get("/agents", response_model=List[AgentResponse])
 async def list_agents(
-    provincia: str | None = None,
+    provincia: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -153,17 +154,17 @@ async def get_my_stats(
 # Properties - Público
 # ============================================
 
-@router.get("/properties", response_model=list[REPropertyListResponse])
+@router.get("/properties", response_model=List[REPropertyListResponse])
 async def list_properties(
-    cidade: str | None = None,
-    provincia: str | None = None,
-    bairro: str | None = None,
-    tipo: PropertyTypeRE | None = None,
-    tipo_transacao: TransactionType | None = None,
-    preco_min: float | None = None,
-    preco_max: float | None = None,
-    quartos_min: int | None = None,
-    area_min: int | None = None,
+    cidade: Optional[str] = None,
+    provincia: Optional[str] = None,
+    bairro: Optional[str] = None,
+    tipo: Optional[PropertyTypeRE] = None,
+    tipo_transacao: Optional[TransactionType] = None,
+    preco_min: Optional[float] = None,
+    preco_max: Optional[float] = None,
+    quartos_min: Optional[int] = None,
+    area_min: Optional[int] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -303,7 +304,7 @@ async def get_property_simple(property_id: UUID, db: AsyncSession) -> REProperty
     )
 
 
-@router.get("/properties/my/list", response_model=list[REPropertyResponse])
+@router.get("/properties/my/list", response_model=List[REPropertyResponse])
 async def list_my_properties(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -368,7 +369,7 @@ async def publish_property(
 @router.post("/leads", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
 async def create_lead(
     request: LeadCreate,
-    current_user: User | None = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Cria contacto/lead para um imóvel."""
@@ -394,9 +395,9 @@ async def create_lead(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/leads", response_model=list[LeadDetailResponse])
+@router.get("/leads", response_model=List[LeadDetailResponse])
 async def list_my_leads(
-    status: LeadStatus | None = None,
+    status: Optional[LeadStatus] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.AGENTE_IMOBILIARIO, UserRole.ADMIN)),
@@ -503,7 +504,7 @@ async def remove_favorite(
     return {"status": "success", "message": "Removido dos favoritos"}
 
 
-@router.get("/favorites", response_model=list[FavoriteResponse])
+@router.get("/favorites", response_model=List[FavoriteResponse])
 async def list_my_favorites(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),

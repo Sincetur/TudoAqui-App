@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Restaurante Service
 """
+from typing import List, Optional, Tuple
 import secrets
 import math
 from datetime import datetime, timezone, time
@@ -78,7 +79,7 @@ class RestauranteService:
         await db.refresh(restaurant)
         return restaurant
     
-    async def get_restaurant(self, db: AsyncSession, restaurant_id: UUID) -> Restaurant | None:
+    async def get_restaurant(self, db: AsyncSession, restaurant_id: UUID) -> Optional[Restaurant]:
         """Obtém restaurante por ID"""
         result = await db.execute(
             select(Restaurant)
@@ -89,7 +90,7 @@ class RestauranteService:
         )
         return result.unique().scalar_one_or_none()
     
-    async def get_restaurant_by_owner(self, db: AsyncSession, owner_id: UUID) -> Restaurant | None:
+    async def get_restaurant_by_owner(self, db: AsyncSession, owner_id: UUID) -> Optional[Restaurant]:
         """Obtém restaurante pelo owner"""
         result = await db.execute(
             select(Restaurant).where(Restaurant.owner_id == owner_id)
@@ -124,15 +125,15 @@ class RestauranteService:
     async def list_restaurants(
         self,
         db: AsyncSession,
-        cidade: str | None = None,
-        categoria: str | None = None,
-        user_lat: float | None = None,
-        user_lon: float | None = None,
+        cidade: Optional[str] = None,
+        categoria: Optional[str] = None,
+        user_lat: Optional[float] = None,
+        user_lon: Optional[float] = None,
         raio_km: float = 10,
         aberto_agora: bool = False,
         limit: int = 20,
         offset: int = 0
-    ) -> list[tuple[Restaurant, float | None]]:
+    ) -> List[Tuple[Restaurant, Optional[float]]]:
         """Lista restaurantes com distância"""
         query = select(Restaurant).where(
             Restaurant.status == RestaurantStatus.APROVADO.value
@@ -246,7 +247,7 @@ class RestauranteService:
         await db.refresh(item)
         return item
     
-    async def get_menu(self, db: AsyncSession, restaurant_id: UUID) -> list[MenuCategory]:
+    async def get_menu(self, db: AsyncSession, restaurant_id: UUID) -> List[MenuCategory]:
         """Obtém menu completo"""
         result = await db.execute(
             select(MenuCategory)
@@ -369,7 +370,7 @@ class RestauranteService:
         await db.refresh(order)
         return order
     
-    async def get_order(self, db: AsyncSession, order_id: UUID) -> FoodOrder | None:
+    async def get_order(self, db: AsyncSession, order_id: UUID) -> Optional[FoodOrder]:
         """Obtém pedido"""
         result = await db.execute(
             select(FoodOrder)
@@ -387,7 +388,7 @@ class RestauranteService:
         db: AsyncSession,
         order_id: UUID,
         status: FoodOrderStatus,
-        motivo: str | None = None
+        motivo: Optional[str] = None
     ) -> FoodOrder:
         """Atualiza status do pedido"""
         order = await self.get_order(db, order_id)
@@ -419,7 +420,7 @@ class RestauranteService:
         customer_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[FoodOrder]:
+    ) -> List[FoodOrder]:
         """Lista pedidos do cliente"""
         result = await db.execute(
             select(FoodOrder)
@@ -435,10 +436,10 @@ class RestauranteService:
         self,
         db: AsyncSession,
         restaurant_id: UUID,
-        status: FoodOrderStatus | None = None,
+        status: Optional[FoodOrderStatus] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[FoodOrder]:
+    ) -> List[FoodOrder]:
         """Lista pedidos do restaurante"""
         query = select(FoodOrder).where(FoodOrder.restaurant_id == restaurant_id)
         

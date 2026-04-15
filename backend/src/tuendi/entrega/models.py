@@ -2,6 +2,7 @@
 TUDOaqui API - Tuendi Entrega Models
 Módulo de Entregas de Pacotes
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -54,7 +55,7 @@ class Delivery(Base):
         ForeignKey("users.id"),
         nullable=False
     )
-    driver_id: Mapped[UUID | None] = mapped_column(
+    driver_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("drivers.id"),
         nullable=True
@@ -66,13 +67,13 @@ class Delivery(Base):
     
     # Descrição do pacote
     descricao: Mapped[str] = mapped_column(Text, nullable=False)
-    peso_estimado: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)  # kg
+    peso_estimado: Mapped[Optional[Decimal]] = mapped_column(Numeric(8, 2), nullable=True)  # kg
     
     # Origem (recolha)
     origem_endereco: Mapped[str] = mapped_column(Text, nullable=False)
     origem_latitude: Mapped[Decimal] = mapped_column(Numeric(10, 8), nullable=False)
     origem_longitude: Mapped[Decimal] = mapped_column(Numeric(11, 8), nullable=False)
-    origem_referencia: Mapped[str | None] = mapped_column(Text, nullable=True)
+    origem_referencia: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     origem_contato_nome: Mapped[str] = mapped_column(String(120), nullable=False)
     origem_contato_telefone: Mapped[str] = mapped_column(String(20), nullable=False)
     
@@ -80,7 +81,7 @@ class Delivery(Base):
     destino_endereco: Mapped[str] = mapped_column(Text, nullable=False)
     destino_latitude: Mapped[Decimal] = mapped_column(Numeric(10, 8), nullable=False)
     destino_longitude: Mapped[Decimal] = mapped_column(Numeric(11, 8), nullable=False)
-    destino_referencia: Mapped[str | None] = mapped_column(Text, nullable=True)
+    destino_referencia: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     destino_contato_nome: Mapped[str] = mapped_column(String(120), nullable=False)
     destino_contato_telefone: Mapped[str] = mapped_column(String(20), nullable=False)
     
@@ -92,19 +93,19 @@ class Delivery(Base):
     total: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     
     # Notas
-    instrucoes_recolha: Mapped[str | None] = mapped_column(Text, nullable=True)
-    instrucoes_entrega: Mapped[str | None] = mapped_column(Text, nullable=True)
+    instrucoes_recolha: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    instrucoes_entrega: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Código de confirmação
-    codigo_recolha: Mapped[str | None] = mapped_column(String(6), nullable=True)
-    codigo_entrega: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    codigo_recolha: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
+    codigo_entrega: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
     
     # Foto de confirmação
-    foto_recolha_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    foto_entrega_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    foto_recolha_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    foto_entrega_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Integração (marketplace, etc)
-    marketplace_order_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    marketplace_order_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=DeliveryStatus.PENDENTE)
     
@@ -113,11 +114,11 @@ class Delivery(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    aceite_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    recolhido_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    entregue_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelado_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    motivo_cancelamento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    aceite_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    recolhido_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    entregue_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelado_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    motivo_cancelamento: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Relationships
     sender = relationship("User", backref="deliveries_sent", foreign_keys=[sender_id])
@@ -144,10 +145,10 @@ class DeliveryTracking(Base):
     )
     
     status: Mapped[str] = mapped_column(String(30), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

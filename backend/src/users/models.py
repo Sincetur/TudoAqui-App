@@ -3,6 +3,7 @@ TUDOaqui API - User Models
 """
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 from uuid import UUID
 from sqlalchemy import String, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -42,11 +43,12 @@ class User(Base):
         default=uuid.uuid4
     )
     telefone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    nome: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    email: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    nome: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    password_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     role: Mapped[str] = mapped_column(String(30), nullable=False, default=UserRole.CLIENTE)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default=UserStatus.ATIVO)
-    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now()
@@ -92,7 +94,7 @@ class RefreshToken(Base):
     )
     user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     token: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
-    device_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    device_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revogado: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(

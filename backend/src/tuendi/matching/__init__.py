@@ -2,6 +2,7 @@
 TUDOaqui - Driver Matching Service
 Algoritmo de matching com geo-filter e prioridade
 """
+from typing import List, Optional
 import math
 from uuid import UUID
 from sqlalchemy import select, and_
@@ -31,10 +32,10 @@ class MatchingService:
         db: AsyncSession,
         lat: float,
         lon: float,
-        vehicle_type: str | None = None,
-        radius_km: float | None = None,
-        limit: int | None = None,
-    ) -> list[dict]:
+        vehicle_type: Optional[str] = None,
+        radius_km: Optional[float] = None,
+        limit: Optional[int] = None,
+    ) -> List[dict]:
         """Retorna motoristas mais proximos, ordenados por score."""
         radius = radius_km or self.MAX_RADIUS_KM
         max_results = limit or self.MAX_RESULTS

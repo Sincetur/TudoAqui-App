@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Rides Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,7 +67,7 @@ async def request_ride(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/current", response_model=RideWithDriverResponse | None)
+@router.get("/current", response_model=Optional[RideWithDriverResponse])
 async def get_current_ride(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -174,7 +175,7 @@ async def cancel_ride(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/history/client", response_model=list[RideResponse])
+@router.get("/history/client", response_model=List[RideResponse])
 async def get_client_history(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -235,7 +236,7 @@ async def rate_ride(
 # Endpoints do Motorista
 # ============================================
 
-@router.get("/pending/nearby", response_model=list[RideResponse])
+@router.get("/pending/nearby", response_model=List[RideResponse])
 async def get_pending_rides(
     latitude: float = Query(..., ge=-90, le=90),
     longitude: float = Query(..., ge=-180, le=180),
@@ -325,7 +326,7 @@ async def finish_ride(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/history/driver", response_model=list[RideResponse])
+@router.get("/history/driver", response_model=List[RideResponse])
 async def get_driver_history(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),

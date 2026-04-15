@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Phone, ArrowRight, Shield, Loader2 } from 'lucide-react';
+import { Phone, ArrowRight, Shield, Loader2, Lock, UserCog } from 'lucide-react';
 import { api } from '../api';
 
 export default function Login({ onLogin }) {
+  const [mode, setMode] = useState('otp'); // 'otp' or 'admin'
   const [step, setStep] = useState('phone');
   const [telefone, setTelefone] = useState('');
   const [codigo, setCodigo] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formattedPhone, setFormattedPhone] = useState('');
@@ -39,6 +41,28 @@ export default function Login({ onLogin }) {
     }
   };
 
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const result = await api.adminLogin(telefone, password);
+      onLogin(result.user, { access_token: result.access_token, refresh_token: result.refresh_token });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (newMode) => {
+    setMode(newMode);
+    setStep('phone');
+    setError('');
+    setCodigo('');
+    setPassword('');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-950 px-4" data-testid="login-page">
       <div className="w-full max-w-sm">
@@ -53,9 +77,80 @@ export default function Login({ onLogin }) {
           <p className="text-dark-400 text-sm mt-1">a sua vida em um so lugar</p>
         </div>
 
+        {/* Mode Toggle */}
+        <div className="flex mb-4 bg-dark-900 border border-dark-800 rounded-xl p-1" data-testid="login-mode-toggle">
+          <button
+            type="button"
+            onClick={() => switchMode('otp')}
+            data-testid="mode-otp-btn"
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition ${
+              mode === 'otp' ? 'bg-primary-600 text-white' : 'text-dark-400 hover:text-white'
+            }`}
+          >
+            <Phone className="w-4 h-4" />
+            SMS / OTP
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMode('admin')}
+            data-testid="mode-admin-btn"
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition ${
+              mode === 'admin' ? 'bg-primary-600 text-white' : 'text-dark-400 hover:text-white'
+            }`}
+          >
+            <UserCog className="w-4 h-4" />
+            Admin
+          </button>
+        </div>
+
         {/* Card */}
         <div className="bg-dark-900 border border-dark-800 rounded-2xl p-6 shadow-xl">
-          {step === 'phone' ? (
+          {mode === 'admin' ? (
+            /* Admin Password Login */
+            <form onSubmit={handleAdminLogin} data-testid="admin-login-form">
+              <h2 className="text-lg font-semibold text-white mb-1">Acesso Administrador</h2>
+              <p className="text-dark-400 text-sm mb-6">Insira telefone e password de admin</p>
+
+              <div className="relative mb-4">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                <input
+                  data-testid="admin-phone-input"
+                  type="tel"
+                  placeholder="+244 912 000 000"
+                  value={telefone}
+                  onChange={e => setTelefone(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition"
+                  required
+                />
+              </div>
+
+              <div className="relative mb-4">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                <input
+                  data-testid="admin-password-input"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition"
+                  required
+                />
+              </div>
+
+              {error && <p className="text-red-400 text-sm mb-4" data-testid="error-message">{error}</p>}
+
+              <button
+                data-testid="admin-login-btn"
+                type="submit"
+                disabled={loading || !telefone || !password}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <>Entrar como Admin <ArrowRight className="w-4 h-4" /></>
+                )}
+              </button>
+            </form>
+          ) : step === 'phone' ? (
             <form onSubmit={handleSendOtp} data-testid="phone-form">
               <h2 className="text-lg font-semibold text-white mb-1">Entrar</h2>
               <p className="text-dark-400 text-sm mb-6">Insira o seu numero de telefone angolano</p>

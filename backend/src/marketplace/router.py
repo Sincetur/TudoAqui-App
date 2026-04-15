@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Marketplace Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,9 +26,9 @@ router = APIRouter(prefix="/marketplace", tags=["Marketplace"])
 # Sellers - Público
 # ============================================
 
-@router.get("/sellers", response_model=list[SellerResponse])
+@router.get("/sellers", response_model=List[SellerResponse])
 async def list_sellers(
-    cidade: str | None = None,
+    cidade: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -121,12 +122,12 @@ async def get_my_seller_stats(
 # Products - Público
 # ============================================
 
-@router.get("/products", response_model=list[ProductResponse])
+@router.get("/products", response_model=List[ProductResponse])
 async def list_products(
-    seller_id: UUID | None = None,
-    category_id: UUID | None = None,
-    search: str | None = None,
-    destaque: bool | None = None,
+    seller_id: Optional[UUID] = None,
+    category_id: Optional[UUID] = None,
+    search: Optional[str] = None,
+    destaque: Optional[bool] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -253,7 +254,7 @@ async def create_product(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/products/my/list", response_model=list[ProductResponse])
+@router.get("/products/my/list", response_model=List[ProductResponse])
 async def list_my_products(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -379,7 +380,7 @@ async def create_order(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/orders/my", response_model=list[OrderResponse])
+@router.get("/orders/my", response_model=List[OrderResponse])
 async def list_my_orders(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -417,9 +418,9 @@ async def list_my_orders(
 # Orders - Vendedor
 # ============================================
 
-@router.get("/orders/seller", response_model=list[OrderResponse])
+@router.get("/orders/seller", response_model=List[OrderResponse])
 async def list_seller_orders(
-    status: OrderStatus | None = None,
+    status: Optional[OrderStatus] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),
@@ -501,7 +502,7 @@ async def update_order_status(
 # Categories
 # ============================================
 
-@router.get("/categories", response_model=list[CategoryResponse])
+@router.get("/categories", response_model=List[CategoryResponse])
 async def list_categories(
     db: AsyncSession = Depends(get_db)
 ):

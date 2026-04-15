@@ -86,6 +86,7 @@ export const api = {
   getDriverProfile: () => request('/drivers/me'),
 
   // Admin
+  adminLogin: (telefone, password) => request('/auth/admin-login', { method: 'POST', body: JSON.stringify({ telefone, password }) }),
   adminStats: () => request('/admin/stats'),
   adminUsers: (params = '') => request(`/admin/users${params}`),
   adminUpdateRole: (userId, role) => request(`/admin/users/${userId}/role?role=${role}`, { method: 'PUT' }),

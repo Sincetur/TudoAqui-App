@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Driver Models
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -39,20 +40,20 @@ class Driver(Base):
     # Dados do veículo
     veiculo: Mapped[str] = mapped_column(String(100), nullable=False)
     matricula: Mapped[str] = mapped_column(String(30), nullable=False)
-    cor_veiculo: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    marca: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    modelo: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    ano: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cor_veiculo: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    marca: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    modelo: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    ano: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     # Documentos
-    carta_conducao: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    documento_veiculo: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    carta_conducao: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    documento_veiculo: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     # Status online
     online: Mapped[bool] = mapped_column(Boolean, default=False)
-    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
-    ultima_localizacao_at: Mapped[datetime | None] = mapped_column(
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
+    ultima_localizacao_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), 
         nullable=True
     )

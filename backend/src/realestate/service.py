@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Real Estate Service
 """
+from typing import List, Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from decimal import Decimal
@@ -63,7 +64,7 @@ class RealEstateService:
         await db.refresh(agent)
         return agent
     
-    async def get_agent(self, db: AsyncSession, agent_id: UUID) -> RealEstateAgent | None:
+    async def get_agent(self, db: AsyncSession, agent_id: UUID) -> Optional[RealEstateAgent]:
         """Obtém agente por ID"""
         result = await db.execute(
             select(RealEstateAgent)
@@ -72,7 +73,7 @@ class RealEstateService:
         )
         return result.scalar_one_or_none()
     
-    async def get_agent_by_user(self, db: AsyncSession, user_id: UUID) -> RealEstateAgent | None:
+    async def get_agent_by_user(self, db: AsyncSession, user_id: UUID) -> Optional[RealEstateAgent]:
         """Obtém agente pelo user_id"""
         result = await db.execute(
             select(RealEstateAgent).where(RealEstateAgent.user_id == user_id)
@@ -103,10 +104,10 @@ class RealEstateService:
     async def list_agents(
         self,
         db: AsyncSession,
-        provincia: str | None = None,
+        provincia: Optional[str] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[RealEstateAgent]:
+    ) -> List[RealEstateAgent]:
         """Lista agentes aprovados"""
         query = select(RealEstateAgent).where(
             RealEstateAgent.status == AgentStatus.APROVADO.value
@@ -165,7 +166,7 @@ class RealEstateService:
         await db.refresh(prop)
         return prop
     
-    async def get_property(self, db: AsyncSession, property_id: UUID) -> RealEstateProperty | None:
+    async def get_property(self, db: AsyncSession, property_id: UUID) -> Optional[RealEstateProperty]:
         """Obtém imóvel por ID"""
         result = await db.execute(
             select(RealEstateProperty)
@@ -202,18 +203,18 @@ class RealEstateService:
     async def list_properties(
         self,
         db: AsyncSession,
-        cidade: str | None = None,
-        provincia: str | None = None,
-        bairro: str | None = None,
-        tipo: PropertyTypeRE | None = None,
-        tipo_transacao: TransactionType | None = None,
-        preco_min: float | None = None,
-        preco_max: float | None = None,
-        quartos_min: int | None = None,
-        area_min: int | None = None,
+        cidade: Optional[str] = None,
+        provincia: Optional[str] = None,
+        bairro: Optional[str] = None,
+        tipo: Optional[PropertyTypeRE] = None,
+        tipo_transacao: Optional[TransactionType] = None,
+        preco_min: Optional[float] = None,
+        preco_max: Optional[float] = None,
+        quartos_min: Optional[int] = None,
+        area_min: Optional[int] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[RealEstateProperty]:
+    ) -> List[RealEstateProperty]:
         """Lista imóveis"""
         query = select(RealEstateProperty).where(
             RealEstateProperty.status == PropertyStatusRE.ATIVO.value
@@ -265,7 +266,7 @@ class RealEstateService:
         agent_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[RealEstateProperty]:
+    ) -> List[RealEstateProperty]:
         """Lista imóveis do agente"""
         result = await db.execute(
             select(RealEstateProperty)
@@ -301,7 +302,7 @@ class RealEstateService:
     async def create_lead(
         self,
         db: AsyncSession,
-        user_id: UUID | None,
+        user_id: Optional[UUID],
         data: dict
     ) -> Lead:
         """Cria lead/contacto"""
@@ -326,7 +327,7 @@ class RealEstateService:
         await db.refresh(lead)
         return lead
     
-    async def get_lead(self, db: AsyncSession, lead_id: UUID) -> Lead | None:
+    async def get_lead(self, db: AsyncSession, lead_id: UUID) -> Optional[Lead]:
         """Obtém lead por ID"""
         result = await db.execute(
             select(Lead)
@@ -358,10 +359,10 @@ class RealEstateService:
         self,
         db: AsyncSession,
         agent_id: UUID,
-        status: LeadStatus | None = None,
+        status: Optional[LeadStatus] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Lead]:
+    ) -> List[Lead]:
         """Lista leads do agente"""
         query = select(Lead).where(Lead.agent_id == agent_id)
         
@@ -445,7 +446,7 @@ class RealEstateService:
         user_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[PropertyFavorite]:
+    ) -> List[PropertyFavorite]:
         """Lista favoritos do usuário"""
         result = await db.execute(
             select(PropertyFavorite)

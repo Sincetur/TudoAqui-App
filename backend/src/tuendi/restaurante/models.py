@@ -2,6 +2,7 @@
 TUDOaqui API - Tuendi Restaurante Models
 Módulo de Delivery de Comida
 """
+from typing import Optional
 from datetime import datetime, time
 from enum import Enum
 from uuid import UUID
@@ -54,9 +55,9 @@ class Restaurant(Base):
     )
     
     nome: Mapped[str] = mapped_column(String(120), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
-    logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    banner_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    logo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    banner_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Localização
     endereco: Mapped[str] = mapped_column(Text, nullable=False)
@@ -67,7 +68,7 @@ class Restaurant(Base):
     # Horário de funcionamento
     hora_abertura: Mapped[time] = mapped_column(Time, default=time(8, 0))
     hora_fecho: Mapped[time] = mapped_column(Time, default=time(22, 0))
-    dias_funcionamento: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # [0-6]
+    dias_funcionamento: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # [0-6]
     
     # Configurações de entrega
     raio_entrega_km: Mapped[int] = mapped_column(Integer, default=10)
@@ -76,7 +77,7 @@ class Restaurant(Base):
     taxa_entrega: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
     
     # Categorias de culinária
-    categorias: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # ["Angolana", "Portuguesa", etc]
+    categorias: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # ["Angolana", "Portuguesa", etc]
     
     # Stats
     rating_medio: Mapped[Decimal] = mapped_column(Numeric(3, 2), default=5.00)
@@ -123,7 +124,7 @@ class MenuCategory(Base):
     )
     
     nome: Mapped[str] = mapped_column(String(80), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ordem: Mapped[int] = mapped_column(Integer, default=0)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     
@@ -153,20 +154,20 @@ class MenuItem(Base):
     )
     
     nome: Mapped[str] = mapped_column(String(120), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
-    imagem_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    imagem_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     preco: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    preco_promocional: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_promocional: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     # Tempo de preparo específico do item
-    tempo_preparo_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    tempo_preparo_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
     # Opcionais/Adicionais
-    opcoes: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    opcoes: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Informações nutricionais/alérgenos
-    info_nutricional: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    info_nutricional: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     popular: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[str] = mapped_column(String(20), default=MenuItemStatus.ATIVO)
@@ -204,7 +205,7 @@ class FoodOrder(Base):
         ForeignKey("restaurants.id"),
         nullable=False
     )
-    driver_id: Mapped[UUID | None] = mapped_column(
+    driver_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("drivers.id"),
         nullable=True
@@ -214,7 +215,7 @@ class FoodOrder(Base):
     endereco_entrega: Mapped[str] = mapped_column(Text, nullable=False)
     latitude_entrega: Mapped[Decimal] = mapped_column(Numeric(10, 8), nullable=False)
     longitude_entrega: Mapped[Decimal] = mapped_column(Numeric(11, 8), nullable=False)
-    referencia_entrega: Mapped[str | None] = mapped_column(Text, nullable=True)
+    referencia_entrega: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Valores
     subtotal: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
@@ -224,17 +225,17 @@ class FoodOrder(Base):
     
     # Contato
     telefone_contato: Mapped[str] = mapped_column(String(20), nullable=False)
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Tempo estimado
     tempo_preparo_estimado: Mapped[int] = mapped_column(Integer, nullable=False)  # minutos
-    tempo_entrega_estimado: Mapped[int | None] = mapped_column(Integer, nullable=True)  # minutos
+    tempo_entrega_estimado: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # minutos
     
     # Código de entrega
-    codigo_entrega: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    codigo_entrega: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
     
     # Integração Tuendi Entrega
-    delivery_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    delivery_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=FoodOrderStatus.PENDENTE)
     
@@ -243,12 +244,12 @@ class FoodOrder(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    aceite_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    pronto_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    recolhido_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    entregue_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelado_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    motivo_cancelamento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    aceite_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    pronto_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    recolhido_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    entregue_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelado_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    motivo_cancelamento: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Relationships
     customer = relationship("User", backref="food_orders")
@@ -285,10 +286,10 @@ class FoodOrderItem(Base):
     subtotal: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     
     # Opcionais selecionados
-    opcoes_selecionadas: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    opcoes_selecionadas: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Notas do cliente
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Snapshot do item
     item_nome: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -324,10 +325,10 @@ class RestaurantReview(Base):
     )
     
     nota_comida: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
-    nota_entrega: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-5
+    nota_entrega: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 1-5
     nota_geral: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
     
-    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comentario: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

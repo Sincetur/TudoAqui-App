@@ -11,6 +11,7 @@ from sqlalchemy import select, func
 
 from src.database import async_session
 from src.users.models import User, UserRole, UserStatus
+from src.auth.service import AuthService
 from src.events.models import Event, EventStatus, TicketType
 from src.marketplace.models import Seller, SellerStatus, ProductCategory, Product, ProductStatus
 from src.alojamento.models import Property, PropertyType, PropertyStatus
@@ -30,20 +31,29 @@ async def run_seed():
             return {"message": "Seed data ja existe", "seeded": False}
 
         # === USERS ===
+        admin_password_hash = AuthService.hash_password("TUDOaqui@2026")
         users = {}
         user_data = [
-            ("seed_admin", "+244912000000", "Admin TUDOaqui", UserRole.ADMIN),
-            ("seed_org", "+244911000001", "Carlos Mendes", UserRole.GUIA_TURISTA),
-            ("seed_seller", "+244911000002", "Ana Ferreira", UserRole.PROPRIETARIO),
-            ("seed_host", "+244911000003", "Manuel Santos", UserRole.PROPRIETARIO),
-            ("seed_agent", "+244911000004", "Sofia Neto", UserRole.AGENTE_IMOBILIARIO),
-            ("seed_rest", "+244911000005", "Pedro Gomes", UserRole.PROPRIETARIO),
-            ("seed_guide", "+244911000006", "Joana Silva", UserRole.AGENTE_VIAGEM),
+            ("seed_admin", "+244912000000", "Admin TUDOaqui", UserRole.ADMIN, admin_password_hash),
+            ("seed_org", "+244911000001", "Carlos Mendes", UserRole.GUIA_TURISTA, None),
+            ("seed_seller", "+244911000002", "Ana Ferreira", UserRole.PROPRIETARIO, None),
+            ("seed_host", "+244911000003", "Manuel Santos", UserRole.PROPRIETARIO, None),
+            ("seed_agent", "+244911000004", "Sofia Neto", UserRole.AGENTE_IMOBILIARIO, None),
+            ("seed_rest", "+244911000005", "Pedro Gomes", UserRole.PROPRIETARIO, None),
+            ("seed_guide", "+244911000006", "Joana Silva", UserRole.AGENTE_VIAGEM, None),
         ]
-        for key, tel, nome, role in user_data:
-            u = User(id=uuid.uuid4(), telefone=tel, nome=nome, role=role, status=UserStatus.ATIVO)
-            session.add(u)
-            users[key] = u
+        for key, tel, nome, role, pw_hash in user_data:
+            # Check if user already exists (e.g. admin created at startup)
+            result = await session.execute(
+                select(User).where(User.telefone == tel)
+            )
+            existing = result.scalar_one_or_none()
+            if existing:
+                users[key] = existing
+            else:
+                u = User(id=uuid.uuid4(), telefone=tel, nome=nome, role=role, status=UserStatus.ATIVO, password_hash=pw_hash)
+                session.add(u)
+                users[key] = u
         await session.flush()
 
         # === EVENTS ===

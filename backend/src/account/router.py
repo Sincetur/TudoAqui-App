@@ -2,6 +2,7 @@
 TUDOaqui API - Account Router
 Endpoints da conta do utilizador (perfil, pedidos de upgrade)
 """
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -24,8 +25,8 @@ class RoleRequestCreate(BaseModel):
 
 
 class ProfileUpdate(BaseModel):
-    nome: str | None = None
-    email: str | None = None
+    nome: Optional[str] = None
+    email: Optional[str] = None
 
 
 @router.get("/profile")

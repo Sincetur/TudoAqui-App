@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Ride Models
 """
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -38,7 +39,7 @@ class Ride(Base):
         ForeignKey("users.id"),
         nullable=False
     )
-    motorista_id: Mapped[UUID | None] = mapped_column(
+    motorista_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), 
         ForeignKey("drivers.id"),
         nullable=True
@@ -55,10 +56,10 @@ class Ride(Base):
     destino_longitude: Mapped[Decimal] = mapped_column(Numeric(11, 8), nullable=False)
     
     # Valores
-    distancia_km: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
-    duracao_estimada_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    valor_estimado: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
-    valor_final: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    distancia_km: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
+    duracao_estimada_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    valor_estimado: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
+    valor_final: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     # Status
     status: Mapped[str] = mapped_column(
@@ -71,11 +72,11 @@ class Ride(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    aceite_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    iniciada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    finalizada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    motivo_cancelamento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    aceite_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    iniciada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    finalizada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    motivo_cancelamento: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
@@ -134,8 +135,8 @@ class RideTracking(Base):
     )
     latitude: Mapped[Decimal] = mapped_column(Numeric(10, 8), nullable=False)
     longitude: Mapped[Decimal] = mapped_column(Numeric(11, 8), nullable=False)
-    velocidade: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
-    bearing: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    velocidade: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2), nullable=True)
+    bearing: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2), nullable=True)
     recorded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now()
@@ -168,7 +169,7 @@ class Rating(Base):
     )
     tipo: Mapped[str] = mapped_column(String(30), nullable=False)
     nota: Mapped[int] = mapped_column(Integer, nullable=False)
-    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comentario: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now()

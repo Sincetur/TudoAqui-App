@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Entrega Service
 """
+from typing import List, Optional
 import secrets
 import math
 from datetime import datetime, timezone
@@ -73,7 +74,7 @@ class EntregaService:
         destino_lon: float,
         tipo: DeliveryType,
         prioridade: DeliveryPriority,
-        peso_kg: float | None = None
+        peso_kg: Optional[float] = None
     ) -> dict:
         """Estima preço da entrega"""
         # Calcula distância
@@ -173,7 +174,7 @@ class EntregaService:
         await db.refresh(delivery)
         return delivery
     
-    async def get_delivery(self, db: AsyncSession, delivery_id: UUID) -> Delivery | None:
+    async def get_delivery(self, db: AsyncSession, delivery_id: UUID) -> Optional[Delivery]:
         """Obtém entrega por ID"""
         result = await db.execute(
             select(Delivery)
@@ -189,10 +190,10 @@ class EntregaService:
         self,
         db: AsyncSession,
         sender_id: UUID,
-        status: DeliveryStatus | None = None,
+        status: Optional[DeliveryStatus] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Delivery]:
+    ) -> List[Delivery]:
         """Lista entregas do remetente"""
         query = select(Delivery).where(Delivery.sender_id == sender_id)
         
@@ -211,7 +212,7 @@ class EntregaService:
         driver_lon: float,
         raio_km: float = 10,
         limit: int = 20
-    ) -> list[Delivery]:
+    ) -> List[Delivery]:
         """Lista entregas disponíveis próximas ao motorista"""
         # Converte raio para graus (aproximação)
         raio_graus = raio_km / 111
@@ -239,10 +240,10 @@ class EntregaService:
         self,
         db: AsyncSession,
         driver_id: UUID,
-        status: DeliveryStatus | None = None,
+        status: Optional[DeliveryStatus] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Delivery]:
+    ) -> List[Delivery]:
         """Lista entregas do motorista"""
         query = select(Delivery).where(Delivery.driver_id == driver_id)
         
@@ -323,7 +324,7 @@ class EntregaService:
         delivery_id: UUID,
         driver_id: UUID,
         codigo: str,
-        foto_url: str | None = None
+        foto_url: Optional[str] = None
     ) -> Delivery:
         """Confirma recolha do pacote"""
         delivery = await self.get_delivery(db, delivery_id)
@@ -390,7 +391,7 @@ class EntregaService:
         delivery_id: UUID,
         driver_id: UUID,
         codigo: str,
-        foto_url: str | None = None
+        foto_url: Optional[str] = None
     ) -> Delivery:
         """Confirma entrega do pacote"""
         delivery = await self.get_delivery(db, delivery_id)
@@ -486,7 +487,7 @@ class EntregaService:
         self,
         db: AsyncSession,
         delivery_id: UUID
-    ) -> list[DeliveryTracking]:
+    ) -> List[DeliveryTracking]:
         """Obtém histórico de tracking"""
         result = await db.execute(
             select(DeliveryTracking)

@@ -4,7 +4,7 @@ Gestão de conexões WebSocket para tempo real
 """
 import json
 from uuid import UUID
-from typing import Dict, Set
+from typing import Dict, Optional, Set
 from fastapi import WebSocket, WebSocketDisconnect
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -17,7 +17,7 @@ class ConnectionInfo:
     user_id: UUID
     user_type: str  # 'client' | 'driver'
     connected_at: datetime = field(default_factory=datetime.now)
-    ride_id: UUID | None = None
+    ride_id: Optional[UUID] = None
 
 
 class WebSocketManager:

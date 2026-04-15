@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Turismo Schemas
 """
+from typing import List, Optional
 from datetime import datetime, date, time
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
@@ -14,23 +15,23 @@ from src.turismo.models import ExperienceType, ExperienceStatus, ExperienceBooki
 class ExperienceBase(BaseModel):
     """Schema base de experiência"""
     titulo: str = Field(..., min_length=3, max_length=150)
-    descricao: str | None = None
+    descricao: Optional[str] = None
     tipo: ExperienceType = ExperienceType.TOUR
     local: str = Field(..., min_length=2, max_length=150)
     cidade: str = Field(..., min_length=2, max_length=100)
-    ponto_encontro: str | None = None
-    latitude: float | None = Field(None, ge=-90, le=90)
-    longitude: float | None = Field(None, ge=-180, le=180)
+    ponto_encontro: Optional[str] = None
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
     duracao_horas: int = Field(2, ge=1, le=72)
     min_participantes: int = Field(1, ge=1)
     max_participantes: int = Field(10, ge=1, le=100)
     preco: float = Field(..., gt=0)
-    preco_crianca: float | None = None
-    inclui: list[str] | None = None
-    nao_inclui: list[str] | None = None
-    requisitos: list[str] | None = None
-    imagens: list[str] | None = None
-    idiomas: list[str] | None = None
+    preco_crianca: Optional[float] = None
+    inclui: Optional[List[str]] = None
+    nao_inclui: Optional[List[str]] = None
+    requisitos: Optional[List[str]] = None
+    imagens: Optional[List[str]] = None
+    idiomas: Optional[List[str]] = None
 
 
 class ExperienceCreate(ExperienceBase):
@@ -40,25 +41,25 @@ class ExperienceCreate(ExperienceBase):
 
 class ExperienceUpdate(BaseModel):
     """Schema para atualizar experiência"""
-    titulo: str | None = None
-    descricao: str | None = None
-    tipo: ExperienceType | None = None
-    local: str | None = None
-    cidade: str | None = None
-    ponto_encontro: str | None = None
-    latitude: float | None = None
-    longitude: float | None = None
-    duracao_horas: int | None = None
-    min_participantes: int | None = None
-    max_participantes: int | None = None
-    preco: float | None = None
-    preco_crianca: float | None = None
-    inclui: list[str] | None = None
-    nao_inclui: list[str] | None = None
-    requisitos: list[str] | None = None
-    imagens: list[str] | None = None
-    idiomas: list[str] | None = None
-    status: ExperienceStatus | None = None
+    titulo: Optional[str] = None
+    descricao: Optional[str] = None
+    tipo: Optional[ExperienceType] = None
+    local: Optional[str] = None
+    cidade: Optional[str] = None
+    ponto_encontro: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    duracao_horas: Optional[int] = None
+    min_participantes: Optional[int] = None
+    max_participantes: Optional[int] = None
+    preco: Optional[float] = None
+    preco_crianca: Optional[float] = None
+    inclui: Optional[List[str]] = None
+    nao_inclui: Optional[List[str]] = None
+    requisitos: Optional[List[str]] = None
+    imagens: Optional[List[str]] = None
+    idiomas: Optional[List[str]] = None
+    status: Optional[ExperienceStatus] = None
 
 
 class ExperienceResponse(ExperienceBase):
@@ -83,7 +84,7 @@ class ExperienceListResponse(BaseModel):
     duracao_horas: int
     preco: float
     rating_medio: float
-    imagem_principal: str | None = None
+    imagem_principal: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -97,7 +98,7 @@ class ScheduleCreate(BaseModel):
     data: date
     hora_inicio: time
     vagas_disponiveis: int = Field(..., ge=1)
-    preco_especial: float | None = None
+    preco_especial: Optional[float] = None
 
 
 class ScheduleResponse(BaseModel):
@@ -109,7 +110,7 @@ class ScheduleResponse(BaseModel):
     vagas_disponiveis: int
     vagas_reservadas: int
     vagas_livres: int = 0
-    preco_especial: float | None
+    preco_especial: Optional[float]
     ativo: bool
     
     model_config = ConfigDict(from_attributes=True)
@@ -126,7 +127,7 @@ class ExperienceBookingCreate(BaseModel):
     adultos: int = Field(1, ge=1, le=20)
     criancas: int = Field(0, ge=0, le=20)
     telefone_contato: str = Field(..., min_length=9)
-    notas: str | None = None
+    notas: Optional[str] = None
 
 
 class ExperienceBookingResponse(BaseModel):
@@ -144,11 +145,11 @@ class ExperienceBookingResponse(BaseModel):
     total: float
     qr_voucher: str
     telefone_contato: str
-    notas: str | None
+    notas: Optional[str]
     status: ExperienceBookingStatus
     created_at: datetime
-    confirmada_at: datetime | None
-    validada_at: datetime | None
+    confirmada_at: Optional[datetime]
+    validada_at: Optional[datetime]
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -160,7 +161,7 @@ class ExperienceBookingDetailResponse(ExperienceBookingResponse):
     experience_cidade: str
     schedule_data: date
     schedule_hora: time
-    host_nome: str | None
+    host_nome: Optional[str]
 
 
 class BookingValidateRequest(BaseModel):
@@ -175,7 +176,7 @@ class BookingValidateRequest(BaseModel):
 class ExperienceReviewCreate(BaseModel):
     """Schema para criar avaliação"""
     nota: int = Field(..., ge=1, le=5)
-    comentario: str | None = Field(None, max_length=2000)
+    comentario: Optional[str] = Field(None, max_length=2000)
 
 
 class ExperienceReviewResponse(BaseModel):
@@ -184,9 +185,9 @@ class ExperienceReviewResponse(BaseModel):
     experience_id: UUID
     user_id: UUID
     nota: int
-    comentario: str | None
+    comentario: Optional[str]
     created_at: datetime
-    user_nome: str | None = None
+    user_nome: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 

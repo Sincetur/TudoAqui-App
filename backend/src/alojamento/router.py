@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Alojamento Router
 """
+from typing import List, Optional
 from uuid import UUID
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -27,15 +28,15 @@ router = APIRouter(prefix="/alojamento", tags=["Alojamento"])
 # Properties - Público
 # ============================================
 
-@router.get("/properties", response_model=list[PropertyListResponse])
+@router.get("/properties", response_model=List[PropertyListResponse])
 async def list_properties(
-    cidade: str | None = None,
-    provincia: str | None = None,
-    tipo: PropertyType | None = None,
-    hospedes: int | None = None,
-    preco_min: float | None = None,
-    preco_max: float | None = None,
-    quartos_min: int | None = None,
+    cidade: Optional[str] = None,
+    provincia: Optional[str] = None,
+    tipo: Optional[PropertyType] = None,
+    hospedes: Optional[int] = None,
+    preco_min: Optional[float] = None,
+    preco_max: Optional[float] = None,
+    quartos_min: Optional[int] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
@@ -128,7 +129,7 @@ async def check_availability(
     }
 
 
-@router.get("/properties/{property_id}/reviews", response_model=list[ReviewResponse])
+@router.get("/properties/{property_id}/reviews", response_model=List[ReviewResponse])
 async def list_property_reviews(
     property_id: UUID,
     limit: int = Query(20, ge=1, le=100),
@@ -170,7 +171,7 @@ async def create_property(
     return await get_property(prop.id, db)
 
 
-@router.get("/properties/my/list", response_model=list[PropertyResponse])
+@router.get("/properties/my/list", response_model=List[PropertyResponse])
 async def list_my_properties(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -329,7 +330,7 @@ async def create_booking(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/bookings/my", response_model=list[BookingResponse])
+@router.get("/bookings/my", response_model=List[BookingResponse])
 async def list_my_bookings(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -396,9 +397,9 @@ async def create_review(
 # Bookings - Anfitrião
 # ============================================
 
-@router.get("/bookings/host", response_model=list[BookingResponse])
+@router.get("/bookings/host", response_model=List[BookingResponse])
 async def list_host_bookings(
-    status: BookingStatus | None = None,
+    status: Optional[BookingStatus] = None,
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.PROPRIETARIO, UserRole.ADMIN)),

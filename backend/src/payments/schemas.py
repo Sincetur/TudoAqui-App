@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Payment Schemas
 """
+from typing import Optional
 from datetime import datetime
 from uuid import UUID
 from decimal import Decimal
@@ -18,8 +19,8 @@ class PaymentCreate(BaseModel):
     origem_id: UUID
     metodo: PaymentMethod
     valor: float = Field(..., gt=0)
-    comprovativo_ref: str | None = None
-    notas: str | None = None
+    comprovativo_ref: Optional[str] = None
+    notas: Optional[str] = None
 
 
 class PaymentResponse(BaseModel):
@@ -34,12 +35,12 @@ class PaymentResponse(BaseModel):
     taxa_servico: float
     valor_total: float
     status: PaymentStatus
-    external_ref: str | None = None
-    comprovativo_ref: str | None = None
-    notas: str | None = None
-    admin_nota: str | None = None
+    external_ref: Optional[str] = None
+    comprovativo_ref: Optional[str] = None
+    notas: Optional[str] = None
+    admin_nota: Optional[str] = None
     created_at: datetime
-    confirmado_at: datetime | None = None
+    confirmado_at: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -47,19 +48,19 @@ class PaymentResponse(BaseModel):
 class PaymentConfirm(BaseModel):
     """Schema para confirmar pagamento (webhook)"""
     referencia: str
-    external_ref: str | None = None
-    external_status: str | None = None
+    external_ref: Optional[str] = None
+    external_status: Optional[str] = None
 
 
 class PaymentSubmitComprovativo(BaseModel):
     """Schema para submeter comprovativo de transferencia"""
     comprovativo_ref: str
-    notas: str | None = None
+    notas: Optional[str] = None
 
 
 class AdminPaymentAction(BaseModel):
     """Schema para accao admin sobre pagamento"""
-    nota: str | None = None
+    nota: Optional[str] = None
 
 
 # ============================================
@@ -83,13 +84,13 @@ class BankInfoResponse(BaseModel):
 class LedgerEntryResponse(BaseModel):
     """Schema de entrada no ledger"""
     id: UUID
-    payment_id: UUID | None = None
+    payment_id: Optional[UUID] = None
     origem_tipo: str
     origem_id: UUID
-    beneficiario_id: UUID | None = None
+    beneficiario_id: Optional[UUID] = None
     tipo: str
     valor: float
-    descricao: str | None = None
+    descricao: Optional[str] = None
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)

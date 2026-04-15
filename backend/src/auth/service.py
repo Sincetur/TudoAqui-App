@@ -4,8 +4,10 @@ TUDOaqui API - Auth Service
 import string
 import secrets
 from datetime import datetime, timedelta, timezone
+from typing import Optional, Tuple
 from uuid import UUID
 
+import bcrypt
 from jose import JWTError, jwt
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +20,17 @@ class AuthService:
     """Serviço de autenticação"""
     
     @staticmethod
+    def hash_password(password: str) -> str:
+        """Hash password com bcrypt"""
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+    
+    @staticmethod
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """Verifica password contra hash bcrypt"""
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+    
+    @staticmethod
     def generate_otp() -> str:
         """Gera código OTP de 6 dígitos (criptograficamente seguro)"""
         return ''.join(secrets.choice(string.digits) for _ in range(settings.OTP_LENGTH))
@@ -28,7 +41,7 @@ class AuthService:
         return secrets.token_urlsafe(64)
     
     @staticmethod
-    def create_access_token(user_id: UUID, role: str) -> tuple[str, datetime]:
+    def create_access_token(user_id: UUID, role: str) -> Tuple[str, datetime]:
         """Cria access token JWT"""
         expires = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = {
@@ -42,7 +55,7 @@ class AuthService:
         return token, expires
     
     @staticmethod
-    def decode_token(token: str) -> dict | None:
+    def decode_token(token: str) -> Optional[dict]:
         """Decodifica e valida token JWT"""
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -80,7 +93,7 @@ class AuthService:
         
         return otp
     
-    async def verify_otp(self, db: AsyncSession, telefone: str, codigo: str) -> OTPCode | None:
+    async def verify_otp(self, db: AsyncSession, telefone: str, codigo: str) -> Optional[OTPCode]:
         """Verifica código OTP"""
         result = await db.execute(
             select(OTPCode)
@@ -120,7 +133,7 @@ class AuthService:
         db: AsyncSession, 
         telefone: str, 
         role: UserRole = UserRole.CLIENTE
-    ) -> tuple[User, bool]:
+    ) -> Tuple[User, bool]:
         """Obtém ou cria utilizador"""
         result = await db.execute(
             select(User).where(User.telefone == telefone)
@@ -145,7 +158,7 @@ class AuthService:
         self, 
         db: AsyncSession, 
         user_id: UUID,
-        device_info: str | None = None
+        device_info: Optional[str] = None
     ) -> RefreshToken:
         """Cria refresh token"""
         token = self.generate_refresh_token()
@@ -163,7 +176,7 @@ class AuthService:
         
         return refresh
     
-    async def validate_refresh_token(self, db: AsyncSession, token: str) -> RefreshToken | None:
+    async def validate_refresh_token(self, db: AsyncSession, token: str) -> Optional[RefreshToken]:
         """Valida refresh token"""
         result = await db.execute(
             select(RefreshToken)
@@ -201,6 +214,27 @@ class AuthService:
         await db.commit()
         return result.rowcount
     
+    async def authenticate_admin(self, db: AsyncSession, telefone: str, password: str) -> Optional[User]:
+        """Autentica admin por telefone + password"""
+        result = await db.execute(
+            select(User).where(User.telefone == telefone)
+        )
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            return None
+        
+        if user.role != UserRole.ADMIN.value:
+            return None
+        
+        if not user.password_hash:
+            return None
+        
+        if not self.verify_password(password, user.password_hash):
+            return None
+        
+        return user
+
     async def _send_sms(self, telefone: str, message: str) -> bool:
         """
         Envia SMS usando o provider configurado.

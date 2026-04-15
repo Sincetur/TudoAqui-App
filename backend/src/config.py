@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     MOBILEMONEY_API_KEY: str = ""
     
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8080"]
     
     class Config:
         env_file = ".env"

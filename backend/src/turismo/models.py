@@ -2,6 +2,7 @@
 TUDOaqui API - Turismo Models
 Módulo Turismo: Experiências & Pacotes
 """
+from typing import Optional
 from datetime import datetime, date, time
 from enum import Enum
 from uuid import UUID
@@ -55,15 +56,15 @@ class Experience(Base):
     )
     
     titulo: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     tipo: Mapped[str] = mapped_column(String(30), default=ExperienceType.TOUR)
     
     # Localização
     local: Mapped[str] = mapped_column(String(150), nullable=False)
     cidade: Mapped[str] = mapped_column(String(100), nullable=False)
-    ponto_encontro: Mapped[str | None] = mapped_column(Text, nullable=True)
-    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    ponto_encontro: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     # Duração e capacidade
     duracao_horas: Mapped[int] = mapped_column(Integer, default=2)
@@ -72,18 +73,18 @@ class Experience(Base):
     
     # Preço
     preco: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    preco_crianca: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_crianca: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     # O que está incluído (JSON array)
-    inclui: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    nao_inclui: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    requisitos: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    inclui: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    nao_inclui: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    requisitos: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Imagens
-    imagens: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    imagens: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Idiomas disponíveis
-    idiomas: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    idiomas: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Stats
     rating_medio: Mapped[Decimal] = mapped_column(Numeric(3, 2), default=5.00)
@@ -132,7 +133,7 @@ class ExperienceSchedule(Base):
     vagas_disponiveis: Mapped[int] = mapped_column(Integer, nullable=False)
     vagas_reservadas: Mapped[int] = mapped_column(Integer, default=0)
     
-    preco_especial: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_especial: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
     
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     
@@ -189,10 +190,10 @@ class ExperienceBooking(Base):
     
     # Contato
     telefone_contato: Mapped[str] = mapped_column(String(20), nullable=False)
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Integração Tuendi
-    tuendi_transporte_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    tuendi_transporte_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=ExperienceBookingStatus.PENDENTE)
     
@@ -200,9 +201,9 @@ class ExperienceBooking(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    confirmada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    validada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    confirmada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    validada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # Relationships
     experience = relationship("Experience", backref="bookings")
@@ -236,7 +237,7 @@ class ExperienceReview(Base):
     )
     
     nota: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
-    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comentario: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

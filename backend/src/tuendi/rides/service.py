@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Rides Service
 """
+from typing import List, Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from decimal import Decimal
@@ -58,7 +59,7 @@ class RideService:
         latitude: float, 
         longitude: float,
         raio_metros: int = None
-    ) -> list[Driver]:
+    ) -> List[Driver]:
         """Busca motoristas próximos via MatchingService (geo-filter + score)"""
         raio_km = (raio_metros or settings.RAIO_BUSCA_MOTORISTAS) / 1000
         candidates = await matching_service.find_nearest_drivers(
@@ -164,7 +165,7 @@ class RideService:
         
         return ride
     
-    async def get_ride(self, db: AsyncSession, ride_id: UUID) -> Ride | None:
+    async def get_ride(self, db: AsyncSession, ride_id: UUID) -> Optional[Ride]:
         """Obtém corrida por ID"""
         result = await db.execute(
             select(Ride)
@@ -239,7 +240,7 @@ class RideService:
         db: AsyncSession,
         ride_id: UUID,
         user_id: UUID,
-        motivo: str | None = None
+        motivo: Optional[str] = None
     ) -> Ride:
         """Cancela corrida"""
         ride = await self.get_ride(db, ride_id)
@@ -272,7 +273,7 @@ class RideService:
         cliente_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Ride]:
+    ) -> List[Ride]:
         """Lista corridas do cliente"""
         result = await db.execute(
             select(Ride)
@@ -290,7 +291,7 @@ class RideService:
         driver_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Ride]:
+    ) -> List[Ride]:
         """Lista corridas do motorista"""
         result = await db.execute(
             select(Ride)
@@ -306,7 +307,7 @@ class RideService:
         db: AsyncSession,
         driver_latitude: float,
         driver_longitude: float
-    ) -> list[Ride]:
+    ) -> List[Ride]:
         """Lista corridas pendentes próximas ao motorista"""
         raio_graus = settings.RAIO_BUSCA_MOTORISTAS / 111000
         
@@ -336,7 +337,7 @@ class RideService:
         avaliado_id: UUID,
         tipo: str,
         nota: int,
-        comentario: str | None = None
+        comentario: Optional[str] = None
     ) -> Rating:
         """Adiciona avaliação"""
         rating = Rating(
@@ -360,8 +361,8 @@ class RideService:
         ride_id: UUID,
         latitude: float,
         longitude: float,
-        velocidade: float | None = None,
-        bearing: float | None = None
+        velocidade: Optional[float] = None,
+        bearing: Optional[float] = None
     ) -> RideTracking:
         """Adiciona ponto de tracking"""
         point = RideTracking(
@@ -381,7 +382,7 @@ class RideService:
         self,
         db: AsyncSession,
         ride_id: UUID
-    ) -> list[RideTracking]:
+    ) -> List[RideTracking]:
         """Obtém todos os pontos de tracking de uma corrida"""
         result = await db.execute(
             select(RideTracking)

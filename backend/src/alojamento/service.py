@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Alojamento Service
 """
+from typing import List, Optional, Tuple
 from datetime import datetime, timezone, date, timedelta
 from uuid import UUID
 from decimal import Decimal
@@ -66,7 +67,7 @@ class AlojamentoService:
         
         return property_obj
     
-    async def get_property(self, db: AsyncSession, property_id: UUID) -> Property | None:
+    async def get_property(self, db: AsyncSession, property_id: UUID) -> Optional[Property]:
         """Obtém propriedade por ID"""
         result = await db.execute(
             select(Property)
@@ -103,16 +104,16 @@ class AlojamentoService:
     async def list_properties(
         self,
         db: AsyncSession,
-        cidade: str | None = None,
-        provincia: str | None = None,
-        tipo: PropertyType | None = None,
-        hospedes: int | None = None,
-        preco_min: float | None = None,
-        preco_max: float | None = None,
-        quartos_min: int | None = None,
+        cidade: Optional[str] = None,
+        provincia: Optional[str] = None,
+        tipo: Optional[PropertyType] = None,
+        hospedes: Optional[int] = None,
+        preco_min: Optional[float] = None,
+        preco_max: Optional[float] = None,
+        quartos_min: Optional[int] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Property]:
+    ) -> List[Property]:
         """Lista propriedades com filtros"""
         query = select(Property).where(
             Property.status == PropertyStatus.ATIVO.value,
@@ -145,7 +146,7 @@ class AlojamentoService:
         host_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Property]:
+    ) -> List[Property]:
         """Lista propriedades do anfitrião"""
         result = await db.execute(
             select(Property)
@@ -177,7 +178,7 @@ class AlojamentoService:
         property_id: UUID,
         data_checkin: date,
         data_checkout: date
-    ) -> tuple[bool, list[date]]:
+    ) -> Tuple[bool, List[date]]:
         """
         Verifica disponibilidade.
         Retorna: (disponível, lista de datas indisponíveis)
@@ -229,8 +230,8 @@ class AlojamentoService:
         data_inicio: date,
         data_fim: date,
         disponivel: bool,
-        preco_especial: float | None = None,
-        motivo_bloqueio: str | None = None
+        preco_especial: Optional[float] = None,
+        motivo_bloqueio: Optional[str] = None
     ):
         """Atualiza disponibilidade de um período"""
         current = data_inicio
@@ -349,7 +350,7 @@ class AlojamentoService:
         
         return booking
     
-    async def get_booking(self, db: AsyncSession, booking_id: UUID) -> Booking | None:
+    async def get_booking(self, db: AsyncSession, booking_id: UUID) -> Optional[Booking]:
         """Obtém reserva por ID"""
         result = await db.execute(
             select(Booking)
@@ -366,7 +367,7 @@ class AlojamentoService:
         db: AsyncSession,
         booking_id: UUID,
         status: BookingStatus,
-        motivo_cancelamento: str | None = None
+        motivo_cancelamento: Optional[str] = None
     ) -> Booking:
         """Atualiza status da reserva"""
         booking = await self.get_booking(db, booking_id)
@@ -396,7 +397,7 @@ class AlojamentoService:
         guest_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Booking]:
+    ) -> List[Booking]:
         """Lista reservas do hóspede"""
         result = await db.execute(
             select(Booking)
@@ -412,10 +413,10 @@ class AlojamentoService:
         self,
         db: AsyncSession,
         host_id: UUID,
-        status: BookingStatus | None = None,
+        status: Optional[BookingStatus] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Booking]:
+    ) -> List[Booking]:
         """Lista reservas das propriedades do anfitrião"""
         query = (
             select(Booking)
@@ -499,7 +500,7 @@ class AlojamentoService:
         property_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[PropertyReview]:
+    ) -> List[PropertyReview]:
         """Lista avaliações de uma propriedade"""
         result = await db.execute(
             select(PropertyReview)

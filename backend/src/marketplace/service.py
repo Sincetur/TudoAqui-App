@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Marketplace Service
 """
+from typing import List, Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from decimal import Decimal
@@ -65,7 +66,7 @@ class MarketplaceService:
         
         return seller
     
-    async def get_seller(self, db: AsyncSession, seller_id: UUID) -> Seller | None:
+    async def get_seller(self, db: AsyncSession, seller_id: UUID) -> Optional[Seller]:
         """Obtém vendedor por ID"""
         result = await db.execute(
             select(Seller)
@@ -74,7 +75,7 @@ class MarketplaceService:
         )
         return result.scalar_one_or_none()
     
-    async def get_seller_by_user(self, db: AsyncSession, user_id: UUID) -> Seller | None:
+    async def get_seller_by_user(self, db: AsyncSession, user_id: UUID) -> Optional[Seller]:
         """Obtém vendedor pelo user_id"""
         result = await db.execute(
             select(Seller).where(Seller.user_id == user_id)
@@ -116,11 +117,11 @@ class MarketplaceService:
     async def list_sellers(
         self,
         db: AsyncSession,
-        status: SellerStatus | None = None,
-        cidade: str | None = None,
+        status: Optional[SellerStatus] = None,
+        cidade: Optional[str] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Seller]:
+    ) -> List[Seller]:
         """Lista vendedores"""
         query = select(Seller)
         
@@ -174,7 +175,7 @@ class MarketplaceService:
         
         return product
     
-    async def get_product(self, db: AsyncSession, product_id: UUID) -> Product | None:
+    async def get_product(self, db: AsyncSession, product_id: UUID) -> Optional[Product]:
         """Obtém produto por ID"""
         result = await db.execute(
             select(Product)
@@ -209,13 +210,13 @@ class MarketplaceService:
     async def list_products(
         self,
         db: AsyncSession,
-        seller_id: UUID | None = None,
-        category_id: UUID | None = None,
-        search: str | None = None,
-        destaque: bool | None = None,
+        seller_id: Optional[UUID] = None,
+        category_id: Optional[UUID] = None,
+        search: Optional[str] = None,
+        destaque: Optional[bool] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Product]:
+    ) -> List[Product]:
         """Lista produtos"""
         query = select(Product).options(joinedload(Product.seller))
         
@@ -245,7 +246,7 @@ class MarketplaceService:
         seller_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Product]:
+    ) -> List[Product]:
         """Lista produtos do vendedor"""
         result = await db.execute(
             select(Product)
@@ -347,7 +348,7 @@ class MarketplaceService:
         
         return order
     
-    async def get_order(self, db: AsyncSession, order_id: UUID) -> MarketplaceOrder | None:
+    async def get_order(self, db: AsyncSession, order_id: UUID) -> Optional[MarketplaceOrder]:
         """Obtém pedido por ID"""
         result = await db.execute(
             select(MarketplaceOrder)
@@ -399,7 +400,7 @@ class MarketplaceService:
         buyer_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[MarketplaceOrder]:
+    ) -> List[MarketplaceOrder]:
         """Lista pedidos do comprador"""
         result = await db.execute(
             select(MarketplaceOrder)
@@ -415,10 +416,10 @@ class MarketplaceService:
         self,
         db: AsyncSession,
         seller_id: UUID,
-        status: OrderStatus | None = None,
+        status: Optional[OrderStatus] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[MarketplaceOrder]:
+    ) -> List[MarketplaceOrder]:
         """Lista pedidos do vendedor"""
         query = select(MarketplaceOrder).where(MarketplaceOrder.seller_id == seller_id)
         
@@ -435,7 +436,7 @@ class MarketplaceService:
     # Categories
     # ============================================
     
-    async def list_categories(self, db: AsyncSession) -> list[ProductCategory]:
+    async def list_categories(self, db: AsyncSession) -> List[ProductCategory]:
         """Lista categorias"""
         result = await db.execute(
             select(ProductCategory)

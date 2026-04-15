@@ -2,6 +2,7 @@
 TUDOaqui API - Alojamento Models
 Módulo Alojamento: Modelo Airbnb local
 """
+from typing import Optional
 from datetime import datetime, date
 from enum import Enum
 from uuid import UUID
@@ -55,15 +56,15 @@ class Property(Base):
     )
     
     titulo: Mapped[str] = mapped_column(String(150), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    descricao: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     tipo: Mapped[str] = mapped_column(String(30), default=PropertyType.CASA)
     
     # Localização
     endereco: Mapped[str] = mapped_column(Text, nullable=False)
     cidade: Mapped[str] = mapped_column(String(100), nullable=False)
     provincia: Mapped[str] = mapped_column(String(100), nullable=False)
-    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 8), nullable=True)
-    longitude: Mapped[Decimal | None] = mapped_column(Numeric(11, 8), nullable=True)
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 8), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(11, 8), nullable=True)
     
     # Capacidade
     quartos: Mapped[int] = mapped_column(Integer, default=1)
@@ -84,10 +85,10 @@ class Property(Base):
     checkout_hora: Mapped[str] = mapped_column(String(5), default="11:00")
     
     # Comodidades (JSON array)
-    comodidades: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    comodidades: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Imagens (JSON array de URLs)
-    imagens: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    imagens: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     
     # Stats
     rating_medio: Mapped[Decimal] = mapped_column(Numeric(3, 2), default=5.00)
@@ -132,8 +133,8 @@ class PropertyAvailability(Base):
     
     data: Mapped[date] = mapped_column(Date, nullable=False)
     disponivel: Mapped[bool] = mapped_column(Boolean, default=True)
-    preco_especial: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
-    motivo_bloqueio: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    preco_especial: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
+    motivo_bloqueio: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
 
 class Booking(Base):
@@ -175,11 +176,11 @@ class Booking(Base):
     
     # Contato
     telefone_contato: Mapped[str] = mapped_column(String(20), nullable=False)
-    notas: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Integração Tuendi
-    tuendi_ida_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
-    tuendi_volta_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    tuendi_ida_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    tuendi_volta_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=BookingStatus.PENDENTE)
     
@@ -188,11 +189,11 @@ class Booking(Base):
         DateTime(timezone=True), 
         server_default=func.now()
     )
-    confirmada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    checkin_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    checkout_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    cancelada_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    motivo_cancelamento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confirmada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    checkin_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    checkout_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelada_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    motivo_cancelamento: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Relationships
     property = relationship("Property", back_populates="bookings")
@@ -229,12 +230,12 @@ class PropertyReview(Base):
     
     # Notas (1-5)
     nota_geral: Mapped[int] = mapped_column(Integer, nullable=False)
-    nota_limpeza: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    nota_localizacao: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    nota_comunicacao: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    nota_valor: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    nota_limpeza: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    nota_localizacao: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    nota_comunicacao: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    nota_valor: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
-    comentario: Mapped[str | None] = mapped_column(Text, nullable=True)
+    comentario: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 

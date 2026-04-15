@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Turismo Service
 """
+from typing import List, Optional, Tuple
 import hashlib
 import secrets
 from datetime import datetime, timezone, date
@@ -71,7 +72,7 @@ class TurismoService:
         await db.refresh(experience)
         return experience
     
-    async def get_experience(self, db: AsyncSession, experience_id: UUID) -> Experience | None:
+    async def get_experience(self, db: AsyncSession, experience_id: UUID) -> Optional[Experience]:
         """Obtém experiência por ID"""
         result = await db.execute(
             select(Experience)
@@ -108,12 +109,12 @@ class TurismoService:
     async def list_experiences(
         self,
         db: AsyncSession,
-        cidade: str | None = None,
-        tipo: ExperienceType | None = None,
-        preco_max: float | None = None,
+        cidade: Optional[str] = None,
+        tipo: Optional[ExperienceType] = None,
+        preco_max: Optional[float] = None,
         limit: int = 20,
         offset: int = 0
-    ) -> list[Experience]:
+    ) -> List[Experience]:
         """Lista experiências"""
         query = select(Experience).where(
             Experience.status == ExperienceStatus.ATIVO.value,
@@ -138,7 +139,7 @@ class TurismoService:
         host_id: UUID,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Experience]:
+    ) -> List[Experience]:
         """Lista experiências do anfitrião"""
         result = await db.execute(
             select(Experience)
@@ -196,8 +197,8 @@ class TurismoService:
         self,
         db: AsyncSession,
         experience_id: UUID,
-        data_inicio: date | None = None
-    ) -> list[ExperienceSchedule]:
+        data_inicio: Optional[date] = None
+    ) -> List[ExperienceSchedule]:
         """Lista horários de uma experiência"""
         query = select(ExperienceSchedule).where(
             ExperienceSchedule.experience_id == experience_id,
@@ -293,7 +294,7 @@ class TurismoService:
         await db.refresh(booking)
         return booking
     
-    async def get_booking(self, db: AsyncSession, booking_id: UUID) -> ExperienceBooking | None:
+    async def get_booking(self, db: AsyncSession, booking_id: UUID) -> Optional[ExperienceBooking]:
         """Obtém reserva por ID"""
         result = await db.execute(
             select(ExperienceBooking)
@@ -311,7 +312,7 @@ class TurismoService:
         db: AsyncSession,
         qr_voucher: str,
         experience_id: UUID
-    ) -> tuple[bool, str, ExperienceBooking | None]:
+    ) -> Tuple[bool, str, Optional[ExperienceBooking]]:
         """Valida QR voucher"""
         result = await db.execute(
             select(ExperienceBooking)
@@ -345,7 +346,7 @@ class TurismoService:
         db: AsyncSession,
         qr_voucher: str,
         experience_id: UUID
-    ) -> tuple[bool, str, ExperienceBooking | None]:
+    ) -> Tuple[bool, str, Optional[ExperienceBooking]]:
         """Usa voucher (marca como realizada)"""
         valid, message, booking = await self.validate_voucher(db, qr_voucher, experience_id)
         
@@ -366,7 +367,7 @@ class TurismoService:
         user_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[ExperienceBooking]:
+    ) -> List[ExperienceBooking]:
         """Lista reservas do usuário"""
         result = await db.execute(
             select(ExperienceBooking)
@@ -385,10 +386,10 @@ class TurismoService:
         self,
         db: AsyncSession,
         host_id: UUID,
-        status: ExperienceBookingStatus | None = None,
+        status: Optional[ExperienceBookingStatus] = None,
         limit: int = 50,
         offset: int = 0
-    ) -> list[ExperienceBooking]:
+    ) -> List[ExperienceBooking]:
         """Lista reservas das experiências do anfitrião"""
         query = (
             select(ExperienceBooking)
@@ -468,7 +469,7 @@ class TurismoService:
         experience_id: UUID,
         limit: int = 20,
         offset: int = 0
-    ) -> list[ExperienceReview]:
+    ) -> List[ExperienceReview]:
         """Lista avaliações de uma experiência"""
         result = await db.execute(
             select(ExperienceReview)

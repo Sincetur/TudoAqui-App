@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Notifications Service
 """
+from typing import List
 from uuid import UUID
 from sqlalchemy import select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,7 +60,7 @@ class NotificationService:
         unread_only: bool = False,
         limit: int = 50,
         offset: int = 0
-    ) -> list[Notification]:
+    ) -> List[Notification]:
         """Lista notificações do utilizador"""
         query = select(Notification).where(Notification.user_id == user_id)
         

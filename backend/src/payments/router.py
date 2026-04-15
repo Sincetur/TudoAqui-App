@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Payments Router
 """
+from typing import List
 from uuid import UUID
 from decimal import Decimal
 import os
@@ -127,7 +128,7 @@ async def get_payment(
     return PaymentResponse.model_validate(payment)
 
 
-@router.get("", response_model=list[PaymentResponse])
+@router.get("", response_model=List[PaymentResponse])
 async def list_my_payments(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -219,7 +220,7 @@ async def multicaixa_webhook(
 # Ledger Endpoints
 # ============================================
 
-@router.get("/ledger/me", response_model=list[LedgerEntryResponse])
+@router.get("/ledger/me", response_model=List[LedgerEntryResponse])
 async def get_my_ledger(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -277,7 +278,7 @@ async def topup_wallet(
 # Admin Endpoints
 # ============================================
 
-@router.get("/admin/all", response_model=list[PaymentResponse])
+@router.get("/admin/all", response_model=List[PaymentResponse])
 async def admin_list_all_payments(
     status_filter: str = None,
     metodo: str = None,

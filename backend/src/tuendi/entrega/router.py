@@ -1,6 +1,7 @@
 """
 TUDOaqui API - Tuendi Entrega Router
 """
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,9 +60,9 @@ async def create_delivery(
     return _delivery_to_response(delivery)
 
 
-@router.get("/my", response_model=list[DeliveryListResponse])
+@router.get("/my", response_model=List[DeliveryListResponse])
 async def list_my_deliveries(
-    status: DeliveryStatus | None = None,
+    status: Optional[DeliveryStatus] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
@@ -106,7 +107,7 @@ async def get_delivery(
     return _delivery_to_detail_response(delivery)
 
 
-@router.get("/{delivery_id}/tracking", response_model=list[TrackingResponse])
+@router.get("/{delivery_id}/tracking", response_model=List[TrackingResponse])
 async def get_tracking(
     delivery_id: UUID,
     current_user: User = Depends(get_current_user),
@@ -150,7 +151,7 @@ async def cancel_delivery(
 # Motorista - Gerir Entregas
 # ============================================
 
-@router.get("/driver/available", response_model=list[DeliveryListResponse])
+@router.get("/driver/available", response_model=List[DeliveryListResponse])
 async def list_available_deliveries(
     latitude: float = Query(..., ge=-90, le=90),
     longitude: float = Query(..., ge=-180, le=180),
@@ -178,9 +179,9 @@ async def list_available_deliveries(
     ]
 
 
-@router.get("/driver/my", response_model=list[DeliveryListResponse])
+@router.get("/driver/my", response_model=List[DeliveryListResponse])
 async def list_driver_deliveries(
-    status: DeliveryStatus | None = None,
+    status: Optional[DeliveryStatus] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(require_roles(UserRole.MOTORISTA, UserRole.ADMIN)),
